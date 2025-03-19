@@ -1,0 +1,19 @@
+# Ignorowanie katalogów systemowych i binarnych
+/.idea/
+/*.iml
+/.gradle/
+/build/
+/local.properties
+/.cxx/
+/captures/
+/.externalNativeBuild/
+
+# Pliki dla Android Studio
+/.settings/
+/.gradle/
+/app/build/
+/*.keystore
+
+# Pliki systemowe
+.DS_Store
+Thumbs.db
