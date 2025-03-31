@@ -1,0 +1,20 @@
+<resources>
+    <!-- Marginesy -->
+    <dimen name="margin_small">8dp</dimen>
+    <dimen name="margin_medium">16dp</dimen>
+    <dimen name="margin_large">32dp</dimen>
+
+    <!-- Paddingi -->
+    <dimen name="padding_standard">12dp</dimen>
+
+    <!-- Tekst -->
+    <dimen name="text_title_size">32sp</dimen>
+    <dimen name="text_button_size">16sp</dimen>
+
+    <!-- Wysokości elementów -->
+    <dimen name="button_height">48dp</dimen>
+
+    <!-- Layout specifics -->
+    <dimen name="button_margin_top">89dp</dimen>
+
+</resources>
