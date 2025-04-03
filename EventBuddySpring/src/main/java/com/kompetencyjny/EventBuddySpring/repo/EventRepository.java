@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
-    // Możesz dodać metody wyszukujące, np. findByTitle(String title)
+    // Możesz dodać metody np. findByTitle(String title);
 }

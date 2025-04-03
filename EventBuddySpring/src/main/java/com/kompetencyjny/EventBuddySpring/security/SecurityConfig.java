@@ -18,7 +18,8 @@ public class SecurityConfig {
                         authorizeRequests
                                 .requestMatchers("/auth/register").permitAll()  // Zezwól na dostęp do rejestracji
                                 .requestMatchers("/auth/login").permitAll()  // Zezwól na dostęp do strony głównej
-                                .anyRequest().authenticated()  // Pozostałe endpointy wymagają autoryzacji
+                               // .anyRequest().authenticated()  // Pozostałe endpointy wymagają autoryzacji
+                                .anyRequest().permitAll()
                 )
                 .formLogin().disable()  // Wyłącza domyślną stronę logowania Spring Security
                 .csrf(csrf -> csrf.disable());  // Wyłączenie CSRF

@@ -3,25 +3,27 @@ package com.kompetencyjny.EventBuddySpring.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "tasks")
-public class Task {
+@Table(name = "expenses")
+public class Expense {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-    private String status; // np. TO_DO, IN_PROGRESS, DONE
+    private String description;
+    private BigDecimal amount;
+
+    @ManyToOne
+    @JoinColumn(name = "payer_id")
+    private User payer;
 
     @ManyToOne
     @JoinColumn(name = "event_id")
     private Event event;
-
-    @ManyToOne
-    @JoinColumn(name = "assigned_user_id")
-    private User assignedUser;
 }

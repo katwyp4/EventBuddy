@@ -1,10 +1,9 @@
 package com.kompetencyjny.EventBuddySpring.repo;
 
-import com.kompetencyjny.EventBuddySpring.model.Task;
+import com.kompetencyjny.EventBuddySpring.model.Message;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface TaskRepository extends JpaRepository<Task, Long> {
-    // np. List<Task> findByStatus(String status);
+public interface MessageRepository extends JpaRepository<Message, Long> {
 }

@@ -7,21 +7,16 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "tasks")
-public class Task {
+@Table(name = "photos")
+public class Photo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-    private String status; // np. TO_DO, IN_PROGRESS, DONE
+    private String url;
 
     @ManyToOne
     @JoinColumn(name = "event_id")
     private Event event;
-
-    @ManyToOne
-    @JoinColumn(name = "assigned_user_id")
-    private User assignedUser;
 }
