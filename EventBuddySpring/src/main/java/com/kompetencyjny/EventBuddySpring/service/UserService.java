@@ -6,6 +6,8 @@ import com.kompetencyjny.EventBuddySpring.repo.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class UserService {
     private final UserRepository userRepository;
@@ -25,5 +27,13 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(password));
         user.setRole(Role.USER);
         return userRepository.save(user);
+    }
+    public boolean authenticateUser(String username, String password) {
+        Optional<User> userOptional = userRepository.findByUsername(username);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            return passwordEncoder.matches(password, user.getPassword());
+        }
+        return false;
     }
 }

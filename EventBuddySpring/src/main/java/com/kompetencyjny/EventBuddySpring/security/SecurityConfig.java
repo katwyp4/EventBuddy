@@ -17,11 +17,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers("/auth/register").permitAll()  // Zezwól na dostęp do rejestracji
+                                .requestMatchers("/auth/login").permitAll()  // Zezwól na dostęp do strony głównej
                                 .anyRequest().authenticated()  // Pozostałe endpointy wymagają autoryzacji
                 )
-                .formLogin(withDefaults())  // Włącza domyślną stronę logowania
+                .formLogin().disable()  // Wyłącza domyślną stronę logowania Spring Security
                 .csrf(csrf -> csrf.disable());  // Wyłączenie CSRF
 
         return http.build();
     }
 }
+
+
