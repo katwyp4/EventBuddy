@@ -1,12 +1,17 @@
 package com.kompetencyjny.EventBuddySpring.controller;
 
-import com.kompetencyjny.EventBuddySpring.model.User;
+import com.kompetencyjny.EventBuddySpring.security.JwtUtil;
 import com.kompetencyjny.EventBuddySpring.service.UserService;
+import com.kompetencyjny.EventBuddySpring.model.User;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
@@ -14,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
     private final UserService userService;
+    private final JwtUtil jwtUtil;
+
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestParam String username, @RequestParam String password) {
@@ -21,19 +28,18 @@ public class AuthController {
         logger.info("Zarejestrowano użytkownika: {}", user.getUsername());
         return ResponseEntity.ok("Zarejestrowano użytkownika: " + user.getUsername());
     }
-
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestParam String username, @RequestParam String password) {
-        logger.info("Próba logowania: username={}", username);
-
         boolean isAuthenticated = userService.authenticateUser(username, password);
 
         if (isAuthenticated) {
-            logger.info("Zalogowano pomyślnie: {}", username);
-            return ResponseEntity.ok("Zalogowano pomyślnie! Witaj, " + username + "!");
+            String token = jwtUtil.generateToken(username);
+
+            Map<String, String> response = new HashMap<>();
+            response.put("token", token);
+            return ResponseEntity.ok(response);
         } else {
-            logger.warn("Nieudane logowanie: {}", username);
-            return ResponseEntity.status(401).body("Błędna nazwa użytkownika lub hasło. Spróbuj ponownie.");
+            return ResponseEntity.status(401).body("Błędna nazwa użytkownika lub hasło.");
         }
     }
 }
