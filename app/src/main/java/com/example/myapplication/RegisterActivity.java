@@ -14,6 +14,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.myapplication.network.ApiService;
 import com.example.myapplication.network.RetrofitClient;
+import com.example.myapplication.model.RegisterResponse;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -61,22 +62,23 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        Call<String> call = apiService.registerUser(username, password, firstName, lastName);
+        Call<RegisterResponse> call = apiService.registerUser(username, password, firstName, lastName);
 
-        call.enqueue(new Callback<String>() {
+        call.enqueue(new Callback<RegisterResponse>() {
             @Override
-            public void onResponse(Call<String> call, Response<String> response) {
-                if (response.isSuccessful()) {
-                    Toast.makeText(RegisterActivity.this,   response.body(), Toast.LENGTH_LONG).show();
+            public void onResponse(Call<RegisterResponse> call, Response<RegisterResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Toast.makeText(RegisterActivity.this, response.body().getMessage(), Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(RegisterActivity.this, "Błąd rejestracji", Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<String> call, Throwable t) {
+            public void onFailure(Call<RegisterResponse> call, Throwable t) {
                 Toast.makeText(RegisterActivity.this, "Błąd połączenia: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
+
     }
 }
