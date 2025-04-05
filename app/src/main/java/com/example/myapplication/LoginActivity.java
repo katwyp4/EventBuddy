@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.example.myapplication.network.ApiService;
 import com.example.myapplication.network.RetrofitClient;
+import com.example.myapplication.model.LoginResponse;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -57,23 +58,26 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        Call<String> call = apiService.loginUser(email, password);
-        call.enqueue(new Callback<String>() {
+        Call<LoginResponse> call = apiService.loginUser(email, password);
+        call.enqueue(new Callback<LoginResponse>() {
             @Override
-            public void onResponse(Call<String> call, Response<String> response) {
-                if (response.isSuccessful()) {
-                    Toast.makeText(LoginActivity.this, " Zalogowano: " + response.body(), Toast.LENGTH_LONG).show();
-                    // TODO: przejście do następnej aktywności
+            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    String token = response.body().getToken();
+                    Toast.makeText(LoginActivity.this, "Zalogowano. Token: " + token, Toast.LENGTH_LONG).show();
+
+                    // TODO: Zapis tokena i przejście dalej
                 } else {
                     Toast.makeText(LoginActivity.this, "Błąd logowania", Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<String> call, Throwable t) {
+            public void onFailure(Call<LoginResponse> call, Throwable t) {
                 Toast.makeText(LoginActivity.this, "Błąd połączenia: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
+
     }
 
 

@@ -23,11 +23,19 @@ public class AuthController {
 
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestParam String username, @RequestParam String password) {
-        User user = userService.registerUser(username, password);
+    public ResponseEntity<?> register(
+            @RequestParam String username,
+            @RequestParam String password,
+            @RequestParam String firstName,
+            @RequestParam String lastName
+    ) {
+        User user = userService.registerUser(username, password, firstName, lastName);
         logger.info("Zarejestrowano użytkownika: {}", user.getUsername());
-        return ResponseEntity.ok("Zarejestrowano użytkownika: " + user.getUsername());
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Zarejestrowano użytkownika: " + user.getUsername());
+        return ResponseEntity.ok(response);
     }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestParam String username, @RequestParam String password) {
         boolean isAuthenticated = userService.authenticateUser(username, password);
