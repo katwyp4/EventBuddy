@@ -38,4 +38,24 @@ public class UserService {
         }
         return false;
     }
+
+    public Optional<User> findById(Long id){
+        Optional<User> userOptional = userRepository.findById(id);
+        if (userOptional.isEmpty()) return userOptional;
+        if (userOptional.get().getActive().equals(false)) return Optional.empty();
+        return userOptional;
+    }
+    public Optional<User> findByUserName(String username){
+        Optional<User> userOptional = userRepository.findByUsername(username);
+        if (userOptional.isEmpty()) return userOptional;
+        if (userOptional.get().getActive().equals(false)) return Optional.empty();
+        return userOptional;
+    }
+
+    public Optional<User> findDeletedByUserName(String username){
+        Optional<User> userOptional = userRepository.findByUsername(username);
+        if (userOptional.isEmpty()) return userOptional;
+        if (userOptional.get().getActive().equals(true)) return Optional.empty();
+        return userOptional;
+    }
 }
