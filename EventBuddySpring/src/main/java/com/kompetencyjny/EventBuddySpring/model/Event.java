@@ -3,8 +3,6 @@ package com.kompetencyjny.EventBuddySpring.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -69,18 +67,5 @@ public class Event {
 
     public boolean isParticipant(User user){
         return participants.contains(new EventParticipant(this, user));
-    }
-
-    public Optional<EventParticipant> getEventParticipant(User user){
-        return participants.stream().filter(participant->participant.getUser().equals(user)).findFirst();
-    }
-
-    public EventParticipant setParticipantRole(User user, EventRole role) {
-        Optional<EventParticipant> eventParticipantOpt = getEventParticipant(user);
-        if (eventParticipantOpt.isEmpty()) return addParticipant(user, role);
-
-        EventParticipant eventParticipant = eventParticipantOpt.get();
-        eventParticipant.setEventRole(role);
-        return eventParticipant;
     }
 }

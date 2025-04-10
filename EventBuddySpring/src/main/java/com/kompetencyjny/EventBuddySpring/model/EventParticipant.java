@@ -1,7 +1,6 @@
 package com.kompetencyjny.EventBuddySpring.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,7 +14,7 @@ import java.util.Objects;
 public class EventParticipant {
 
     @EmbeddedId
-    private UserEventId id = new UserEventId();
+    private UserEventId id;
 
     @ManyToOne
     @MapsId("eventId")
@@ -30,15 +29,13 @@ public class EventParticipant {
     private EventRole eventRole=EventRole.PASSIVE;
 
     public EventParticipant(Event event, User user){
-        this.id.setUserId(user.getId());
-        this.id.setEventId(event.getId());
+        this.id = new UserEventId(user.getId(), event.getId());
         this.event=event;
         this.user=user;
     }
 
     public EventParticipant(Event event, User user, EventRole eventRole){
-        this.id.setUserId(user.getId());
-        this.id.setEventId(event.getId());
+        this.id = new UserEventId(user.getId(), event.getId());
         this.event=event;
         this.user=user;
         this.eventRole = eventRole;

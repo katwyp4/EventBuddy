@@ -24,7 +24,7 @@ public interface EventService {
 
     void deleteById(Long id, String loggedUserName);
 
-    boolean isUserPermitted(Event event, String username, EventRole minRole);
+    boolean isUserPermitted(Long eventId, String username, EventRole minRole);
 
     boolean isUserAParticipantOf(Long eventId, Long userId);
 

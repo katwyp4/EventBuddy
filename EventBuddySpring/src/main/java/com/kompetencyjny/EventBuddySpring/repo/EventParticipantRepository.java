@@ -6,6 +6,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 public interface EventParticipantRepository extends JpaRepository<EventParticipant, UserEventId> {
-    Page<EventParticipant> findAllByEventId(Long eventId, Pageable pageable);
+    Page<EventParticipant> findAllById_EventId(Long eventId, Pageable pageable);
+    Optional<EventParticipant> findById_EventIdAndId_UserId(Long eventId, Long userId);
+
 }

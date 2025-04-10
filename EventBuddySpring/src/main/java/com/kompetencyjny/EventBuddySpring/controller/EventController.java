@@ -5,6 +5,7 @@ import com.kompetencyjny.EventBuddySpring.model.EventParticipant;
 import com.kompetencyjny.EventBuddySpring.model.EventRole;
 import com.kompetencyjny.EventBuddySpring.service.EventService;
 import com.kompetencyjny.EventBuddySpring.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -17,13 +18,11 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/events")
+@RequiredArgsConstructor
 public class EventController {
 
     private final EventService eventService;
 
-    public EventController(EventService eventService) {
-        this.eventService = eventService;
-    }
 
     // [GET] /api/events?size={}?page={}
     @GetMapping

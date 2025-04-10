@@ -2,6 +2,7 @@ package com.kompetencyjny.EventBuddySpring.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,6 +12,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @Embeddable
+@AllArgsConstructor
 public class UserEventId implements Serializable {
     @Column(name = "user_id")
     private Long userId;
