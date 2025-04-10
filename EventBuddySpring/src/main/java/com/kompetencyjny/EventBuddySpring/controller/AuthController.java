@@ -27,9 +27,10 @@ public class AuthController {
             @RequestParam String username,
             @RequestParam String password,
             @RequestParam String firstName,
-            @RequestParam String lastName
+            @RequestParam String lastName,
+            @RequestParam String email
     ) {
-        User user = userService.registerUser(username, password, firstName, lastName);
+        User user = userService.registerUser(username, password, firstName, lastName, email);
         logger.info("Zarejestrowano użytkownika: {}", user.getUsername());
         Map<String, String> response = new HashMap<>();
         response.put("message", "Zarejestrowano użytkownika: " + user.getUsername());

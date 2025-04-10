@@ -18,7 +18,7 @@ public class UserService {
         this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
-    public User registerUser(String username, String password, String firstName, String lastName) {
+    public User registerUser(String username, String password, String firstName, String lastName, String email) {
         if (userRepository.findByUsername(username).isPresent()) {
             throw new RuntimeException("Użytkownik już istnieje!");
         }
@@ -28,6 +28,7 @@ public class UserService {
         user.setRole(Role.USER);
         user.setFirstName(firstName);
         user.setLastName(lastName);
+        user.setEmail(email);
         return userRepository.save(user);
     }
     public boolean authenticateUser(String username, String password) {

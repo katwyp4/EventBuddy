@@ -1,7 +1,7 @@
 package com.kompetencyjny.EventBuddySpring.service.impl;
 
-import com.kompetencyjny.EventBuddySpring.exeption.NotFoundExeption;
-import com.kompetencyjny.EventBuddySpring.exeption.UnauthorizedExeption;
+import com.kompetencyjny.EventBuddySpring.exception.NotFoundException;
+import com.kompetencyjny.EventBuddySpring.exception.UnauthorizedException;
 import com.kompetencyjny.EventBuddySpring.model.*;
 import com.kompetencyjny.EventBuddySpring.repo.EventParticipantRepository;
 import com.kompetencyjny.EventBuddySpring.repo.EventRepository;
@@ -30,7 +30,7 @@ public class EventServiceImpl implements EventService {
         event.setId(null);
         Optional<User> loggedUserOpt = userService.findByUserName(loggedUserName);
         if (loggedUserOpt.isEmpty())
-            throw new NotFoundExeption("!!! YOU SHOULD NOT SEE THIS !!! Cannot find logged in user! username: \""+loggedUserName+"\".\nThis method expects to get a username of logged in user.");
+            throw new NotFoundException("!!! YOU SHOULD NOT SEE THIS !!! Cannot find logged in user! username: \""+loggedUserName+"\".\nThis method expects to get a username of logged in user.");
 
         event.addParticipant(loggedUserOpt.get(), EventRole.ADMIN);
         return this.eventRepository.save(event);
@@ -50,22 +50,27 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Optional<Event> findById(Long id) {
-            if (!this.existsById(id)) return Optional.empty();
-           return eventRepository.findById(id);
+            Optional<Event> eventOpt = eventRepository.findById(id);
+            if (eventOpt.isEmpty()) return eventOpt;
+            Boolean isActive = eventOpt.get().getActive();
+            if (isActive==null || !isActive) return Optional.empty();
+            return eventOpt;
     }
 
     @Override
     public boolean existsById(Long id) {
         Optional<Event> eventOpt = eventRepository.findById(id);
         if (eventOpt.isEmpty()) return false;
-        return eventOpt.get().getActive();
+        Boolean isActive =  eventOpt.get().getActive();
+        return (isActive != null) && isActive;
+
     }
 
     @Override
     public Event fullUpdate(Long id, Event event, String loggedUserName) {
         if (!this.existsById(id)) throw new RuntimeException("Trying to update non existing event!");
         if (!isUserPermitted(id, loggedUserName, EventRole.ADMIN))
-            throw new UnauthorizedExeption("User username:"+loggedUserName+" not allowed to update event "+id);
+            throw new UnauthorizedException("User username:"+loggedUserName+" not allowed to update event "+id);
 
         event.setId(id);
         return eventRepository.save(event);
@@ -75,7 +80,7 @@ public class EventServiceImpl implements EventService {
     public Event partialUpdate(Long id, Event event, String loggedUserName) {
         if (!this.existsById(id)) throw new RuntimeException("Trying to update non existing event!");
         if (!isUserPermitted(id, loggedUserName, EventRole.ADMIN))
-            throw new UnauthorizedExeption("User username:"+loggedUserName+" not allowed to update event "+id);
+            throw new UnauthorizedException("User username:"+loggedUserName+" not allowed to update event "+id);
 
         event.setId(id);
         return  eventRepository.findById(id).map(existingEvent -> {
@@ -97,7 +102,7 @@ public class EventServiceImpl implements EventService {
 
         Event existingEvent = existingEventOpt.get();
         if (!isUserPermitted(id, loggedUserName, EventRole.ADMIN))
-            throw new UnauthorizedExeption("User username:"+loggedUserName+" not allowed to delete event "+id);
+            throw new UnauthorizedException("User username:"+loggedUserName+" not allowed to delete event "+id);
 
         if (!existingEvent.getActive()) return;
         existingEvent.setActive(false);
@@ -123,7 +128,7 @@ public class EventServiceImpl implements EventService {
     public boolean isUserAParticipantOf(Long eventId, Long userId) {
         Optional<Event> eventOpt = this.findById(eventId);
         Optional<User> userOpt = this.userService.findById(userId);
-        if (userOpt.isEmpty() || eventOpt.isEmpty()) throw new NotFoundExeption("User or Event does not exists!");
+        if (userOpt.isEmpty() || eventOpt.isEmpty()) throw new NotFoundException("User or Event does not exists!");
         return eventParticipantRepository.existsById(new UserEventId(userId, eventId));
     }
 
@@ -131,12 +136,12 @@ public class EventServiceImpl implements EventService {
     public EventParticipant addEventParticipant(Long eventId, Long userId, EventRole role, String loggedUserName){
         Optional<Event> eventOpt = this.findById(eventId);
         Optional<User> userOpt = this.userService.findById(userId);
-        if (userOpt.isEmpty() || eventOpt.isEmpty()) throw new NotFoundExeption("User or Event does not exists!");
+        if (userOpt.isEmpty() || eventOpt.isEmpty()) throw new NotFoundException("User or Event does not exists!");
         Event event = eventOpt.get();
         User user = userOpt.get();
 
         if (!isUserPermitted(eventId, loggedUserName, EventRole.ADMIN))
-            throw new UnauthorizedExeption("User username:"+loggedUserName+" not allowed to add a participant to event: "+eventId);
+            throw new UnauthorizedException("User username:"+loggedUserName+" not allowed to add a participant to event: "+eventId);
 
         EventParticipant eventParticipant = event.addParticipant(user, role);
         eventRepository.save(event);
@@ -152,7 +157,7 @@ public class EventServiceImpl implements EventService {
         User user = userOpt.get();
 
         if (!isUserPermitted(eventId, loggedUserName, EventRole.ADMIN))
-            throw new UnauthorizedExeption("User username:"+loggedUserName+" not allowed to remove participants from event: "+eventId);
+            throw new UnauthorizedException("User username:"+loggedUserName+" not allowed to remove participants from event: "+eventId);
 
         event.removeParticipant(user);
         eventRepository.save(event);
@@ -160,12 +165,13 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Optional<EventParticipant> getEventParticipant(Long eventId, Long userId) {
+
         return eventParticipantRepository.findById_EventIdAndId_UserId(eventId, userId);
     }
 
     @Override
     public Page<EventParticipant> findAllEventParticipants(Pageable pageable, Long eventId) {
-        if (eventRepository.existsById(eventId)) throw new NotFoundExeption("Event not found eventId: "+eventId);
+        if (! this.existsById(eventId)) throw new NotFoundException("Event not found eventId: "+eventId);
         return eventParticipantRepository.findAllById_EventId(eventId, pageable);
     }
 
@@ -173,13 +179,13 @@ public class EventServiceImpl implements EventService {
     public EventParticipant updateEventParticipantRole(Long eventId, Long userId, EventRole eventRole, String loggedUserName){
         Optional<Event> eventOpt = this.findById(eventId);
         Optional<User> userOpt = this.userService.findById(userId);
-        if (userOpt.isEmpty() || eventOpt.isEmpty()) throw new NotFoundExeption("Event or user does not exist! eventId: "+eventId+" userId "+ userId);
+        if (userOpt.isEmpty() || eventOpt.isEmpty()) throw new NotFoundException("Event or user does not exist! eventId: "+eventId+" userId "+ userId);
 
         Event event = eventOpt.get();
         User user = userOpt.get();
 
         if (!isUserPermitted(eventId, loggedUserName, EventRole.ADMIN))
-            throw new UnauthorizedExeption("User username:"+loggedUserName+" not allowed to change user's role for event "+eventId);
+            throw new UnauthorizedException("User username:"+loggedUserName+" not allowed to change user's role for event "+eventId);
 
         Optional<EventParticipant> eventParticipantOpt = eventParticipantRepository.findById_EventIdAndId_UserId(eventId, userId);
         if (eventParticipantOpt.isEmpty()){

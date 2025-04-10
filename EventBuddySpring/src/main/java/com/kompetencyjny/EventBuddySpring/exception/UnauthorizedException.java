@@ -1,11 +1,11 @@
-package com.kompetencyjny.EventBuddySpring.exeption;
+package com.kompetencyjny.EventBuddySpring.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.UNAUTHORIZED)
-public class UnauthorizedExeption extends RuntimeException{
-    public UnauthorizedExeption(String message){
+public class UnauthorizedException extends RuntimeException{
+    public UnauthorizedException(String message){
         super(message);
     }
 }
