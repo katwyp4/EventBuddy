@@ -15,10 +15,10 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-    // Handle NotFoundException
-    @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<Object> handleUnauthorizedException(UnauthorizedException ex) {
-        // Return a 401 with the exception message
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
+    // Handle ForbiddenException
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<Object> handleUnauthorizedException(ForbiddenException ex) {
+        // Return a 403 with the exception message
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
     }
 }

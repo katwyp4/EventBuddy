@@ -20,7 +20,6 @@ public interface EventService {
 
     Event fullUpdate(Long id, Event event, String loggedUserName);
 
-    Event partialUpdate(Long id, Event event, String loggedUserName);
 
     void deleteById(Long id, String loggedUserName);
 

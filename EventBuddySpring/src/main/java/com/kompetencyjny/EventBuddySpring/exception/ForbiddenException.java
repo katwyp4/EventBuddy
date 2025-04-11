@@ -3,9 +3,9 @@ package com.kompetencyjny.EventBuddySpring.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(HttpStatus.UNAUTHORIZED)
-public class UnauthorizedException extends RuntimeException{
-    public UnauthorizedException(String message){
+@ResponseStatus(HttpStatus.FORBIDDEN)
+public class ForbiddenException extends RuntimeException{
+    public ForbiddenException(String message){
         super(message);
     }
 }

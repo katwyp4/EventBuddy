@@ -46,14 +46,21 @@ dependencies {
 	// Lombok (automatyczne generowanie getterów/setterów)
 	compileOnly 'org.projectlombok:lombok:1.18.36'
 	annotationProcessor 'org.projectlombok:lombok:1.18.36'
+	testImplementation 'org.projectlombok:lombok:1.18.36'
+	testAnnotationProcessor 'org.projectlombok:lombok:1.18.36'
 	//mapstruct
 	implementation 'org.mapstruct:mapstruct:1.6.3'
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+	testImplementation 'org.mapstruct:mapstruct:1.6.3'
+	testAnnotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 	// Lombok & MapStruct integration
 	annotationProcessor "org.projectlombok:lombok-mapstruct-binding:0.2.0"
+	testAnnotationProcessor "org.projectlombok:lombok-mapstruct-binding:0.2.0"
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
 
 	// DevTools (dla szybszego restartu)
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -65,6 +72,8 @@ dependencies {
 	testImplementation 'com.h2database:h2'
 	testImplementation 'org.testcontainers:junit-jupiter'
 	testImplementation 'org.testcontainers:postgresql'
+	testImplementation "org.mockito:mockito-inline:5.2.0"
+
 }
 
 tasks.named('test') {

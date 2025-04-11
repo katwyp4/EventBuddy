@@ -1,10 +1,12 @@
 package com.kompetencyjny.EventBuddySpring.service;
 
+import com.kompetencyjny.EventBuddySpring.exception.NotFoundException;
 import com.kompetencyjny.EventBuddySpring.model.User;
 import com.kompetencyjny.EventBuddySpring.model.Role;
 import com.kompetencyjny.EventBuddySpring.repo.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -58,5 +60,14 @@ public class UserService {
         if (userOptional.isEmpty()) return userOptional;
         if (userOptional.get().getActive().equals(true)) return Optional.empty();
         return userOptional;
+    }
+
+    @Transactional
+    public User setUserRole(String username, Role role){
+        Optional<User> userOpt = this.findByUserName(username);
+        if (userOpt.isEmpty()) throw new NotFoundException("User of username: "+username+" does not exist!");
+        User user = userOpt.get();
+        user.setRole(role);
+        return userRepository.save(user);
     }
 }

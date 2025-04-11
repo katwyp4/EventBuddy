@@ -12,7 +12,6 @@ import com.kompetencyjny.EventBuddySpring.model.EventRole;
 import com.kompetencyjny.EventBuddySpring.service.EventService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -44,7 +43,6 @@ public class EventController {
     @GetMapping("/{id}")
     public ResponseEntity<EventDto> getEventById(@PathVariable Long id) {
         Optional<Event> event = eventService.findById(id);
-        if (event.isEmpty()) System.out.println("It is indeed empty!");
         return event.map(event_ -> ResponseEntity.ok(eventMapper.toDto(event_)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -55,7 +53,7 @@ public class EventController {
     public ResponseEntity<EventDto> createEvent(@Valid @RequestBody EventRequest eventRequest, @AuthenticationPrincipal UserDetails userDetails) {
         Event event = eventMapper.toEntity(eventRequest);
         event = eventService.create(event, userDetails.getUsername());
-        return ResponseEntity.ok(eventMapper.toDto(event));
+        return new ResponseEntity<>(eventMapper.toDto(event), HttpStatus.CREATED);
     }
 
     // [PUT] /api/events/{id}
@@ -67,17 +65,6 @@ public class EventController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         Event updatedEvent = eventService.fullUpdate(id, eventMapper.toEntity(eventRequest), userDetails.getUsername());
-        return ResponseEntity.ok(eventMapper.toDto(updatedEvent));
-    }
-    // [PATCH] /api/events/{id}
-    @PatchMapping("/{id}")
-    public ResponseEntity<EventDto> partialUpdateEvent(@PathVariable Long id,
-                                                       @Valid @RequestBody EventRequest eventRequest,
-                                                       @AuthenticationPrincipal UserDetails userDetails) {
-        if (! eventService.existsById(id)){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        Event updatedEvent = eventService.partialUpdate(id, eventMapper.toEntity(eventRequest), userDetails.getUsername());
         return ResponseEntity.ok(eventMapper.toDto(updatedEvent));
     }
 
@@ -93,19 +80,19 @@ public class EventController {
     }
 
     // Dodanie uczestnika (userId) do wydarzenia (eventId)
-    // [POST] /api/events/{eventId}/participants/{userId}?role={eventRole}
-    @PostMapping("/{eventId}/participants/{userId}")
-    public ResponseEntity<EventParticipantDto> addParticipantToEvent(@PathVariable Long eventId,
-                                                                     @PathVariable Long userId,
-                                                                     @Valid @RequestParam(required = false) EventRoleRequest eventRoleRequest,
-                                                                     @AuthenticationPrincipal UserDetails userDetails) {
+    // [PUT] /api/events/{eventId}/participants/{userId}?role={eventRole}
+    @PutMapping("/{eventId}/participants/{userId}")
+    public ResponseEntity<EventParticipantDto> setEventParticipantRole(@PathVariable Long eventId,
+                                                                       @PathVariable Long userId,
+                                                                       @Valid @RequestParam(required = false) EventRoleRequest eventRoleRequest,
+                                                                       @AuthenticationPrincipal UserDetails userDetails) {
 
 
         EventRole eventRole;
         if (eventRoleRequest==null) eventRole = EventRole.PASSIVE;
         else eventRole = eventRoleRequest.toEventRoleEnum();
 
-        EventParticipant eventParticipant = eventService.addEventParticipant(eventId, userId, eventRole, userDetails.getUsername());
+        EventParticipant eventParticipant = eventService.updateEventParticipantRole(eventId, userId, eventRole, userDetails.getUsername());
         return ResponseEntity.ok(eventParticipantMapper.toDto(eventParticipant));
     }
     // Informacje o uczestniku (userId) z wydarzenia (eventId)
@@ -132,9 +119,9 @@ public class EventController {
     // Usuwanie uczestnika (userId) z wydarzenia (eventId)
     // [DELETE] /api/events/{eventId}/participants/{userId}
     @DeleteMapping("/{eventId}/participants/{userId}")
-    public ResponseEntity<Void> removeParticipantToEvent(@PathVariable Long eventId,
-                                                         @PathVariable Long userId,
-                                                         @AuthenticationPrincipal UserDetails userDetails
+    public ResponseEntity<Void> removeParticipantFromEvent(@PathVariable Long eventId,
+                                                           @PathVariable Long userId,
+                                                           @AuthenticationPrincipal UserDetails userDetails
                                                          ){
         eventService.removeEventParticipant(eventId,userId, userDetails.getUsername());
         return null;
