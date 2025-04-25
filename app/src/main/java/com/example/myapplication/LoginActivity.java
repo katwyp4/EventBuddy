@@ -20,6 +20,9 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import android.content.Intent;
+
+
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -66,7 +69,10 @@ public class LoginActivity extends AppCompatActivity {
                     String token = response.body().getToken();
                     Toast.makeText(LoginActivity.this, "Zalogowano. Token: " + token, Toast.LENGTH_LONG).show();
 
-                    // TODO: Zapis tokena i przejście dalej
+                    Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // Czyści stos, nie wrócisz do loginu
+                    startActivity(intent);
+
                 } else {
                     Toast.makeText(LoginActivity.this, "Błąd logowania", Toast.LENGTH_LONG).show();
                 }
