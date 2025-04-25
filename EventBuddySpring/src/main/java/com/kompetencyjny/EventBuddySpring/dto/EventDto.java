@@ -1,5 +1,6 @@
 package com.kompetencyjny.EventBuddySpring.dto;
 
+import com.kompetencyjny.EventBuddySpring.model.EventPrivacy;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,4 +22,5 @@ public class EventDto {
     private Double longitude;
     private Double latitude;
     private String shareLink;
+    private String eventPrivacy;
 }

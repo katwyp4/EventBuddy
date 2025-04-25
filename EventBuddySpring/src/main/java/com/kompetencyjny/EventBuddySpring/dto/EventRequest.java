@@ -1,6 +1,7 @@
 package com.kompetencyjny.EventBuddySpring.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,4 +23,6 @@ public class EventRequest {
 
     private Double latitude;
     private Double longitude;
+    @Pattern(regexp = "(PRIVATE|PUBLIC_OPEN|PUBLIC_CLOSED)")
+    private String eventPrivacy;
 }

@@ -14,10 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
@@ -38,25 +35,74 @@ public class EventServiceImpl implements EventService {
         return this.eventRepository.save(event);
     }
 
+
+
     @Override
-    public List<Event> findAll() {
-        return StreamSupport.stream(eventRepository.findByActiveTrue()
-                .spliterator(),
-                false)
-                .collect(Collectors.toList());
-    }
-    @Override
-    public Page<Event> findAll(Pageable pageable) {
-        return eventRepository.findByActiveTrue(pageable);
+    public Page<Event> findAllVisible(Pageable pageable, String loggedUserName) {
+        Optional<User> userOpt = userService.findByUserName(loggedUserName);
+        if (userOpt.isEmpty()) {
+            throw new NotFoundException("User whith loggedUserName: "+loggedUserName+" does not exist");
+        }
+
+        Long userId = userOpt.get().getId();
+        return eventRepository.findEventsVisibleToUser(userId, pageable);
     }
 
     @Override
-    public Optional<Event> findById(Long id) {
+    public Page<Event> findAllPublic(Pageable pageable) {
+
+        return eventRepository.findPublicEvents(pageable);
+    }
+
+    @Override
+    public Page<Event> findAllInternal(Pageable pageable) {
+        return eventRepository.findAll(pageable);
+    }
+
+
+    @Override
+    public Optional<Event> findVisibleById(Long id, String loggedUserName) {
             Optional<Event> eventOpt = eventRepository.findById(id);
             if (eventOpt.isEmpty()) return eventOpt;
             Boolean isActive = eventOpt.get().getActive();
             if (isActive==null || !isActive) return Optional.empty();
+            if (!isEventVisibleToUser(eventOpt.get(), loggedUserName)) return Optional.empty();
             return eventOpt;
+    }
+
+    @Override
+    public Optional<Event> findPublicById(Long id) {
+        Optional<Event> eventOpt = eventRepository.findById(id);
+        if (eventOpt.isEmpty()) return eventOpt;
+        Event event = eventOpt.get();
+        Boolean isActive = event.getActive();
+        if (isActive==null || !isActive) return Optional.empty();
+        if (event.getEventPrivacy().equals(EventPrivacy.PRIVATE)) return Optional.empty();
+        return eventOpt;
+    }
+
+    @Override
+    public Optional<Event> findByIdInternal(Long id) {
+        Optional<Event> eventOpt = eventRepository.findById(id);
+        if (eventOpt.isEmpty()) return eventOpt;
+        Boolean isActive = eventOpt.get().getActive();
+        if (isActive==null || !isActive) return Optional.empty();
+        return eventOpt;
+    }
+
+    private boolean isEventVisibleToUser(Event event, String userName){
+        if (event.getEventPrivacy().equals(EventPrivacy.PUBLIC_CLOSED)) return true;
+        if (event.getEventPrivacy().equals(EventPrivacy.PUBLIC_OPEN)) return true;
+        Optional<User> user = userService.findByUserName(userName);
+        if (user.isEmpty()) return false;
+        if (user.get().getRole()==Role.ADMIN) return true;
+        return isUserAParticipantOf(event.getId(), user.get().getId());
+    }
+
+    private boolean isEventVisibleToUser(Long eventId, String userName){
+        Optional<Event> eventOpt = eventRepository.findById(eventId);
+        if (eventOpt.isEmpty()) return false;
+        return isEventVisibleToUser(eventOpt.get(), userName);
     }
 
     @Override
@@ -109,7 +155,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public boolean isUserAParticipantOf(Long eventId, Long userId) {
-        Optional<Event> eventOpt = this.findById(eventId);
+        Optional<Event> eventOpt = this.findByIdInternal(eventId);
         Optional<User> userOpt = this.userService.findById(userId);
         if (userOpt.isEmpty() || eventOpt.isEmpty()) throw new NotFoundException("User or Event does not exists!");
         return eventParticipantRepository.existsById(new UserEventId(userId, eventId));
@@ -118,11 +164,12 @@ public class EventServiceImpl implements EventService {
     @Transactional
     @Override
     public EventParticipant addEventParticipant(Long eventId, Long userId, EventRole role, String loggedUserName){
-        Optional<Event> eventOpt = this.findById(eventId);
+        Optional<Event> eventOpt = this.findByIdInternal(eventId);
         Optional<User> userOpt = this.userService.findById(userId);
         if (userOpt.isEmpty() || eventOpt.isEmpty()) throw new NotFoundException("User or Event does not exists!");
         Event event = eventOpt.get();
         User user = userOpt.get();
+        if (!isEventVisibleToUser(event, loggedUserName)) throw new NotFoundException("User or Event does not exists!");
 
         if (!isUserPermitted(eventId, loggedUserName, EventRole.ADMIN))
             throw new ForbiddenException("User username:"+loggedUserName+" not allowed to add a participant to event: "+eventId);
@@ -134,11 +181,12 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public void removeEventParticipant(Long eventId, Long userId, String loggedUserName){
-        Optional<Event> eventOpt = this.findById(eventId);
+        Optional<Event> eventOpt = this.findByIdInternal(eventId);
         Optional<User> userOpt = this.userService.findById(userId);
         if (userOpt.isEmpty() || eventOpt.isEmpty()) throw new RuntimeException("User or Event does not exists!");
         Event event = eventOpt.get();
         User user = userOpt.get();
+        if (!isEventVisibleToUser(event, loggedUserName)) throw new NotFoundException("User or Event does not exists!");
 
         if (!isUserPermitted(eventId, loggedUserName, EventRole.ADMIN))
             throw new ForbiddenException("User username:"+loggedUserName+" not allowed to remove participants from event: "+eventId);
@@ -148,28 +196,50 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Optional<EventParticipant> getEventParticipant(Long eventId, Long userId) {
-
+    public Optional<EventParticipant> getEventParticipantInternal(Long eventId, Long userId) {
         return eventParticipantRepository.findById_EventIdAndId_UserId(eventId, userId);
     }
 
     @Override
-    public Page<EventParticipant> findAllEventParticipants(Pageable pageable, Long eventId) {
-        if (! this.existsById(eventId)) throw new NotFoundException("Event not found eventId: "+eventId);
+    public Optional<EventParticipant> getEventParticipant(Long eventId, Long userId, String loggedUserName) {
+        if (!isEventVisibleToUser(eventId, loggedUserName)) return Optional.empty();
+        return eventParticipantRepository.findById_EventIdAndId_UserId(eventId, userId);
+    }
+
+    @Override
+    public Page<EventParticipant> findAllEventParticipants(Pageable pageable, Long eventId, String loggedUserName) {
+        if (!isEventVisibleToUser(eventId, loggedUserName)) throw new NotFoundException("Event does not exists!");
         return eventParticipantRepository.findAllById_EventId(eventId, pageable);
     }
 
     @Override
     public EventParticipant updateEventParticipantRole(Long eventId, Long userId, EventRole eventRole, String loggedUserName){
-        Optional<Event> eventOpt = this.findById(eventId);
+        Optional<Event> eventOpt = this.findByIdInternal(eventId);
         Optional<User> userOpt = this.userService.findById(userId);
         if (userOpt.isEmpty() || eventOpt.isEmpty()) throw new NotFoundException("Event or user does not exist! eventId: "+eventId+" userId "+ userId);
 
         Event event = eventOpt.get();
         User user = userOpt.get();
 
-        if (!isUserPermitted(eventId, loggedUserName, EventRole.ADMIN))
+        Optional<User> loggedUserOpt = userService.findByUserName(loggedUserName);
+        if (loggedUserOpt.isEmpty()) throw new NotFoundException("Logged user not found!");
+
+        User loggedUser = loggedUserOpt.get();
+
+        if (!isEventVisibleToUser(event, loggedUserName)) throw new NotFoundException("User or Event does not exists! eventId: "+eventId+" userId "+userId);
+
+        if (!isUserPermitted(eventId, loggedUserName, EventRole.ADMIN) && user != loggedUser)
             throw new ForbiddenException("User username:"+loggedUserName+" not allowed to change user's role for event "+eventId);
+
+        if (user == loggedUser && loggedUser.getRole()!=Role.ADMIN) {
+            Optional<EventParticipant> eventParticipantOpt = eventParticipantRepository.findById(new UserEventId(userId, eventId));
+            if (eventParticipantOpt.isEmpty() && eventRole.compareTo(EventRole.PASSIVE)>0)
+                throw new ForbiddenException("User username:" + loggedUserName + " not allowed to change user's role for event " + eventId);
+            if (eventParticipantOpt.isEmpty() && !event.getEventPrivacy().equals(EventPrivacy.PUBLIC_OPEN))
+                throw new ForbiddenException("User username:" + loggedUserName + " not allowed to change user's role for event " + eventId);
+            if (eventParticipantOpt.isPresent() && eventParticipantOpt.get().getEventRole().compareTo(eventRole)<0)
+                throw new ForbiddenException("User username:" + loggedUserName + " not allowed to change user's role for event " + eventId);
+        }
 
         Optional<EventParticipant> eventParticipantOpt = eventParticipantRepository.findById_EventIdAndId_UserId(eventId, userId);
         if (eventParticipantOpt.isEmpty()){

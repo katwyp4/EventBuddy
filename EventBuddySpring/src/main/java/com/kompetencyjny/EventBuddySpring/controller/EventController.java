@@ -34,16 +34,21 @@ public class EventController {
 
     // [GET] /api/events?size={}?page={}
     @GetMapping
-    public ResponseEntity<Page<EventDto>> getAllEvents(Pageable pageable) {
-         Page<EventDto> eventDtos = eventService.findAll(pageable).map(eventMapper::toDto);
-         return ResponseEntity.ok(eventDtos);
+    public ResponseEntity<Page<EventDto>> getAllEvents(Pageable pageable, @AuthenticationPrincipal UserDetails userDetails) {
+        Page<EventDto> eventDtos;
+        if (userDetails == null) eventDtos =  eventService.findAllPublic(pageable).map(eventMapper::toDto);
+        eventDtos = eventService.findAllVisible(pageable, userDetails.getUsername()).map(eventMapper::toDto);
+        return ResponseEntity.ok(eventDtos);
     }
 
     // [GET] /api/events/{id}
     @GetMapping("/{id}")
-    public ResponseEntity<EventDto> getEventById(@PathVariable Long id) {
-        Optional<Event> event = eventService.findById(id);
-        return event.map(event_ -> ResponseEntity.ok(eventMapper.toDto(event_)))
+    public ResponseEntity<EventDto> getEventById(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
+        Optional<Event> eventOpt;
+        if (userDetails == null) eventOpt = eventService.findPublicById(id);
+        else eventOpt = eventService.findVisibleById(id, userDetails.getUsername());
+
+        return eventOpt.map(event_ -> ResponseEntity.ok(eventMapper.toDto(event_)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -84,13 +89,13 @@ public class EventController {
     @PutMapping("/{eventId}/participants/{userId}")
     public ResponseEntity<EventParticipantDto> setEventParticipantRole(@PathVariable Long eventId,
                                                                        @PathVariable Long userId,
-                                                                       @Valid @RequestParam(required = false) EventRoleRequest eventRoleRequest,
+                                                                       @Valid @RequestBody(required = false) EventRoleRequest role,
                                                                        @AuthenticationPrincipal UserDetails userDetails) {
 
 
         EventRole eventRole;
-        if (eventRoleRequest==null) eventRole = EventRole.PASSIVE;
-        else eventRole = eventRoleRequest.toEventRoleEnum();
+        if (role==null) eventRole = EventRole.PASSIVE;
+        else eventRole = role.toEventRoleEnum();
 
         EventParticipant eventParticipant = eventService.updateEventParticipantRole(eventId, userId, eventRole, userDetails.getUsername());
         return ResponseEntity.ok(eventParticipantMapper.toDto(eventParticipant));
@@ -99,9 +104,11 @@ public class EventController {
     // [GET] /api/events/{eventId}/participants/{userId}
     @GetMapping("/{eventId}/participants/{userId}")
     public ResponseEntity<EventParticipantDto> getParticipant(@PathVariable Long eventId,
-                                                                  @PathVariable Long userId
+                                                              @PathVariable Long userId,
+                                                              @AuthenticationPrincipal UserDetails userDetails
     ){
-        Optional<EventParticipant> eventParticipantOpt =  eventService.getEventParticipant(eventId, userId);
+        if (userDetails == null) return new ResponseEntity<EventParticipantDto>(HttpStatus.UNAUTHORIZED);
+        Optional<EventParticipant> eventParticipantOpt =  eventService.getEventParticipant(eventId, userId,userDetails.getUsername());
         if (eventParticipantOpt.isEmpty()) return ResponseEntity.notFound().build();
 
         return ResponseEntity.ok(eventParticipantMapper.toDto(eventParticipantOpt.get()));
@@ -111,9 +118,11 @@ public class EventController {
     // [GET] /api/events/{eventId}/participants/
     @GetMapping("/{eventId}/participants")
     public ResponseEntity<Page<EventParticipantDto>> getParticipants(Pageable pageable,
-                                                                    @PathVariable Long eventId
+                                                                    @PathVariable Long eventId,
+                                                                    @AuthenticationPrincipal UserDetails userDetails
     ){
-        return ResponseEntity.ok(eventService.findAllEventParticipants(pageable, eventId).map(eventParticipantMapper::toDto));
+        if (userDetails == null) return new ResponseEntity<Page<EventParticipantDto>>(HttpStatus.UNAUTHORIZED);
+        return ResponseEntity.ok(eventService.findAllEventParticipants(pageable, eventId, userDetails.getUsername()).map(eventParticipantMapper::toDto));
     }
 
     // Usuwanie uczestnika (userId) z wydarzenia (eventId)
