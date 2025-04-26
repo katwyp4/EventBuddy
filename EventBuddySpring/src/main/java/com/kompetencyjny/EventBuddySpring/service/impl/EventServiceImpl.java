@@ -188,7 +188,11 @@ public class EventServiceImpl implements EventService {
         User user = userOpt.get();
         if (!isEventVisibleToUser(event, loggedUserName)) throw new NotFoundException("User or Event does not exists!");
 
-        if (!isUserPermitted(eventId, loggedUserName, EventRole.ADMIN))
+        Optional<User> loggedUserOpt = userService.findByUserName(loggedUserName);
+        if (loggedUserOpt.isEmpty()) throw  new NotFoundException("Logged user does not exist");
+        User loggedUser = loggedUserOpt.get();
+
+        if (!isUserPermitted(eventId, loggedUserName, EventRole.ADMIN) && !loggedUser.equals(user))
             throw new ForbiddenException("User username:"+loggedUserName+" not allowed to remove participants from event: "+eventId);
 
         event.removeParticipant(user);

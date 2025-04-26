@@ -335,27 +335,14 @@ public class EventControllerIntegrationTests {
 
     // GET--------------------------------------------------------------------------------------------------------------
     @Test
-    public void testThatListEventsReturnsHttpStatus200() throws Exception{
-        assertThrows(ServletException.class,
-                () -> mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/events")
-                        .contentType(MediaType.APPLICATION_JSON)
-        ));
-    }
-
-    @Test
-    public void testThatListEventsReturnsListOfEventsPrivateNotIncludedNotLoogedIn() throws Exception {
+    public void testThatListEventsReturnsHttpStatus403WhenNotLoggedIn() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        Event privateEvent = TestDataUtil.getEventPrivate1();
-        privateEvent.setId(null);
-        eventService.create(privateEvent, userA.getUsername());
-        Event eventA = TestDataUtil.getEventA();
-        eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
-        assertThrows(ServletException.class, () ->mockMvc.perform(
-                    MockMvcRequestBuilders.get("/api/events")
-                            .contentType(MediaType.APPLICATION_JSON)
-            )
+        String token = jwtUtil.generateToken(userA.getUsername());
+        mockMvc.perform(
+        MockMvcRequestBuilders.get("/api/events")
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(
+                MockMvcResultMatchers.status().isForbidden()
         );
     }
 
@@ -704,11 +691,13 @@ public class EventControllerIntegrationTests {
     public void testThatGetEventByIdOnExistingReturnsHttpStatus200() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
         Event eventA = TestDataUtil.getEventA();
+        String token = jwtUtil.generateToken(userA.getUsername());
         eventA.setId(null);
         eventService.create(eventA, userA.getUsername());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer "+token)
 
         ).andExpect(
                 MockMvcResultMatchers.status().isOk()
@@ -718,12 +707,14 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatGetEventByIdOnExistingReturnsEvent() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
+        String token = jwtUtil.generateToken(userA.getUsername());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
         eventService.create(eventA, userA.getUsername());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer "+token)
 
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.id").isNumber()
@@ -743,7 +734,22 @@ public class EventControllerIntegrationTests {
     }
 
     @Test
-    public void testThatGetEventByIdOnPrivateReturns404NotLoggedIn() throws Exception {
+    public void testThatGetEventByIdOnExistingReturns403ForNotLoggedIn() throws Exception {
+        User userA = TestDataUtil.getRegisteredUserA(userService);
+        Event eventA = TestDataUtil.getEventA();
+        eventA.setId(null);
+        eventService.create(eventA, userA.getUsername());
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/api/events/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+
+        ).andExpect(
+                MockMvcResultMatchers.status().isForbidden()
+        );
+    }
+
+    @Test
+    public void testThatGetEventByIdOnPrivateReturns403NotLoggedIn() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
         Event eventA = TestDataUtil.getEventPrivate1();
         eventA.setId(null);
@@ -753,7 +759,7 @@ public class EventControllerIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON)
 
         ).andExpect(
-                MockMvcResultMatchers.status().isNotFound()
+                MockMvcResultMatchers.status().isForbidden()
         );
     }
 
@@ -918,7 +924,7 @@ public class EventControllerIntegrationTests {
     }
 
     @Test
-    public void testThatGetEventByIdOnClosedPublicReturns200NotLoggedIn() throws Exception {
+    public void testThatGetEventByIdOnClosedPublicReturns403NotLoggedIn() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
         String token = jwtUtil.generateToken(userA.getUsername());
         Event eventA = TestDataUtil.getEventPublicClosed();
@@ -929,35 +935,7 @@ public class EventControllerIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON)
 
         ).andExpect(
-                MockMvcResultMatchers.status().isOk()
-        );
-    }
-
-    @Test
-    public void testThatGetEventByIdOnPublicClosedReturnsEventNotLoggedIn() throws Exception {
-        User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
-        Event eventA = TestDataUtil.getEventPublicClosed();
-        eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
-        mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/events/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.id").isNumber()
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.title").value(eventA.getTitle())
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.description").value(eventA.getDescription())
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.latitude").value(eventA.getLatitude())
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.longitude").value(eventA.getLongitude())
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.location").value(eventA.getLocation())
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.date").value(eventA.getDate().toString())
+                MockMvcResultMatchers.status().isForbidden()
         );
     }
 
@@ -1106,9 +1084,12 @@ public class EventControllerIntegrationTests {
     }
     @Test
     public void testThatGetEventByIdWhenNoRecordsReturnsHttpStatus404() throws Exception{
+        User user = TestDataUtil.getRegisteredUserA(userService);
+        String token = jwtUtil.generateToken(user.getUsername());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer "+ token)
 
         ).andExpect(
                 MockMvcResultMatchers.status().isNotFound()
@@ -1117,12 +1098,14 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatGetEventByIdWhenDoesNotExistsReturnsHttpStatus404() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
+        String token = jwtUtil.generateToken(userA.getUsername());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
         eventService.create(eventA, userA.getUsername());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events/2")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer "+ token)
 
         ).andExpect(
                 MockMvcResultMatchers.status().isNotFound()
@@ -3002,7 +2985,7 @@ public class EventControllerIntegrationTests {
         // Unauthenticated user should be unauthorized
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events/" + event.getId() + "/participants")
-        ).andExpect(MockMvcResultMatchers.status().isUnauthorized());
+        ).andExpect(MockMvcResultMatchers.status().isForbidden());
     }
 
     @Test
@@ -3045,6 +3028,117 @@ public class EventControllerIntegrationTests {
         ).andExpect(MockMvcResultMatchers.status().isOk());
     }
 
+    //DELETE -----------------------------------------------------------------------------------------------------------
+    @Test
+    public void testUserCanDeleteThemself() throws Exception {
+        User creator = TestDataUtil.getRegisteredUserA(userService);
+        User user = TestDataUtil.getRegisteredUserB(userService);
+        Event event = eventService.create(TestDataUtil.getEventA(), creator.getUsername());
+        eventService.addEventParticipant(event.getId(), user.getId(), EventRole.ACTIVE, creator.getUsername());
+        String token = jwtUtil.generateToken(user.getUsername());
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.delete("/api/events/" + event.getId() + "/participants/" + user.getId())
+                        .header("Authorization", "Bearer " + token)
+        ).andExpect(MockMvcResultMatchers.status().isOk());
+
+        Optional<EventParticipant> epOpt = eventService.getEventParticipantInternal(event.getId(), user.getId());
+        assertFalse(epOpt.isPresent());
+    }
+
+    @Test
+    public void testAdminCanDeleteOtherUser() throws Exception {
+        User creator = TestDataUtil.getRegisteredUserA(userService);
+        User admin = TestDataUtil.getRegisteredUserB(userService);
+        User targetUser = TestDataUtil.getRegisteredUserC(userService);
+        Event event = eventService.create(TestDataUtil.getEventA(), creator.getUsername());
+        eventService.addEventParticipant(event.getId(), admin.getId(), EventRole.ADMIN, creator.getUsername());
+        eventService.addEventParticipant(event.getId(), targetUser.getId(), EventRole.ACTIVE, creator.getUsername());
+        String token = jwtUtil.generateToken(admin.getUsername());
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.delete("/api/events/" + event.getId() + "/participants/" + targetUser.getId())
+                        .header("Authorization", "Bearer " + token)
+        ).andExpect(MockMvcResultMatchers.status().isOk());
+
+        Optional<EventParticipant> epOpt = eventService.getEventParticipantInternal(event.getId(), targetUser.getId());
+        assertFalse(epOpt.isPresent());
+    }
+
+    @Test
+    public void testAdminCanDeleteOtherAdmin() throws Exception {
+        User creator = TestDataUtil.getRegisteredUserA(userService);
+        User admin1 = TestDataUtil.getRegisteredUserB(userService);
+        User admin2 = TestDataUtil.getRegisteredUserC(userService);
+        Event event = eventService.create(TestDataUtil.getEventA(), creator.getUsername());
+        eventService.addEventParticipant(event.getId(), admin1.getId(), EventRole.ADMIN, creator.getUsername());
+        eventService.addEventParticipant(event.getId(), admin2.getId(), EventRole.ADMIN, creator.getUsername());
+        String token = jwtUtil.generateToken(admin1.getUsername());
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.delete("/api/events/" + event.getId() + "/participants/" + admin2.getId())
+                        .header("Authorization", "Bearer " + token)
+        ).andExpect(MockMvcResultMatchers.status().isOk());
+
+        Optional<EventParticipant> epOpt = eventService.getEventParticipantInternal(event.getId(), admin2.getId());
+        assertFalse(epOpt.isPresent());
+    }
+
+    @Test
+    public void testActiveUserCannotDeleteOtherUser() throws Exception {
+        User creator = TestDataUtil.getRegisteredUserA(userService);
+        User activeUser = TestDataUtil.getRegisteredUserB(userService);
+        User targetUser = TestDataUtil.getRegisteredUserC(userService);
+        Event event = eventService.create(TestDataUtil.getEventA(), creator.getUsername());
+        eventService.addEventParticipant(event.getId(), activeUser.getId(), EventRole.ACTIVE, creator.getUsername());
+        eventService.addEventParticipant(event.getId(), targetUser.getId(), EventRole.PASSIVE, creator.getUsername());
+        String token = jwtUtil.generateToken(activeUser.getUsername());
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.delete("/api/events/" + event.getId() + "/participants/" + targetUser.getId())
+                        .header("Authorization", "Bearer " + token)
+        ).andExpect(MockMvcResultMatchers.status().isForbidden());
+
+        Optional<EventParticipant> epOpt = eventService.getEventParticipantInternal(event.getId(), targetUser.getId());
+        assertTrue(epOpt.isPresent());
+    }
+
+    @Test
+    public void testPassiveUserCannotDeleteOtherUser() throws Exception {
+        User creator = TestDataUtil.getRegisteredUserA(userService);
+        User passiveUser = TestDataUtil.getRegisteredUserB(userService);
+        User targetUser = TestDataUtil.getRegisteredUserC(userService);
+        Event event = eventService.create(TestDataUtil.getEventA(), creator.getUsername());
+        eventService.addEventParticipant(event.getId(), passiveUser.getId(), EventRole.PASSIVE, creator.getUsername());
+        eventService.addEventParticipant(event.getId(), targetUser.getId(), EventRole.ACTIVE, creator.getUsername());
+        String token = jwtUtil.generateToken(passiveUser.getUsername());
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.delete("/api/events/" + event.getId() + "/participants/" + targetUser.getId())
+                        .header("Authorization", "Bearer " + token)
+        ).andExpect(MockMvcResultMatchers.status().isForbidden());
+
+        Optional<EventParticipant> epOpt = eventService.getEventParticipantInternal(event.getId(), targetUser.getId());
+        assertTrue(epOpt.isPresent());
+    }
+
+    @Test
+    public void testNotParticipantUserCannotDeleteOtherUser() throws Exception {
+        User creator = TestDataUtil.getRegisteredUserA(userService);
+        User stranger = TestDataUtil.getRegisteredUserB(userService);
+        User targetUser = TestDataUtil.getRegisteredUserC(userService);
+        Event event = eventService.create(TestDataUtil.getEventA(), creator.getUsername());
+        eventService.addEventParticipant(event.getId(), targetUser.getId(), EventRole.ACTIVE, creator.getUsername());
+        String token = jwtUtil.generateToken(stranger.getUsername());
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.delete("/api/events/" + event.getId() + "/participants/" + targetUser.getId())
+                        .header("Authorization", "Bearer " + token)
+        ).andExpect(MockMvcResultMatchers.status().isForbidden());
+
+        Optional<EventParticipant> epOpt = eventService.getEventParticipantInternal(event.getId(), targetUser.getId());
+        assertTrue(epOpt.isPresent());
+    }
 
 }
 

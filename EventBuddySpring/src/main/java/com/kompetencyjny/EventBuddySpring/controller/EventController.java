@@ -36,7 +36,6 @@ public class EventController {
     @GetMapping
     public ResponseEntity<Page<EventDto>> getAllEvents(Pageable pageable, @AuthenticationPrincipal UserDetails userDetails) {
         Page<EventDto> eventDtos;
-        if (userDetails == null) eventDtos =  eventService.findAllPublic(pageable).map(eventMapper::toDto);
         eventDtos = eventService.findAllVisible(pageable, userDetails.getUsername()).map(eventMapper::toDto);
         return ResponseEntity.ok(eventDtos);
     }
@@ -45,8 +44,7 @@ public class EventController {
     @GetMapping("/{id}")
     public ResponseEntity<EventDto> getEventById(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
         Optional<Event> eventOpt;
-        if (userDetails == null) eventOpt = eventService.findPublicById(id);
-        else eventOpt = eventService.findVisibleById(id, userDetails.getUsername());
+        eventOpt = eventService.findVisibleById(id, userDetails.getUsername());
 
         return eventOpt.map(event_ -> ResponseEntity.ok(eventMapper.toDto(event_)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -107,7 +105,6 @@ public class EventController {
                                                               @PathVariable Long userId,
                                                               @AuthenticationPrincipal UserDetails userDetails
     ){
-        if (userDetails == null) return new ResponseEntity<EventParticipantDto>(HttpStatus.UNAUTHORIZED);
         Optional<EventParticipant> eventParticipantOpt =  eventService.getEventParticipant(eventId, userId,userDetails.getUsername());
         if (eventParticipantOpt.isEmpty()) return ResponseEntity.notFound().build();
 
@@ -121,7 +118,6 @@ public class EventController {
                                                                     @PathVariable Long eventId,
                                                                     @AuthenticationPrincipal UserDetails userDetails
     ){
-        if (userDetails == null) return new ResponseEntity<Page<EventParticipantDto>>(HttpStatus.UNAUTHORIZED);
         return ResponseEntity.ok(eventService.findAllEventParticipants(pageable, eventId, userDetails.getUsername()).map(eventParticipantMapper::toDto));
     }
 
