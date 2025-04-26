@@ -44,4 +44,28 @@ public interface EventRepository extends JpaRepository<Event, Long>, PagingAndSo
     com.kompetencyjny.EventBuddySpring.model.EventPrivacy.PUBLIC_CLOSED)
 """)
     Page<Event> findPublicEvents(Pageable pageable);
+
+    @Query("""
+    SELECT e
+    FROM Event e
+    WHERE e.active = true
+    AND EXISTS (
+        SELECT ep FROM EventParticipant ep
+        WHERE ep.event = e AND ep.id.userId = :userId
+    )
+    AND (
+        e.eventPrivacy IN
+        (com.kompetencyjny.EventBuddySpring.model.EventPrivacy.PUBLIC_OPEN,
+        com.kompetencyjny.EventBuddySpring.model.EventPrivacy.PUBLIC_CLOSED)
+        OR EXISTS (
+            SELECT ep FROM EventParticipant ep
+            WHERE ep.event = e AND ep.id.userId = :loggedId
+        )
+        OR EXISTS (
+            SELECT u FROM User u
+            WHERE u.id = :loggedId and u.role = ADMIN
+        )
+    )
+""")
+    Page<Event> findAllEventsOfUser(Pageable pageable, @Param("userId") Long userId, @Param("loggedId") Long loggedId);
 }

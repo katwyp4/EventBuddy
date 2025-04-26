@@ -251,8 +251,19 @@ public class EventServiceImpl implements EventService {
             eventRepository.save(event);
             return eventParticipant;
         }
+
         EventParticipant eventParticipant = eventParticipantOpt.get();
         eventParticipant.setEventRole(eventRole);
         return eventParticipantRepository.save(eventParticipant);
+    }
+
+    public Page<Event> findAllEventsOfUser(Pageable pageable, Long userId, String loggedUserName){
+        Optional<User> userOpt = this.userService.findById(userId);
+        if (userOpt.isEmpty()) throw new NotFoundException("User does not exist! UserId: "+ userId);
+
+        Optional<User> loggedInOpt = userService.findByUserName(loggedUserName);
+        if (loggedInOpt.isEmpty()) throw new NotFoundException("Logged in user does not exists!");
+
+        return eventRepository.findAllEventsOfUser(pageable, userId, loggedInOpt.get().getId());
     }
 }

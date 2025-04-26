@@ -131,4 +131,14 @@ public class EventController {
         eventService.removeEventParticipant(eventId,userId, userDetails.getUsername());
         return null;
     }
+
+    // Wyświetlanie eventów dla danego użytkownika
+    @GetMapping("/events-of-user/{userId}")
+    public ResponseEntity<Page<EventDto>> getEventsOfUser(Pageable pageable,
+                                                                     @PathVariable Long userId,
+                                                                     @AuthenticationPrincipal UserDetails userDetails
+    ){
+        return ResponseEntity.ok(eventService.findAllEventsOfUser(pageable, userId, userDetails.getUsername()).map(eventMapper::toDto));
+    }
+
 }

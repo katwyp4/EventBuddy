@@ -20,6 +20,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -3138,6 +3139,160 @@ public class EventControllerIntegrationTests {
 
         Optional<EventParticipant> epOpt = eventService.getEventParticipantInternal(event.getId(), targetUser.getId());
         assertTrue(epOpt.isPresent());
+    }
+    @Test
+    public void testUserSeesOnlyTheirOwnEvents() throws Exception {
+        User user = TestDataUtil.getRegisteredUserA(userService);
+        Event privateEvent = eventService.create(TestDataUtil.getEventPrivate1(), user.getUsername());
+        Event publicClosedEvent = eventService.create(TestDataUtil.getEventPublicClosed(), user.getUsername());
+        Event publicOpenEvent = eventService.create(TestDataUtil.getEventA(), user.getUsername());
+
+        User otherUser = TestDataUtil.getRegisteredUserB(userService);
+        eventService.create(TestDataUtil.getEventPrivate1(), otherUser.getUsername());
+
+        String token = jwtUtil.generateToken(user.getUsername());
+
+        MvcResult result = mockMvc.perform(
+                        MockMvcRequestBuilders.get("/api/events/events-of-user/" + user.getId())
+                                .header("Authorization", "Bearer " + token)
+                ).andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+
+        String response = result.getResponse().getContentAsString();
+        assertTrue(response.contains(privateEvent.getTitle()));
+        assertTrue(response.contains(publicClosedEvent.getTitle()));
+        assertTrue(response.contains(publicOpenEvent.getTitle()));
+        assertFalse(response.contains("EventOfOtherUser"));
+    }
+
+    @Test
+    public void testAdminSeesAllEventsOfAnyUser() throws Exception {
+        User admin = TestDataUtil.getRegisteredUserAdmin1(userService);
+        User user = TestDataUtil.getRegisteredUserA(userService);
+
+        Event privateEvent = eventService.create(TestDataUtil.getEventPrivate1(), user.getUsername());
+        Event publicClosedEvent = eventService.create(TestDataUtil.getEventPublicClosed(), user.getUsername());
+        Event publicOpenEvent = eventService.create(TestDataUtil.getEventA(), user.getUsername());
+
+        String token = jwtUtil.generateToken(admin.getUsername());
+
+        MvcResult result = mockMvc.perform(
+                        MockMvcRequestBuilders.get("/api/events/events-of-user/" + user.getId())
+                                .header("Authorization", "Bearer " + token)
+                ).andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+
+        String response = result.getResponse().getContentAsString();
+        assertTrue(response.contains(privateEvent.getTitle()));
+        assertTrue(response.contains(publicClosedEvent.getTitle()));
+        assertTrue(response.contains(publicOpenEvent.getTitle()));
+    }
+
+    @Test
+    public void testOtherUserSeesOnlyPublicParticipatedEvents() throws Exception {
+        User creator = TestDataUtil.getRegisteredUserA(userService);
+        User otherUser = TestDataUtil.getRegisteredUserB(userService);
+
+        Event privateEvent = eventService.create(TestDataUtil.getEventPrivate1(), creator.getUsername());
+        Event publicClosedEvent = eventService.create(TestDataUtil.getEventPublicClosed(), creator.getUsername());
+        Event publicOpenEvent = eventService.create(TestDataUtil.getEventA(), creator.getUsername());
+
+        eventService.addEventParticipant(publicClosedEvent.getId(), otherUser.getId(), EventRole.ACTIVE, creator.getUsername());
+        eventService.addEventParticipant(publicOpenEvent.getId(), otherUser.getId(), EventRole.ACTIVE, creator.getUsername());
+
+        String token = jwtUtil.generateToken(otherUser.getUsername());
+
+        MvcResult result = mockMvc.perform(
+                        MockMvcRequestBuilders.get("/api/events/events-of-user/" + creator.getId())
+                                .header("Authorization", "Bearer " + token)
+                ).andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+
+        String response = result.getResponse().getContentAsString();
+        assertTrue(response.contains(publicClosedEvent.getTitle()));
+        assertTrue(response.contains(publicOpenEvent.getTitle()));
+        assertFalse(response.contains(privateEvent.getTitle()));
+    }
+
+    @Test
+    public void testAnonymousUserCannotAccessEvents() throws Exception {
+        User user = TestDataUtil.getRegisteredUserA(userService);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/api/events/events-of-user/" + user.getId())
+        ).andExpect(MockMvcResultMatchers.status().isForbidden());
+    }
+
+    @Test
+    public void testUserSeesOnlyEventsTheyParticipateIn() throws Exception {
+        User creator1 = TestDataUtil.getRegisteredUserA(userService);
+        User creator2 = TestDataUtil.getRegisteredUserB(userService);
+        User participantUser = TestDataUtil.getRegisteredUserC(userService);
+
+        Event eventCreatedByCreator1 = eventService.create(TestDataUtil.getEventPublicClosed(), creator1.getUsername());
+        Event eventCreatedByCreator2 = eventService.create(TestDataUtil.getEventA(), creator2.getUsername());
+        Event eventNotParticipated = eventService.create(TestDataUtil.getEventB(), creator1.getUsername());
+
+        // Participant joins two events
+        eventService.addEventParticipant(eventCreatedByCreator1.getId(), participantUser.getId(), EventRole.PASSIVE, creator1.getUsername());
+        eventService.addEventParticipant(eventCreatedByCreator2.getId(), participantUser.getId(), EventRole.PASSIVE, creator2.getUsername());
+
+        String token = jwtUtil.generateToken(participantUser.getUsername());
+
+        MvcResult result = mockMvc.perform(
+                        MockMvcRequestBuilders.get("/api/events/events-of-user/" + participantUser.getId())
+                                .header("Authorization", "Bearer " + token)
+                ).andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+
+        String response = result.getResponse().getContentAsString();
+        assertTrue(response.contains(eventCreatedByCreator1.getTitle()));
+        assertTrue(response.contains(eventCreatedByCreator2.getTitle()));
+        assertFalse(response.contains(eventNotParticipated.getTitle()));
+    }
+
+    @Test
+    public void testUserWithNoParticipationGetsEmptyList() throws Exception {
+        User user = TestDataUtil.getRegisteredUserA(userService);
+        User creator = TestDataUtil.getRegisteredUserB(userService);
+
+        // Creator makes events, but user does not join anything
+        eventService.create(TestDataUtil.getEventPrivate1(), creator.getUsername());
+        eventService.create(TestDataUtil.getEventA(), creator.getUsername());
+        eventService.create(TestDataUtil.getEventPublicClosed(), creator.getUsername());
+
+        String token = jwtUtil.generateToken(user.getUsername());
+
+        MvcResult result = mockMvc.perform(
+                        MockMvcRequestBuilders.get("/api/events/events-of-user/" + user.getId())
+                                .header("Authorization", "Bearer " + token)
+                ).andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+
+        String response = result.getResponse().getContentAsString();
+        assertFalse(response.contains("title"));
+    }
+
+    @Test
+    public void testOtherUserSeesEmptyListIfNoParticipation() throws Exception {
+        User creator = TestDataUtil.getRegisteredUserA(userService);
+        User participantUser = TestDataUtil.getRegisteredUserB(userService);
+        User otherUser = TestDataUtil.getRegisteredUserC(userService);
+
+        eventService.create(TestDataUtil.getEventPrivate1(), creator.getUsername());
+        eventService.create(TestDataUtil.getEventPublicClosed(), creator.getUsername());
+        eventService.create(TestDataUtil.getEventA(), creator.getUsername());
+
+        String token = jwtUtil.generateToken(otherUser.getUsername());
+
+        MvcResult result = mockMvc.perform(
+                        MockMvcRequestBuilders.get("/api/events/events-of-user/" + participantUser.getId())
+                                .header("Authorization", "Bearer " + token)
+                ).andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+
+        String response = result.getResponse().getContentAsString();
+        assertFalse(response.contains("title"));
     }
 
 }
