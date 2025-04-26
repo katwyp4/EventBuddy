@@ -44,4 +44,6 @@ public interface EventService {
     Page<EventParticipant> findAllEventParticipants(Pageable pageable, Long eventId, String loggedUserName);
 
     EventParticipant updateEventParticipantRole(Long eventId, Long userId, EventRole eventRole, String loggedUserName);
+
+    Page<Event> findAllEventsOfUser(Pageable pageable, Long userId, String username);
 }
