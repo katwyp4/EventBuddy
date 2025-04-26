@@ -13,8 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.widget.PopupMenu;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ImageButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import android.widget.Toast;
+
 
 
 
@@ -34,6 +38,11 @@ public class HomeActivity extends AppCompatActivity {
         ImageButton moreButton = findViewById(R.id.moreButton);
         moreButton.setOnClickListener(v -> showPopupMenu(v));
 
+        TextView addButton = findViewById(R.id.addEventButton);
+        addButton.setOnClickListener(v -> {
+            Toast.makeText(this, "Dodaj nowe wydarzenie", Toast.LENGTH_SHORT).show();
+            // Tu potem: startActivity(new Intent(this, AddEventActivity.class));
+        });
 
         eventList = new ArrayList<>();
         eventList.add(new Event("15.05–16.05.2025", "Juwenalia", "Święto studentów pełne atrakcji", R.drawable.juwenalia));
