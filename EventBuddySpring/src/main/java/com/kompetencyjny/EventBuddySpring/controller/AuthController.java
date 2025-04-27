@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,34 +20,36 @@ public class AuthController {
     private final UserService userService;
     private final JwtUtil jwtUtil;
 
-
     @PostMapping("/register")
     public ResponseEntity<?> register(
-            @RequestParam String username,
+            @RequestParam String email,
             @RequestParam String password,
             @RequestParam String firstName,
-            @RequestParam String lastName,
-            @RequestParam String email
+            @RequestParam String lastName
     ) {
-        User user = userService.registerUser(username, password, firstName, lastName, email);
-        logger.info("Zarejestrowano użytkownika: {}", user.getUsername());
+        User user = userService.registerUser(email, password, firstName, lastName);
+        logger.info("Zarejestrowano użytkownika: {}", user.getEmail());
         Map<String, String> response = new HashMap<>();
-        response.put("message", "Zarejestrowano użytkownika: " + user.getUsername());
+        response.put("message", "Zarejestrowano użytkownika: " + user.getEmail());
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestParam String username, @RequestParam String password) {
-        boolean isAuthenticated = userService.authenticateUser(username, password);
+    public ResponseEntity<?> login(
+            @RequestParam String email,
+            @RequestParam String password
+    ) {
+        boolean isAuthenticated = userService.authenticateUser(email, password);
 
         if (isAuthenticated) {
-            String token = jwtUtil.generateToken(username);
-
+            String token = jwtUtil.generateToken(email);
             Map<String, String> response = new HashMap<>();
             response.put("token", token);
             return ResponseEntity.ok(response);
         } else {
-            return ResponseEntity.status(401).body("Błędna nazwa użytkownika lub hasło.");
+            return ResponseEntity
+                    .status(401)
+                    .body("Błędny e-mail lub hasło.");
         }
     }
 }

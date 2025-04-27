@@ -22,7 +22,7 @@ import retrofit2.Response;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    private EditText usernameEditText, passwordEditText, firstNameEditText, lastNameEditText;
+    private EditText emailEditText, passwordEditText, firstNameEditText, lastNameEditText;
     private Button registerButton;
     private ApiService apiService;
 
@@ -39,7 +39,7 @@ public class RegisterActivity extends AppCompatActivity {
         });
 
 
-        usernameEditText = findViewById(R.id.exitTextEmail);
+        emailEditText = findViewById(R.id.exitTextEmail);
         passwordEditText = findViewById(R.id.editTextPassword);
         firstNameEditText = findViewById(R.id.exitTextName);
         lastNameEditText = findViewById(R.id.exitTextSurname);
@@ -52,7 +52,7 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void registerUser() {
-        String username = usernameEditText.getText().toString();
+        String username = emailEditText.getText().toString();
         String password = passwordEditText.getText().toString();
         String firstName = firstNameEditText.getText().toString();
         String lastName = lastNameEditText.getText().toString();

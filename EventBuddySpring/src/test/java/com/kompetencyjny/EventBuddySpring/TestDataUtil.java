@@ -151,13 +151,13 @@ public class TestDataUtil {
     @Transactional
     public static User getRegisteredUserAdmin1(UserService userService){
         User user =  userService.registerUser("userTestAdmin1", "qwerty", "test", "testowy", "testTestAdmin1@example.example");
-        return userService.setUserRole(user.getUsername(), Role.ADMIN);
+        return userService.setUserRole(user.getEmail(), Role.ADMIN);
     }
 
     @Transactional
     public static User getRegisteredUserAdmin2(UserService userService){
         User user =  userService.registerUser("userTestTestAdmin2", "qwerty", "test", "testowy", "testTestAdmin2@example.example");
-        return userService.setUserRole(user.getUsername(), Role.ADMIN);
+        return userService.setUserRole(user.getEmail(), Role.ADMIN);
     }
 
 

@@ -27,9 +27,9 @@ public class EventServiceImpl implements EventService {
     @Override
     public Event create(Event event, String loggedUserName) {
         event.setId(null);
-        Optional<User> loggedUserOpt = userService.findByUserName(loggedUserName);
+        Optional<User> loggedUserOpt = userService.findByEmail(loggedUserName);
         if (loggedUserOpt.isEmpty())
-            throw new NotFoundException("!!! YOU SHOULD NOT SEE THIS !!! Cannot find logged in user! username: \""+loggedUserName+"\".\nThis method expects to get a username of logged in user.");
+            throw new NotFoundException("!!! YOU SHOULD NOT SEE THIS !!! Cannot find logged in user! email: \""+loggedUserName+"\".\nThis method expects to get a email of logged in user.");
 
         event.addParticipant(loggedUserOpt.get(), EventRole.ADMIN);
         return this.eventRepository.save(event);
@@ -39,7 +39,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Page<Event> findAllVisible(Pageable pageable, String loggedUserName) {
-        Optional<User> userOpt = userService.findByUserName(loggedUserName);
+        Optional<User> userOpt = userService.findByEmail(loggedUserName);
         if (userOpt.isEmpty()) {
             throw new NotFoundException("User whith loggedUserName: "+loggedUserName+" does not exist");
         }
@@ -93,7 +93,7 @@ public class EventServiceImpl implements EventService {
     private boolean isEventVisibleToUser(Event event, String userName){
         if (event.getEventPrivacy().equals(EventPrivacy.PUBLIC_CLOSED)) return true;
         if (event.getEventPrivacy().equals(EventPrivacy.PUBLIC_OPEN)) return true;
-        Optional<User> user = userService.findByUserName(userName);
+        Optional<User> user = userService.findByEmail(userName);
         if (user.isEmpty()) return false;
         if (user.get().getRole()==Role.ADMIN) return true;
         return isUserAParticipantOf(event.getId(), user.get().getId());
@@ -140,9 +140,9 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public boolean isUserPermitted(Long eventId, String username, EventRole minRole) {
-        Optional<User> userOpt = userService.findByUserName(username);
-        if (userOpt.isEmpty()) throw new RuntimeException("No user found of username "+username);
+    public boolean isUserPermitted(Long eventId, String email, EventRole minRole) {
+        Optional<User> userOpt = userService.findByEmail(email);
+        if (userOpt.isEmpty()) throw new RuntimeException("No user found of email "+email);
 
         User loggedInUser = userOpt.get();
         if (loggedInUser.getRole() == Role.ADMIN) return true;
@@ -188,7 +188,7 @@ public class EventServiceImpl implements EventService {
         User user = userOpt.get();
         if (!isEventVisibleToUser(event, loggedUserName)) throw new NotFoundException("User or Event does not exists!");
 
-        Optional<User> loggedUserOpt = userService.findByUserName(loggedUserName);
+        Optional<User> loggedUserOpt = userService.findByEmail(loggedUserName);
         if (loggedUserOpt.isEmpty()) throw  new NotFoundException("Logged user does not exist");
         User loggedUser = loggedUserOpt.get();
 
@@ -217,7 +217,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventParticipant updateEventParticipantRole(Long eventId, Long userId, EventRole eventRole, String loggedUserName){
+    public EventParticipant updateEventParticipantRole(Long eventId, Long userId, EventRole eventRole, String loggedEmail){
         Optional<Event> eventOpt = this.findByIdInternal(eventId);
         Optional<User> userOpt = this.userService.findById(userId);
         if (userOpt.isEmpty() || eventOpt.isEmpty()) throw new NotFoundException("Event or user does not exist! eventId: "+eventId+" userId "+ userId);
@@ -225,24 +225,24 @@ public class EventServiceImpl implements EventService {
         Event event = eventOpt.get();
         User user = userOpt.get();
 
-        Optional<User> loggedUserOpt = userService.findByUserName(loggedUserName);
+        Optional<User> loggedUserOpt = userService.findByEmail(loggedEmail);
         if (loggedUserOpt.isEmpty()) throw new NotFoundException("Logged user not found!");
 
         User loggedUser = loggedUserOpt.get();
 
-        if (!isEventVisibleToUser(event, loggedUserName)) throw new NotFoundException("User or Event does not exists! eventId: "+eventId+" userId "+userId);
+        if (!isEventVisibleToUser(event, loggedEmail)) throw new NotFoundException("User or Event does not exists! eventId: "+eventId+" userId "+userId);
 
-        if (!isUserPermitted(eventId, loggedUserName, EventRole.ADMIN) && user != loggedUser)
-            throw new ForbiddenException("User username:"+loggedUserName+" not allowed to change user's role for event "+eventId);
+        if (!isUserPermitted(eventId, loggedEmail, EventRole.ADMIN) && user != loggedUser)
+            throw new ForbiddenException("User username:"+loggedEmail+" not allowed to change user's role for event "+eventId);
 
         if (user == loggedUser && loggedUser.getRole()!=Role.ADMIN) {
             Optional<EventParticipant> eventParticipantOpt = eventParticipantRepository.findById(new UserEventId(userId, eventId));
             if (eventParticipantOpt.isEmpty() && eventRole.compareTo(EventRole.PASSIVE)>0)
-                throw new ForbiddenException("User username:" + loggedUserName + " not allowed to change user's role for event " + eventId);
+                throw new ForbiddenException("User username:" + loggedEmail + " not allowed to change user's role for event " + eventId);
             if (eventParticipantOpt.isEmpty() && !event.getEventPrivacy().equals(EventPrivacy.PUBLIC_OPEN))
-                throw new ForbiddenException("User username:" + loggedUserName + " not allowed to change user's role for event " + eventId);
+                throw new ForbiddenException("User username:" + loggedEmail + " not allowed to change user's role for event " + eventId);
             if (eventParticipantOpt.isPresent() && eventParticipantOpt.get().getEventRole().compareTo(eventRole)<0)
-                throw new ForbiddenException("User username:" + loggedUserName + " not allowed to change user's role for event " + eventId);
+                throw new ForbiddenException("User username:" + loggedEmail + " not allowed to change user's role for event " + eventId);
         }
 
         Optional<EventParticipant> eventParticipantOpt = eventParticipantRepository.findById_EventIdAndId_UserId(eventId, userId);
@@ -261,7 +261,7 @@ public class EventServiceImpl implements EventService {
         Optional<User> userOpt = this.userService.findById(userId);
         if (userOpt.isEmpty()) throw new NotFoundException("User does not exist! UserId: "+ userId);
 
-        Optional<User> loggedInOpt = userService.findByUserName(loggedUserName);
+        Optional<User> loggedInOpt = userService.findByEmail(loggedUserName);
         if (loggedInOpt.isEmpty()) throw new NotFoundException("Logged in user does not exists!");
 
         return eventRepository.findAllEventsOfUser(pageable, userId, loggedInOpt.get().getId());

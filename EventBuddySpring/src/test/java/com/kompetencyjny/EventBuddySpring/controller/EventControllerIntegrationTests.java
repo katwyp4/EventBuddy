@@ -8,10 +8,8 @@ import com.kompetencyjny.EventBuddySpring.model.*;
 import com.kompetencyjny.EventBuddySpring.security.JwtUtil;
 import com.kompetencyjny.EventBuddySpring.service.EventService;
 import com.kompetencyjny.EventBuddySpring.service.UserService;
-import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mapstruct.control.MappingControl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -54,7 +52,7 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatCreateEventSuccessfullyReturnsHttp201Created() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         EventRequest eventA = TestDataUtil.getEventRequestA();
         String eventAJson = objectMapper.writeValueAsString(eventA);
         mockMvc.perform(
@@ -70,7 +68,7 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatCreateEventSuccessfullyAddsToDataBase() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         EventRequest eventA = TestDataUtil.getEventRequestA();
         String eventAJson = objectMapper.writeValueAsString(eventA);
         mockMvc.perform(
@@ -90,7 +88,7 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatTryingToCreateEventWithoutBeingLoggedInReturnsHttp403Forbidden() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         EventRequest eventA = TestDataUtil.getEventRequestA();
         String eventAJson = objectMapper.writeValueAsString(eventA);
         mockMvc.perform(
@@ -105,7 +103,7 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatEventWithCustomIdCannotBeCreated() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(100L);
         String eventAJson = objectMapper.writeValueAsString(eventA);
@@ -126,7 +124,7 @@ public class EventControllerIntegrationTests {
         EventRequest eventA = TestDataUtil.getEventRequestA();
         String eventAJson = objectMapper.writeValueAsString(eventA);
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.post("/api/events")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -157,7 +155,7 @@ public class EventControllerIntegrationTests {
         EventRequest eventA = TestDataUtil.getEventRequestPrivate1();
         String eventAJson = objectMapper.writeValueAsString(eventA);
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.post("/api/events")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -186,7 +184,7 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatCreateEventSuccessfullyAddsToDataBasePrivateEvent() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         EventRequest eventA = TestDataUtil.getEventRequestPrivate1();
         String eventAJson = objectMapper.writeValueAsString(eventA);
         mockMvc.perform(
@@ -208,7 +206,7 @@ public class EventControllerIntegrationTests {
         EventRequest eventA = TestDataUtil.getEventRequestPublicClosed();
         String eventAJson = objectMapper.writeValueAsString(eventA);
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.post("/api/events")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -237,7 +235,7 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatCreateEventSuccessfullyAddsToDataBasePublicClosedEvent() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         EventRequest eventA = TestDataUtil.getEventRequestPublicClosed();
         String eventAJson = objectMapper.writeValueAsString(eventA);
         mockMvc.perform(
@@ -257,7 +255,7 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatCreateEventSuccessfullyReturnsHttp201CreatedMultipleEvents() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         EventRequest eventA = TestDataUtil.getEventRequestA();
         String eventAJson = objectMapper.writeValueAsString(eventA);
         mockMvc.perform(
@@ -284,7 +282,7 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatCreateEventSuccessfullyReturnsSavedObjectMultipleEvents() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
 
         EventRequest eventA = TestDataUtil.getEventRequestA();
         String eventAJson = objectMapper.writeValueAsString(eventA);
@@ -338,7 +336,7 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatListEventsReturnsHttpStatus403WhenNotLoggedIn() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         mockMvc.perform(
         MockMvcRequestBuilders.get("/api/events")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -351,13 +349,13 @@ public class EventControllerIntegrationTests {
     public void testThatListEventsReturnsListOfEventsPrivateNotIncludedNotParticipant() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
         User userB = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(userB.getUsername());
+        String token = jwtUtil.generateToken(userB.getEmail());
         Event privateEvent = TestDataUtil.getEventPrivate1();
         privateEvent.setId(null);
-        eventService.create(privateEvent, userA.getUsername());
+        eventService.create(privateEvent, userA.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -388,13 +386,13 @@ public class EventControllerIntegrationTests {
     public void testThatListEventsReturnsListOfEventsPrivateIncludedNotParticipantButAdmin() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
         User userAdmin1 = TestDataUtil.getRegisteredUserAdmin1(userService);
-        String token = jwtUtil.generateToken(userAdmin1.getUsername());
+        String token = jwtUtil.generateToken(userAdmin1.getEmail());
         Event privateEvent = TestDataUtil.getEventPrivate1();
         privateEvent.setId(null);
-        eventService.create(privateEvent, userA.getUsername());
+        eventService.create(privateEvent, userA.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -426,13 +424,13 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatListEventsReturnsListOfEventsPrivateIncludedCreator() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         Event privateEvent = TestDataUtil.getEventPrivate1();
         privateEvent.setId(null);
-        eventService.create(privateEvent, userA.getUsername());
+        eventService.create(privateEvent, userA.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -465,14 +463,14 @@ public class EventControllerIntegrationTests {
     public void testThatListEventsReturnsListOfEventsPrivateIncludedParticipant() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
         User userB = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(userB.getUsername());
+        String token = jwtUtil.generateToken(userB.getEmail());
         Event privateEvent = TestDataUtil.getEventPrivate1();
         privateEvent.setId(null);
-        privateEvent = eventService.create(privateEvent, userA.getUsername());
-        eventService.addEventParticipant(privateEvent.getId(), userB.getId(), EventRole.PASSIVE, userA.getUsername());
+        privateEvent = eventService.create(privateEvent, userA.getEmail());
+        eventService.addEventParticipant(privateEvent.getId(), userB.getId(), EventRole.PASSIVE, userA.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -505,14 +503,14 @@ public class EventControllerIntegrationTests {
     public void testThatListEventsReturnsListOfEventsClosedPublicIncludedParticipant() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
         User userB = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(userB.getUsername());
+        String token = jwtUtil.generateToken(userB.getEmail());
         Event publicClosedEvent = TestDataUtil.getEventPublicClosed();
         publicClosedEvent.setId(null);
-        publicClosedEvent = eventService.create(publicClosedEvent, userA.getUsername());
-        eventService.addEventParticipant(publicClosedEvent.getId(), userB.getId(), EventRole.PASSIVE, userA.getUsername());
+        publicClosedEvent = eventService.create(publicClosedEvent, userA.getEmail());
+        eventService.addEventParticipant(publicClosedEvent.getId(), userB.getId(), EventRole.PASSIVE, userA.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -545,13 +543,13 @@ public class EventControllerIntegrationTests {
     public void testThatListEventsReturnsListOfEventsClosedPublicIncludedNotParticipant() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
         User userB = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(userB.getUsername());
+        String token = jwtUtil.generateToken(userB.getEmail());
         Event publicClosedEvent = TestDataUtil.getEventPublicClosed();
         publicClosedEvent.setId(null);
-        publicClosedEvent = eventService.create(publicClosedEvent, userA.getUsername());
+        publicClosedEvent = eventService.create(publicClosedEvent, userA.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -583,13 +581,13 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatListEventsReturnsListOfEventsMultipleEvents() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         Event eventB = TestDataUtil.getEventB();
         eventA.setId(null);
-        eventService.create(eventB, userA.getUsername());
+        eventService.create(eventB, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -633,7 +631,7 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatListEventsReturnsListOfEventsAfterAddingThroughAPIMultipleEvents() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         EventRequest eventA = TestDataUtil.getEventRequestA();
         EventRequest eventB = TestDataUtil.getEventRequestB();
         String eventAJson = objectMapper.writeValueAsString(eventA);
@@ -692,9 +690,9 @@ public class EventControllerIntegrationTests {
     public void testThatGetEventByIdOnExistingReturnsHttpStatus200() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
         Event eventA = TestDataUtil.getEventA();
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -708,10 +706,10 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatGetEventByIdOnExistingReturnsEvent() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -739,7 +737,7 @@ public class EventControllerIntegrationTests {
         User userA = TestDataUtil.getRegisteredUserA(userService);
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -754,7 +752,7 @@ public class EventControllerIntegrationTests {
         User userA = TestDataUtil.getRegisteredUserA(userService);
         Event eventA = TestDataUtil.getEventPrivate1();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -768,10 +766,10 @@ public class EventControllerIntegrationTests {
     public void testThatGetEventByIdOnPrivateReturns404NotParticipant() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
         User userB = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(userB.getUsername());
+        String token = jwtUtil.generateToken(userB.getEmail());
         Event eventA = TestDataUtil.getEventPrivate1();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -785,10 +783,10 @@ public class EventControllerIntegrationTests {
     public void testThatGetEventByIdOnPrivateReturns200AdminNotParticipant() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
         User userAdmin = TestDataUtil.getRegisteredUserAdmin1(userService);
-        String token = jwtUtil.generateToken(userAdmin.getUsername());
+        String token = jwtUtil.generateToken(userAdmin.getEmail());
         Event eventA = TestDataUtil.getEventPrivate1();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -802,10 +800,10 @@ public class EventControllerIntegrationTests {
     public void testThatGetEventByIdOnPrivateReturnsEventAdminNotParticipant() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
         User userAdmin = TestDataUtil.getRegisteredUserAdmin1(userService);
-        String token = jwtUtil.generateToken(userAdmin.getUsername());
+        String token = jwtUtil.generateToken(userAdmin.getEmail());
         Event eventA = TestDataUtil.getEventPrivate1();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -832,11 +830,11 @@ public class EventControllerIntegrationTests {
     public void testThatGetEventByIdOnPrivateReturns200Participant() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
         User userB = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(userB.getUsername());
+        String token = jwtUtil.generateToken(userB.getEmail());
         Event eventA = TestDataUtil.getEventPrivate1();
         eventA.setId(null);
-        eventA = eventService.create(eventA, userA.getUsername());
-        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.PASSIVE, userA.getUsername());
+        eventA = eventService.create(eventA, userA.getEmail());
+        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.PASSIVE, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -851,11 +849,11 @@ public class EventControllerIntegrationTests {
     public void testThatGetEventByIdOnPrivateReturnsEventParticipant() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
         User userB = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(userB.getUsername());
+        String token = jwtUtil.generateToken(userB.getEmail());
         Event eventA = TestDataUtil.getEventPrivate1();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
-        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.PASSIVE, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
+        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.PASSIVE, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -881,10 +879,10 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatGetEventByIdOnPrivateReturns200Creator() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         Event eventA = TestDataUtil.getEventPrivate1();
         eventA.setId(null);
-        eventA = eventService.create(eventA, userA.getUsername());
+        eventA = eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -898,10 +896,10 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatGetEventByIdOnPrivateReturnsEventCreator() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         Event eventA = TestDataUtil.getEventPrivate1();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -927,10 +925,10 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatGetEventByIdOnClosedPublicReturns403NotLoggedIn() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         Event eventA = TestDataUtil.getEventPublicClosed();
         eventA.setId(null);
-        eventA = eventService.create(eventA, userA.getUsername());
+        eventA = eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -943,10 +941,10 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatGetEventByIdOnClosedPublicReturns200Creator() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         Event eventA = TestDataUtil.getEventPublicClosed();
         eventA.setId(null);
-        eventA = eventService.create(eventA, userA.getUsername());
+        eventA = eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -960,10 +958,10 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatGetEventByIdOnPublicClosedReturnsEventCreator() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         Event eventA = TestDataUtil.getEventPublicClosed();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -990,10 +988,10 @@ public class EventControllerIntegrationTests {
     public void testThatGetEventByIdOnClosedPublicReturns200NotParticipant() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
         User userB = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(userB.getUsername());
+        String token = jwtUtil.generateToken(userB.getEmail());
         Event eventA = TestDataUtil.getEventPublicClosed();
         eventA.setId(null);
-        eventA = eventService.create(eventA, userA.getUsername());
+        eventA = eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -1008,10 +1006,10 @@ public class EventControllerIntegrationTests {
     public void testThatGetEventByIdOnPublicClosedReturnsEventNotParticipant() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
         User userB = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(userB.getUsername());
+        String token = jwtUtil.generateToken(userB.getEmail());
         Event eventA = TestDataUtil.getEventPublicClosed();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -1038,11 +1036,11 @@ public class EventControllerIntegrationTests {
     public void testThatGetEventByIdOnClosedPublicReturns200Participant() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
         User userB = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(userB.getUsername());
+        String token = jwtUtil.generateToken(userB.getEmail());
         Event eventA = TestDataUtil.getEventPublicClosed();
         eventA.setId(null);
-        eventA = eventService.create(eventA, userA.getUsername());
-        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.PASSIVE, userA.getUsername());
+        eventA = eventService.create(eventA, userA.getEmail());
+        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.PASSIVE, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -1057,11 +1055,11 @@ public class EventControllerIntegrationTests {
     public void testThatGetEventByIdOnPublicClosedReturnsEventParticipant() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
         User userB = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(userB.getUsername());
+        String token = jwtUtil.generateToken(userB.getEmail());
         Event eventA = TestDataUtil.getEventPublicClosed();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
-        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.PASSIVE, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
+        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.PASSIVE, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -1086,7 +1084,7 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatGetEventByIdWhenNoRecordsReturnsHttpStatus404() throws Exception{
         User user = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(user.getUsername());
+        String token = jwtUtil.generateToken(user.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -1099,10 +1097,10 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatGetEventByIdWhenDoesNotExistsReturnsHttpStatus404() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/events/2")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -1118,10 +1116,10 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatUpdateEventOnExistingDoneNothingReturnsHttpStatus200() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         String eventAJson = objectMapper.writeValueAsString(eventA);
         mockMvc.perform(
                 MockMvcRequestBuilders.put("/api/events/1")
@@ -1136,10 +1134,10 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatUpdateEventOnExistingChangedReturnsHttpStatus200() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         eventA.setTitle("Changed title");
         eventA.setDescription("Changed description");
         String eventAJson = objectMapper.writeValueAsString(eventA);
@@ -1157,10 +1155,10 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatUpdateEventOnExistingDoneNothingReturnsEvent() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         String eventAJson = objectMapper.writeValueAsString(eventA);
         mockMvc.perform(
                 MockMvcRequestBuilders.put("/api/events/1")
@@ -1190,10 +1188,10 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatUpdateEventOnExistingChangedReturnsUpdatedEvent() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         eventA.setTitle("Changed title");
         eventA.setDescription("Changed description");
         String eventAJson = objectMapper.writeValueAsString(eventA);
@@ -1223,10 +1221,10 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatEventCannotHaveIdUpdated() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         eventA.setId(100L);
         String eventAJson = objectMapper.writeValueAsString(eventA);
         mockMvc.perform(
@@ -1243,10 +1241,10 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatUpdateEventOnExistingChangedChangesInDataBase() throws Exception {
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         eventA.setTitle("Changed title");
         eventA.setDescription("Changed description");
         String eventAJson = objectMapper.writeValueAsString(eventA);
@@ -1270,7 +1268,7 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatUpdateEventWhenNoRecordsReturnsHttpStatus404() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
         eventA.setTitle("Changed title");
@@ -1289,10 +1287,10 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatUpdateEventWhenDoesNotExistsReturnsHttpStatus404() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         eventA.setTitle("Changed title");
         eventA.setDescription("Changed description");
         String eventAJson = objectMapper.writeValueAsString(eventA);
@@ -1311,7 +1309,7 @@ public class EventControllerIntegrationTests {
         User userA = TestDataUtil.getRegisteredUserA(userService);
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         eventA.setTitle("Changed title");
         eventA.setDescription("Changed description");
         String eventAJson = objectMapper.writeValueAsString(eventA);
@@ -1330,7 +1328,7 @@ public class EventControllerIntegrationTests {
         User userA = TestDataUtil.getRegisteredUserA(userService);
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         eventA.setTitle("Changed title");
         eventA.setDescription("Changed description");
         String eventAJson = objectMapper.writeValueAsString(eventA);
@@ -1355,9 +1353,9 @@ public class EventControllerIntegrationTests {
         User userA = TestDataUtil.getRegisteredUserA(userService);
         Event eventA = TestDataUtil.getEventA();
         User userB = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(userB.getUsername());
+        String token = jwtUtil.generateToken(userB.getEmail());
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         eventA.setTitle("Changed title");
         eventA.setDescription("Changed description");
         String eventAJson = objectMapper.writeValueAsString(eventA);
@@ -1375,11 +1373,11 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatUpdateEventWhenNotParticipantDidNotChangeAnythingInTheDataBase() throws Exception {
         User userB = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(userB.getUsername());
+        String token = jwtUtil.generateToken(userB.getEmail());
         User userA = TestDataUtil.getRegisteredUserA(userService);
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         eventA.setTitle("Changed title");
         eventA.setDescription("Changed description");
         String eventAJson = objectMapper.writeValueAsString(eventA);
@@ -1405,12 +1403,12 @@ public class EventControllerIntegrationTests {
         User userA = TestDataUtil.getRegisteredUserA(userService);
         Event eventA = TestDataUtil.getEventA();
         User userB = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(userB.getUsername());
+        String token = jwtUtil.generateToken(userB.getEmail());
         Event eventB = TestDataUtil.getEventB();
         eventA.setId(null);
         eventB.setId(null);
-        eventService.create(eventA, userA.getUsername());
-        eventService.create(eventB, userB.getUsername());
+        eventService.create(eventA, userA.getEmail());
+        eventService.create(eventB, userB.getEmail());
         eventA.setTitle("Changed title");
         eventA.setDescription("Changed description");
         String eventAJson = objectMapper.writeValueAsString(eventA);
@@ -1428,14 +1426,14 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatUpdateEventWhenNotParticipantOfThatEventButAdminOfAnotherDidNotChangeAnythingInTheDataBase() throws Exception {
         User userB = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(userB.getUsername());
+        String token = jwtUtil.generateToken(userB.getEmail());
         User userA = TestDataUtil.getRegisteredUserA(userService);
         Event eventA = TestDataUtil.getEventA();
         Event eventB = TestDataUtil.getEventB();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         eventB.setId(null);
-        eventService.create(eventB, userB.getUsername());
+        eventService.create(eventB, userB.getEmail());
         eventA.setTitle("Changed title");
         eventA.setDescription("Changed description");
         String eventAJson = objectMapper.writeValueAsString(eventA);
@@ -1461,13 +1459,13 @@ public class EventControllerIntegrationTests {
         User userA = TestDataUtil.getRegisteredUserA(userService);
         Event eventA = TestDataUtil.getEventA();
         User userB = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(userB.getUsername());
+        String token = jwtUtil.generateToken(userB.getEmail());
         Event eventB = TestDataUtil.getEventB();
         eventA.setId(null);
         eventB.setId(null);
-        eventService.create(eventA, userA.getUsername());
-        eventService.create(eventB, userB.getUsername());
-        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.PASSIVE, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
+        eventService.create(eventB, userB.getEmail());
+        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.PASSIVE, userA.getEmail());
         eventA.setTitle("Changed title");
         eventA.setDescription("Changed description");
         String eventAJson = objectMapper.writeValueAsString(eventA);
@@ -1485,15 +1483,15 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatUpdateEventWhenPassiveParticipantOfThatEventButAdminOfAnotherDidNotChangeAnythingInTheDataBase() throws Exception {
         User userB = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(userB.getUsername());
+        String token = jwtUtil.generateToken(userB.getEmail());
         User userA = TestDataUtil.getRegisteredUserA(userService);
         Event eventA = TestDataUtil.getEventA();
         Event eventB = TestDataUtil.getEventB();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         eventB.setId(null);
-        eventService.create(eventB, userB.getUsername());
-        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.PASSIVE, userA.getUsername());
+        eventService.create(eventB, userB.getEmail());
+        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.PASSIVE, userA.getEmail());
         eventA.setTitle("Changed title");
         eventA.setDescription("Changed description");
         String eventAJson = objectMapper.writeValueAsString(eventA);
@@ -1519,13 +1517,13 @@ public class EventControllerIntegrationTests {
         User userA = TestDataUtil.getRegisteredUserA(userService);
         Event eventA = TestDataUtil.getEventA();
         User userB = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(userB.getUsername());
+        String token = jwtUtil.generateToken(userB.getEmail());
         Event eventB = TestDataUtil.getEventB();
         eventA.setId(null);
         eventB.setId(null);
-        eventService.create(eventA, userA.getUsername());
-        eventService.create(eventB, userB.getUsername());
-        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.ACTIVE, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
+        eventService.create(eventB, userB.getEmail());
+        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.ACTIVE, userA.getEmail());
         eventA.setTitle("Changed title");
         eventA.setDescription("Changed description");
         String eventAJson = objectMapper.writeValueAsString(eventA);
@@ -1543,15 +1541,15 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatUpdateEventWhenActiveParticipantOfThatEventButAdminOfAnotherDidNotChangeAnythingInTheDataBase() throws Exception {
         User userB = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(userB.getUsername());
+        String token = jwtUtil.generateToken(userB.getEmail());
         User userA = TestDataUtil.getRegisteredUserA(userService);
         Event eventA = TestDataUtil.getEventA();
         Event eventB = TestDataUtil.getEventB();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         eventB.setId(null);
-        eventService.create(eventB, userB.getUsername());
-        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.ACTIVE, userA.getUsername());
+        eventService.create(eventB, userB.getEmail());
+        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.ACTIVE, userA.getEmail());
         eventA.setTitle("Changed title");
         eventA.setDescription("Changed description");
         String eventAJson = objectMapper.writeValueAsString(eventA);
@@ -1577,13 +1575,13 @@ public class EventControllerIntegrationTests {
         User userA = TestDataUtil.getRegisteredUserA(userService);
         Event eventA = TestDataUtil.getEventA();
         User userB = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(userB.getUsername());
+        String token = jwtUtil.generateToken(userB.getEmail());
         Event eventB = TestDataUtil.getEventB();
         eventA.setId(null);
         eventB.setId(null);
-        eventService.create(eventA, userA.getUsername());
-        eventService.create(eventB, userB.getUsername());
-        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.ADMIN, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
+        eventService.create(eventB, userB.getEmail());
+        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.ADMIN, userA.getEmail());
         eventA.setTitle("Changed title");
         eventA.setDescription("Changed description");
         String eventAJson = objectMapper.writeValueAsString(eventA);
@@ -1601,15 +1599,15 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatUpdateEventWhenAdminParticipantOfThatEventChangedInTheDataBase() throws Exception {
         User userB = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(userB.getUsername());
+        String token = jwtUtil.generateToken(userB.getEmail());
         User userA = TestDataUtil.getRegisteredUserA(userService);
         Event eventA = TestDataUtil.getEventA();
         Event eventB = TestDataUtil.getEventB();
         eventB.setId(null);
-        eventService.create(eventB, userB.getUsername());
+        eventService.create(eventB, userB.getEmail());
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
-        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.ADMIN, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
+        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.ADMIN, userA.getEmail());
         eventA.setTitle("Changed title");
         eventA.setDescription("Changed description");
         String eventAJson = objectMapper.writeValueAsString(eventA);
@@ -1633,10 +1631,10 @@ public class EventControllerIntegrationTests {
     public void testThatUpdateEventWhenAdminOfServiceNotParticipantReturnsHttpStatus200() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
         User userAdmin1 = TestDataUtil.getRegisteredUserAdmin1(userService);
-        String token = jwtUtil.generateToken(userAdmin1.getUsername());
+        String token = jwtUtil.generateToken(userAdmin1.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         eventA.setTitle("Changed title");
         eventA.setDescription("Changed description");
         String eventAJson = objectMapper.writeValueAsString(eventA);
@@ -1654,11 +1652,11 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatUpdateEventWhenAdminOfServiceNotParticipantOfThatEventChangedInTheDataBase() throws Exception {
         User userAdmin1 = TestDataUtil.getRegisteredUserAdmin1(userService);
-        String token = jwtUtil.generateToken(userAdmin1.getUsername());
+        String token = jwtUtil.generateToken(userAdmin1.getEmail());
         User userA = TestDataUtil.getRegisteredUserA(userService);
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         eventA.setTitle("Changed title");
         eventA.setDescription("Changed description");
         String eventAJson = objectMapper.writeValueAsString(eventA);
@@ -1682,11 +1680,11 @@ public class EventControllerIntegrationTests {
     public void testThatUpdateEventWhenAdminOfServicePassiveParticipantReturnsHttpStatus200() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
         User userAdmin1 = TestDataUtil.getRegisteredUserAdmin1(userService);
-        String token = jwtUtil.generateToken(userAdmin1.getUsername());
+        String token = jwtUtil.generateToken(userAdmin1.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
-        eventService.addEventParticipant(eventA.getId(), userAdmin1.getId(), EventRole.PASSIVE, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
+        eventService.addEventParticipant(eventA.getId(), userAdmin1.getId(), EventRole.PASSIVE, userA.getEmail());
         eventA.setTitle("Changed title");
         eventA.setDescription("Changed description");
         String eventAJson = objectMapper.writeValueAsString(eventA);
@@ -1704,12 +1702,12 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatUpdateEventWhenAdminOfServicePassiveParticipantOfThatEventChangedInTheDataBase() throws Exception {
         User userAdmin1 = TestDataUtil.getRegisteredUserAdmin1(userService);
-        String token = jwtUtil.generateToken(userAdmin1.getUsername());
+        String token = jwtUtil.generateToken(userAdmin1.getEmail());
         User userA = TestDataUtil.getRegisteredUserA(userService);
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
-        eventService.addEventParticipant(eventA.getId(), userAdmin1.getId(), EventRole.PASSIVE, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
+        eventService.addEventParticipant(eventA.getId(), userAdmin1.getId(), EventRole.PASSIVE, userA.getEmail());
         eventA.setTitle("Changed title");
         eventA.setDescription("Changed description");
         String eventAJson = objectMapper.writeValueAsString(eventA);
@@ -1733,10 +1731,10 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatDeleteReturnsStatusNoContent() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -1749,10 +1747,10 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatDeleteDeletesFromDatabase() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventA = eventService.create(eventA, userA.getUsername());
+        eventA = eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -1764,10 +1762,10 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatDeleteNotLoggedInReturnsStatus403() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -1779,10 +1777,10 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatDeleteNotLoggedInDoesNotDeleteFromDatabase() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventA = eventService.create(eventA, userA.getUsername());
+        eventA = eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -1795,13 +1793,13 @@ public class EventControllerIntegrationTests {
     public void testThatDeleteNotParticipantReturnsStatus403() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
         User userB = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(userB.getUsername());
+        String token = jwtUtil.generateToken(userB.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         Event eventB = TestDataUtil.getEventB();
         eventB.setId(null);
-        eventService.create(eventB, userB.getUsername());
+        eventService.create(eventB, userB.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -1815,13 +1813,13 @@ public class EventControllerIntegrationTests {
     public void testThatDeleteNotParticipantDoesNotDeleteFromDatabase() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
         User userB = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(userB.getUsername());
+        String token = jwtUtil.generateToken(userB.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventA = eventService.create(eventA, userA.getUsername());
+        eventA = eventService.create(eventA, userA.getEmail());
         Event eventB = TestDataUtil.getEventB();
         eventB.setId(null);
-        eventService.create(eventB, userB.getUsername());
+        eventService.create(eventB, userB.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -1836,14 +1834,14 @@ public class EventControllerIntegrationTests {
     public void testThatDeletePassiveParticipantReturnsStatus403() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
         User userB = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(userB.getUsername());
+        String token = jwtUtil.generateToken(userB.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
-        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.PASSIVE, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
+        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.PASSIVE, userA.getEmail());
         Event eventB = TestDataUtil.getEventB();
         eventB.setId(null);
-        eventService.create(eventB, userB.getUsername());
+        eventService.create(eventB, userB.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -1858,14 +1856,14 @@ public class EventControllerIntegrationTests {
     public void testThatDeletePassiveParticipantDoesNotDeleteFromDatabase() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
         User userB = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(userB.getUsername());
+        String token = jwtUtil.generateToken(userB.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventA = eventService.create(eventA, userA.getUsername());
-        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.PASSIVE, userA.getUsername());
+        eventA = eventService.create(eventA, userA.getEmail());
+        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.PASSIVE, userA.getEmail());
         Event eventB = TestDataUtil.getEventB();
         eventB.setId(null);
-        eventService.create(eventB, userB.getUsername());
+        eventService.create(eventB, userB.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -1879,14 +1877,14 @@ public class EventControllerIntegrationTests {
     public void testThatDeleteActiveParticipantReturnsStatus403() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
         User userB = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(userB.getUsername());
+        String token = jwtUtil.generateToken(userB.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
-        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.ACTIVE, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
+        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.ACTIVE, userA.getEmail());
         Event eventB = TestDataUtil.getEventB();
         eventB.setId(null);
-        eventService.create(eventB, userB.getUsername());
+        eventService.create(eventB, userB.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -1901,14 +1899,14 @@ public class EventControllerIntegrationTests {
     public void testThatDeleteActiveParticipantDoesNotDeleteFromDatabase() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
         User userB = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(userB.getUsername());
+        String token = jwtUtil.generateToken(userB.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventA = eventService.create(eventA, userA.getUsername());
-        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.ACTIVE, userA.getUsername());
+        eventA = eventService.create(eventA, userA.getEmail());
+        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.ACTIVE, userA.getEmail());
         Event eventB = TestDataUtil.getEventB();
         eventB.setId(null);
-        eventService.create(eventB, userB.getUsername());
+        eventService.create(eventB, userB.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -1922,14 +1920,14 @@ public class EventControllerIntegrationTests {
     public void testThatDeleteAdminParticipantReturnsStatusNoContent() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
         User userB = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(userB.getUsername());
+        String token = jwtUtil.generateToken(userB.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
-        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.ADMIN, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
+        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.ADMIN, userA.getEmail());
         Event eventB = TestDataUtil.getEventB();
         eventB.setId(null);
-        eventService.create(eventB, userB.getUsername());
+        eventService.create(eventB, userB.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -1944,14 +1942,14 @@ public class EventControllerIntegrationTests {
     public void testThatDeleteAdminParticipantDeletesFromDatabase() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
         User userB = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(userB.getUsername());
+        String token = jwtUtil.generateToken(userB.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventA = eventService.create(eventA, userA.getUsername());
-        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.ADMIN, userA.getUsername());
+        eventA = eventService.create(eventA, userA.getEmail());
+        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.ADMIN, userA.getEmail());
         Event eventB = TestDataUtil.getEventB();
         eventB.setId(null);
-        eventService.create(eventB, userB.getUsername());
+        eventService.create(eventB, userB.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -1965,10 +1963,10 @@ public class EventControllerIntegrationTests {
     public void testThatDeleteAdminOfServiceReturnsStatusNoContent() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
         User userAdmin1 = TestDataUtil.getRegisteredUserAdmin1(userService);
-        String token = jwtUtil.generateToken(userAdmin1.getUsername());
+        String token = jwtUtil.generateToken(userAdmin1.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -1983,10 +1981,10 @@ public class EventControllerIntegrationTests {
     public void testThatDeleteAdminOfServiceDeletesFromDatabase() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
         User userAdmin1 = TestDataUtil.getRegisteredUserAdmin1(userService);
-        String token = jwtUtil.generateToken(userAdmin1.getUsername());
+        String token = jwtUtil.generateToken(userAdmin1.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventA = eventService.create(eventA, userA.getUsername());
+        eventA = eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -2001,11 +1999,11 @@ public class EventControllerIntegrationTests {
     public void testThatDeleteAdminOfServiceThatIsAParticipantReturnsStatusNoContent() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
         User userAdmin1 = TestDataUtil.getRegisteredUserAdmin1(userService);
-        String token = jwtUtil.generateToken(userAdmin1.getUsername());
+        String token = jwtUtil.generateToken(userAdmin1.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
-        eventService.addEventParticipant(eventA.getId(), userAdmin1.getId(), EventRole.PASSIVE, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
+        eventService.addEventParticipant(eventA.getId(), userAdmin1.getId(), EventRole.PASSIVE, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -2020,11 +2018,11 @@ public class EventControllerIntegrationTests {
     public void testThatDeleteAdminOfServiceThatIsAParticipantDeletesFromDatabase() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
         User userAdmin1 = TestDataUtil.getRegisteredUserAdmin1(userService);
-        String token = jwtUtil.generateToken(userAdmin1.getUsername());
+        String token = jwtUtil.generateToken(userAdmin1.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventA = eventService.create(eventA, userA.getUsername());
-        eventService.addEventParticipant(eventA.getId(), userAdmin1.getId(), EventRole.PASSIVE, userA.getUsername());
+        eventA = eventService.create(eventA, userA.getEmail());
+        eventService.addEventParticipant(eventA.getId(), userAdmin1.getId(), EventRole.PASSIVE, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -2037,7 +2035,7 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatDeleteNonExistingReturnsStatusNotFound() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/api/events/2")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -2050,10 +2048,10 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatDeleteAlreadyDeletedReturnsStatusNotFound() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -2071,10 +2069,10 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatGetAlreadyDeletedReturnsStatusNotFound() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -2093,13 +2091,13 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatListAllNotDoesNotIncludeDeletedEvent() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         Event eventB = TestDataUtil.getEventB();
         eventB.setId(null);
-        eventService.create(eventB, userA.getUsername());
+        eventService.create(eventB, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -2120,10 +2118,10 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatFullUpdateAlreadyDeletedReturnsStatusNotFound() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/api/events/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -2149,11 +2147,11 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatSuccessfullSetParticipantRoleReturns200() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         Event eventA = TestDataUtil.getEventA();
         User userB = TestDataUtil.getRegisteredUserB(userService);
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         EventRoleRequest eventRoleRequest = new EventRoleRequest("PASSIVE");
         String roleRequestJson = objectMapper.writeValueAsString(eventRoleRequest);
 
@@ -2171,11 +2169,11 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatSuccessfullSetParticipantRoleReturnsParticipantDto() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         User userB = TestDataUtil.getRegisteredUserB(userService);
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventA = eventService.create(eventA, userA.getUsername());
+        eventA = eventService.create(eventA, userA.getEmail());
         EventRoleRequest eventRoleRequest = new EventRoleRequest("PASSIVE");
         String roleRequestJson = objectMapper.writeValueAsString(eventRoleRequest);
 
@@ -2192,7 +2190,7 @@ public class EventControllerIntegrationTests {
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.user.id").value(2)
         ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.user.username").value(userB.getUsername())
+                MockMvcResultMatchers.jsonPath("$.user.username").value(userB.getEmail())
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.user.firstName").value(userB.getFirstName())
         ).andExpect(
@@ -2203,11 +2201,11 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatSetParticipantRoleSavedToDataBase() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         User userB = TestDataUtil.getRegisteredUserB(userService);
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventA = eventService.create(eventA, userA.getUsername());
+        eventA = eventService.create(eventA, userA.getEmail());
         EventRoleRequest eventRoleRequest = new EventRoleRequest("PASSIVE");
         String roleRequestJson = objectMapper.writeValueAsString(eventRoleRequest);
 
@@ -2227,12 +2225,12 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatSuccessfullSetParticipantRoleReturns200MultipleParticipantsAdded() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         User userB = TestDataUtil.getRegisteredUserB(userService);
         User userC = TestDataUtil.getRegisteredUserC(userService);
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         EventRoleRequest eventRoleRequest = new EventRoleRequest("PASSIVE");
         String roleRequestJson = objectMapper.writeValueAsString(eventRoleRequest);
 
@@ -2259,12 +2257,12 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatSuccessfullSetParticipantRoleReturnsParticipantDtoMultipleParticipantsAdded() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         User userB = TestDataUtil.getRegisteredUserB(userService);
         User userC = TestDataUtil.getRegisteredUserC(userService);
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventA = eventService.create(eventA, userA.getUsername());
+        eventA = eventService.create(eventA, userA.getEmail());
         EventRoleRequest eventRoleRequest = new EventRoleRequest("PASSIVE");
         String roleRequestJson = objectMapper.writeValueAsString(eventRoleRequest);
 
@@ -2281,7 +2279,7 @@ public class EventControllerIntegrationTests {
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.user.id").value(2)
         ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.user.username").value(userB.getUsername())
+                MockMvcResultMatchers.jsonPath("$.user.username").value(userB.getEmail())
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.user.firstName").value(userB.getFirstName())
         ).andExpect(
@@ -2300,7 +2298,7 @@ public class EventControllerIntegrationTests {
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.user.id").value(3)
         ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.user.username").value(userC.getUsername())
+                MockMvcResultMatchers.jsonPath("$.user.username").value(userC.getEmail())
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.user.firstName").value(userC.getFirstName())
         ).andExpect(
@@ -2311,12 +2309,12 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatSetParticipantRoleSavedToDataBaseMultipleParticipantsAdded() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         User userB = TestDataUtil.getRegisteredUserB(userService);
         User userC = TestDataUtil.getRegisteredUserC(userService);
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventA = eventService.create(eventA, userA.getUsername());
+        eventA = eventService.create(eventA, userA.getEmail());
         EventRoleRequest eventRoleRequest = new EventRoleRequest("PASSIVE");
         String roleRequestJson = objectMapper.writeValueAsString(eventRoleRequest);
 
@@ -2346,11 +2344,11 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatSuccessfullSetParticipantRoleReturns200ActiveRole() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         Event eventA = TestDataUtil.getEventA();
         User userB = TestDataUtil.getRegisteredUserB(userService);
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         EventRoleRequest eventRoleRequest = new EventRoleRequest("ACTIVE");
         String roleRequestJson = objectMapper.writeValueAsString(eventRoleRequest);
 
@@ -2368,11 +2366,11 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatSuccessfullSetParticipantRoleReturnsParticipantDtoActiveRole() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         User userB = TestDataUtil.getRegisteredUserB(userService);
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventA = eventService.create(eventA, userA.getUsername());
+        eventA = eventService.create(eventA, userA.getEmail());
         EventRoleRequest eventRoleRequest = new EventRoleRequest("ACTIVE");
         String roleRequestJson = objectMapper.writeValueAsString(eventRoleRequest);
 
@@ -2389,7 +2387,7 @@ public class EventControllerIntegrationTests {
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.user.id").value(2)
         ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.user.username").value(userB.getUsername())
+                MockMvcResultMatchers.jsonPath("$.user.username").value(userB.getEmail())
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.user.firstName").value(userB.getFirstName())
         ).andExpect(
@@ -2400,11 +2398,11 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatSetParticipantRoleSavedToDataBaseActiveRole() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         User userB = TestDataUtil.getRegisteredUserB(userService);
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventA = eventService.create(eventA, userA.getUsername());
+        eventA = eventService.create(eventA, userA.getEmail());
         EventRoleRequest eventRoleRequest = new EventRoleRequest("ACTIVE");
         String roleRequestJson = objectMapper.writeValueAsString(eventRoleRequest);
 
@@ -2424,11 +2422,11 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatSuccessfullSetParticipantRoleReturns200AdminRole() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         Event eventA = TestDataUtil.getEventA();
         User userB = TestDataUtil.getRegisteredUserB(userService);
         eventA.setId(null);
-        eventService.create(eventA, userA.getUsername());
+        eventService.create(eventA, userA.getEmail());
         EventRoleRequest eventRoleRequest = new EventRoleRequest("ADMIN");
         String roleRequestJson = objectMapper.writeValueAsString(eventRoleRequest);
 
@@ -2446,11 +2444,11 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatSuccessfullSetParticipantRoleReturnsParticipantDtoAdminRole() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         User userB = TestDataUtil.getRegisteredUserB(userService);
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventA = eventService.create(eventA, userA.getUsername());
+        eventA = eventService.create(eventA, userA.getEmail());
         EventRoleRequest eventRoleRequest = new EventRoleRequest("ADMIN");
         String roleRequestJson = objectMapper.writeValueAsString(eventRoleRequest);
 
@@ -2467,7 +2465,7 @@ public class EventControllerIntegrationTests {
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.user.id").value(2)
         ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.user.username").value(userB.getUsername())
+                MockMvcResultMatchers.jsonPath("$.user.username").value(userB.getEmail())
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.user.firstName").value(userB.getFirstName())
         ).andExpect(
@@ -2478,11 +2476,11 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatSetParticipantRoleSavedToDataBaseAdminRole() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         User userB = TestDataUtil.getRegisteredUserB(userService);
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventA = eventService.create(eventA, userA.getUsername());
+        eventA = eventService.create(eventA, userA.getEmail());
         EventRoleRequest eventRoleRequest = new EventRoleRequest("ADMIN");
         String roleRequestJson = objectMapper.writeValueAsString(eventRoleRequest);
 
@@ -2502,11 +2500,11 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatSetParticipantRoleCanChangeParticipantsRole() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         User userB = TestDataUtil.getRegisteredUserB(userService);
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventA = eventService.create(eventA, userA.getUsername());
+        eventA = eventService.create(eventA, userA.getEmail());
         EventRoleRequest eventRoleRequest = new EventRoleRequest("PASSIVE");
         String roleRequestJson = objectMapper.writeValueAsString(eventRoleRequest);
 
@@ -2534,11 +2532,11 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatNotParticipantCannotAddAnotherParticipant() throws Exception{
         User userA = TestDataUtil.getRegisteredUserA(userService);
-        String token = jwtUtil.generateToken(userA.getUsername());
+        String token = jwtUtil.generateToken(userA.getEmail());
         User userB = TestDataUtil.getRegisteredUserB(userService);
         Event eventA = TestDataUtil.getEventA();
         eventA.setId(null);
-        eventA = eventService.create(eventA, userA.getUsername());
+        eventA = eventService.create(eventA, userA.getEmail());
         EventRoleRequest eventRoleRequest = new EventRoleRequest("PASSIVE");
         String roleRequestJson = objectMapper.writeValueAsString(eventRoleRequest);
 
@@ -2567,9 +2565,9 @@ public class EventControllerIntegrationTests {
     public void testThatPassiveParticipantCannotAddAnotherParticipant() throws Exception {
         User creator = TestDataUtil.getRegisteredUserA(userService);
         User passiveUser = TestDataUtil.getRegisteredUserB(userService);
-        Event event = eventService.create(TestDataUtil.getEventPrivate1(), creator.getUsername());
-        eventService.addEventParticipant(event.getId(), passiveUser.getId(), EventRole.PASSIVE, creator.getUsername());
-        String token = jwtUtil.generateToken(passiveUser.getUsername());
+        Event event = eventService.create(TestDataUtil.getEventPrivate1(), creator.getEmail());
+        eventService.addEventParticipant(event.getId(), passiveUser.getId(), EventRole.PASSIVE, creator.getEmail());
+        String token = jwtUtil.generateToken(passiveUser.getEmail());
 
         User targetUser = TestDataUtil.getRegisteredUserC(userService);
         EventRoleRequest roleRequest = new EventRoleRequest("ACTIVE");
@@ -2588,8 +2586,8 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatAdminParticipantCanAddAnotherParticipantForPrivate() throws Exception {
         User creator = TestDataUtil.getRegisteredUserA(userService);
-        Event event = eventService.create(TestDataUtil.getEventPrivate1(), creator.getUsername());
-        String token = jwtUtil.generateToken(creator.getUsername());
+        Event event = eventService.create(TestDataUtil.getEventPrivate1(), creator.getEmail());
+        String token = jwtUtil.generateToken(creator.getEmail());
 
         User targetUser = TestDataUtil.getRegisteredUserB(userService);
         EventRoleRequest roleRequest = new EventRoleRequest("PASSIVE");
@@ -2608,8 +2606,8 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatAdminParticipantCanAddAnotherParticipantForPublicClosed() throws Exception {
         User creator = TestDataUtil.getRegisteredUserA(userService);
-        Event event = eventService.create(TestDataUtil.getEventPublicClosed(), creator.getUsername());
-        String token = jwtUtil.generateToken(creator.getUsername());
+        Event event = eventService.create(TestDataUtil.getEventPublicClosed(), creator.getEmail());
+        String token = jwtUtil.generateToken(creator.getEmail());
 
         User targetUser = TestDataUtil.getRegisteredUserB(userService);
         EventRoleRequest roleRequest = new EventRoleRequest("ACTIVE");
@@ -2629,9 +2627,9 @@ public class EventControllerIntegrationTests {
     public void testThatActiveParticipantCannotAddAnotherParticipant() throws Exception {
         User creator = TestDataUtil.getRegisteredUserA(userService);
         User activeUser = TestDataUtil.getRegisteredUserB(userService);
-        Event event = eventService.create(TestDataUtil.getEventPrivate1(), creator.getUsername());
-        eventService.addEventParticipant(event.getId(), activeUser.getId(), EventRole.ACTIVE, creator.getUsername());
-        String token = jwtUtil.generateToken(activeUser.getUsername());
+        Event event = eventService.create(TestDataUtil.getEventPrivate1(), creator.getEmail());
+        eventService.addEventParticipant(event.getId(), activeUser.getId(), EventRole.ACTIVE, creator.getEmail());
+        String token = jwtUtil.generateToken(activeUser.getEmail());
 
         User targetUser = TestDataUtil.getRegisteredUserC(userService);
         EventRoleRequest roleRequest = new EventRoleRequest("PASSIVE");
@@ -2650,9 +2648,9 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatUserCannotAddItselfForPrivate() throws Exception {
         User creator = TestDataUtil.getRegisteredUserA(userService);
-        Event event = eventService.create(TestDataUtil.getEventPrivate1(), creator.getUsername());
+        Event event = eventService.create(TestDataUtil.getEventPrivate1(), creator.getEmail());
         User user = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(user.getUsername());
+        String token = jwtUtil.generateToken(user.getEmail());
 
         EventRoleRequest roleRequest = new EventRoleRequest("ACTIVE");
         String roleJson = objectMapper.writeValueAsString(roleRequest);
@@ -2670,9 +2668,9 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatUserCannotAddItselfForPublicClosed() throws Exception {
         User creator = TestDataUtil.getRegisteredUserA(userService);
-        Event event = eventService.create(TestDataUtil.getEventPublicClosed(), creator.getUsername());
+        Event event = eventService.create(TestDataUtil.getEventPublicClosed(), creator.getEmail());
         User user = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(user.getUsername());
+        String token = jwtUtil.generateToken(user.getEmail());
 
         EventRoleRequest roleRequest = new EventRoleRequest("PASSIVE");
         String roleJson = objectMapper.writeValueAsString(roleRequest);
@@ -2690,9 +2688,9 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatUserCanAddItselfAsPassiveForPublicOpen() throws Exception {
         User creator = TestDataUtil.getRegisteredUserA(userService);
-        Event event = eventService.create(TestDataUtil.getEventA(), creator.getUsername());
+        Event event = eventService.create(TestDataUtil.getEventA(), creator.getEmail());
         User user = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(user.getUsername());
+        String token = jwtUtil.generateToken(user.getEmail());
 
         EventRoleRequest roleRequest = new EventRoleRequest("PASSIVE");
         String roleJson = objectMapper.writeValueAsString(roleRequest);
@@ -2710,9 +2708,9 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatUserCannotAddItselfAsActiveForPublicOpen() throws Exception {
         User creator = TestDataUtil.getRegisteredUserA(userService);
-        Event event = eventService.create(TestDataUtil.getEventA(), creator.getUsername());
+        Event event = eventService.create(TestDataUtil.getEventA(), creator.getEmail());
         User user = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(user.getUsername());
+        String token = jwtUtil.generateToken(user.getEmail());
 
         EventRoleRequest roleRequest = new EventRoleRequest("ACTIVE");
         String roleJson = objectMapper.writeValueAsString(roleRequest);
@@ -2730,9 +2728,9 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatUserCannotAddItselfAsAdminForPublicOpen() throws Exception {
         User creator = TestDataUtil.getRegisteredUserA(userService);
-        Event event = eventService.create(TestDataUtil.getEventA(), creator.getUsername());
+        Event event = eventService.create(TestDataUtil.getEventA(), creator.getEmail());
         User user = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(user.getUsername());
+        String token = jwtUtil.generateToken(user.getEmail());
 
         EventRoleRequest roleRequest = new EventRoleRequest("ADMIN");
         String roleJson = objectMapper.writeValueAsString(roleRequest);
@@ -2750,10 +2748,10 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatUserCannotChangeItsRoleToAdminFromPassiveForPublicOpen() throws Exception {
         User creator = TestDataUtil.getRegisteredUserA(userService);
-        Event event = eventService.create(TestDataUtil.getEventA(), creator.getUsername());
+        Event event = eventService.create(TestDataUtil.getEventA(), creator.getEmail());
         User user = TestDataUtil.getRegisteredUserB(userService);
-        String tokenUser = jwtUtil.generateToken(user.getUsername());
-        String tokenCreator = jwtUtil.generateToken(creator.getUsername());
+        String tokenUser = jwtUtil.generateToken(user.getEmail());
+        String tokenCreator = jwtUtil.generateToken(creator.getEmail());
 
         EventRoleRequest roleRequest = new EventRoleRequest("PASSIVE");
         String roleJson = objectMapper.writeValueAsString(roleRequest);
@@ -2788,9 +2786,9 @@ public class EventControllerIntegrationTests {
     @Test
     public void testThatUserCannotChangeItsRoleToActiveFromPassiveForPublicOpen() throws Exception {
         User creator = TestDataUtil.getRegisteredUserA(userService);
-        Event event = eventService.create(TestDataUtil.getEventA(), creator.getUsername());
+        Event event = eventService.create(TestDataUtil.getEventA(), creator.getEmail());
         User user = TestDataUtil.getRegisteredUserB(userService);
-        String token = jwtUtil.generateToken(user.getUsername());
+        String token = jwtUtil.generateToken(user.getEmail());
 
         EventRoleRequest roleRequest = new EventRoleRequest("ADMIN");
         String roleJson = objectMapper.writeValueAsString(roleRequest);
@@ -2809,9 +2807,9 @@ public class EventControllerIntegrationTests {
     public void testAdminCanDowngradeToActive() throws Exception {
         User creator = TestDataUtil.getRegisteredUserA(userService);
         User user = TestDataUtil.getRegisteredUserB(userService);
-        Event event = eventService.create(TestDataUtil.getEventA(), creator.getUsername());
-        eventService.addEventParticipant(event.getId(), user.getId(), EventRole.ADMIN, creator.getUsername());
-        String token = jwtUtil.generateToken(user.getUsername());
+        Event event = eventService.create(TestDataUtil.getEventA(), creator.getEmail());
+        eventService.addEventParticipant(event.getId(), user.getId(), EventRole.ADMIN, creator.getEmail());
+        String token = jwtUtil.generateToken(user.getEmail());
 
         EventRoleRequest roleRequest = new EventRoleRequest("ACTIVE");
         String roleJson = objectMapper.writeValueAsString(roleRequest);
@@ -2832,9 +2830,9 @@ public class EventControllerIntegrationTests {
     public void testAdminCanDowngradeToPassive() throws Exception {
         User creator = TestDataUtil.getRegisteredUserA(userService);
         User user = TestDataUtil.getRegisteredUserB(userService);
-        Event event = eventService.create(TestDataUtil.getEventA(), creator.getUsername());
-        eventService.addEventParticipant(event.getId(), user.getId(), EventRole.ADMIN, creator.getUsername());
-        String token = jwtUtil.generateToken(user.getUsername());
+        Event event = eventService.create(TestDataUtil.getEventA(), creator.getEmail());
+        eventService.addEventParticipant(event.getId(), user.getId(), EventRole.ADMIN, creator.getEmail());
+        String token = jwtUtil.generateToken(user.getEmail());
 
         EventRoleRequest roleRequest = new EventRoleRequest("PASSIVE");
         String roleJson = objectMapper.writeValueAsString(roleRequest);
@@ -2855,9 +2853,9 @@ public class EventControllerIntegrationTests {
     public void testActiveCanDowngradeToPassive() throws Exception {
         User creator = TestDataUtil.getRegisteredUserA(userService);
         User user = TestDataUtil.getRegisteredUserB(userService);
-        Event event = eventService.create(TestDataUtil.getEventA(), creator.getUsername());
-        eventService.addEventParticipant(event.getId(), user.getId(), EventRole.ACTIVE, creator.getUsername());
-        String token = jwtUtil.generateToken(user.getUsername());
+        Event event = eventService.create(TestDataUtil.getEventA(), creator.getEmail());
+        eventService.addEventParticipant(event.getId(), user.getId(), EventRole.ACTIVE, creator.getEmail());
+        String token = jwtUtil.generateToken(user.getEmail());
 
         EventRoleRequest roleRequest = new EventRoleRequest("PASSIVE");
         String roleJson = objectMapper.writeValueAsString(roleRequest);
@@ -2878,9 +2876,9 @@ public class EventControllerIntegrationTests {
     public void testPassiveCannotUpgradeToActive() throws Exception {
         User creator = TestDataUtil.getRegisteredUserA(userService);
         User user = TestDataUtil.getRegisteredUserB(userService);
-        Event event = eventService.create(TestDataUtil.getEventA(), creator.getUsername());
-        eventService.addEventParticipant(event.getId(), user.getId(), EventRole.PASSIVE, creator.getUsername());
-        String token = jwtUtil.generateToken(user.getUsername());
+        Event event = eventService.create(TestDataUtil.getEventA(), creator.getEmail());
+        eventService.addEventParticipant(event.getId(), user.getId(), EventRole.PASSIVE, creator.getEmail());
+        String token = jwtUtil.generateToken(user.getEmail());
 
         EventRoleRequest roleRequest = new EventRoleRequest("ACTIVE");
         String roleJson = objectMapper.writeValueAsString(roleRequest);
@@ -2901,9 +2899,9 @@ public class EventControllerIntegrationTests {
     public void testPassiveCannotUpgradeToAdmin() throws Exception {
         User creator = TestDataUtil.getRegisteredUserA(userService);
         User user = TestDataUtil.getRegisteredUserB(userService);
-        Event event = eventService.create(TestDataUtil.getEventA(), creator.getUsername());
-        eventService.addEventParticipant(event.getId(), user.getId(), EventRole.PASSIVE, creator.getUsername());
-        String token = jwtUtil.generateToken(user.getUsername());
+        Event event = eventService.create(TestDataUtil.getEventA(), creator.getEmail());
+        eventService.addEventParticipant(event.getId(), user.getId(), EventRole.PASSIVE, creator.getEmail());
+        String token = jwtUtil.generateToken(user.getEmail());
 
         EventRoleRequest roleRequest = new EventRoleRequest("ADMIN");
         String roleJson = objectMapper.writeValueAsString(roleRequest);
@@ -2924,9 +2922,9 @@ public class EventControllerIntegrationTests {
     public void testActiveCannotUpgradeToAdmin() throws Exception {
         User creator = TestDataUtil.getRegisteredUserA(userService);
         User user = TestDataUtil.getRegisteredUserB(userService);
-        Event event = eventService.create(TestDataUtil.getEventA(), creator.getUsername());
-        eventService.addEventParticipant(event.getId(), user.getId(), EventRole.ACTIVE, creator.getUsername());
-        String token = jwtUtil.generateToken(user.getUsername());
+        Event event = eventService.create(TestDataUtil.getEventA(), creator.getEmail());
+        eventService.addEventParticipant(event.getId(), user.getId(), EventRole.ACTIVE, creator.getEmail());
+        String token = jwtUtil.generateToken(user.getEmail());
 
         EventRoleRequest roleRequest = new EventRoleRequest("ADMIN");
         String roleJson = objectMapper.writeValueAsString(roleRequest);
@@ -2951,13 +2949,13 @@ public class EventControllerIntegrationTests {
         User outsider = TestDataUtil.getRegisteredUserC(userService);
         User globalAdmin = TestDataUtil.getRegisteredUserAdmin1(userService);
 
-        Event event = eventService.create(TestDataUtil.getEventPrivate1(), creator.getUsername());
-        eventService.addEventParticipant(event.getId(), participant.getId(), EventRole.PASSIVE, creator.getUsername());
+        Event event = eventService.create(TestDataUtil.getEventPrivate1(), creator.getEmail());
+        eventService.addEventParticipant(event.getId(), participant.getId(), EventRole.PASSIVE, creator.getEmail());
 
-        String creatorToken = jwtUtil.generateToken(creator.getUsername());
-        String participantToken = jwtUtil.generateToken(participant.getUsername());
-        String outsiderToken = jwtUtil.generateToken(outsider.getUsername());
-        String adminToken = jwtUtil.generateToken(globalAdmin.getUsername());
+        String creatorToken = jwtUtil.generateToken(creator.getEmail());
+        String participantToken = jwtUtil.generateToken(participant.getEmail());
+        String outsiderToken = jwtUtil.generateToken(outsider.getEmail());
+        String adminToken = jwtUtil.generateToken(globalAdmin.getEmail());
 
         // Creator should be able to view
         mockMvc.perform(
@@ -2996,13 +2994,13 @@ public class EventControllerIntegrationTests {
         User outsider = TestDataUtil.getRegisteredUserC(userService);
         User globalAdmin = TestDataUtil.getRegisteredUserAdmin1(userService);
 
-        Event event = eventService.create(TestDataUtil.getEventPublicClosed(), creator.getUsername());
-        eventService.addEventParticipant(event.getId(), participant.getId(), EventRole.ACTIVE, creator.getUsername());
+        Event event = eventService.create(TestDataUtil.getEventPublicClosed(), creator.getEmail());
+        eventService.addEventParticipant(event.getId(), participant.getId(), EventRole.ACTIVE, creator.getEmail());
 
-        String creatorToken = jwtUtil.generateToken(creator.getUsername());
-        String participantToken = jwtUtil.generateToken(participant.getUsername());
-        String outsiderToken = jwtUtil.generateToken(outsider.getUsername());
-        String adminToken = jwtUtil.generateToken(globalAdmin.getUsername());
+        String creatorToken = jwtUtil.generateToken(creator.getEmail());
+        String participantToken = jwtUtil.generateToken(participant.getEmail());
+        String outsiderToken = jwtUtil.generateToken(outsider.getEmail());
+        String adminToken = jwtUtil.generateToken(globalAdmin.getEmail());
 
         // Creator should be able to view
         mockMvc.perform(
@@ -3034,9 +3032,9 @@ public class EventControllerIntegrationTests {
     public void testUserCanDeleteThemself() throws Exception {
         User creator = TestDataUtil.getRegisteredUserA(userService);
         User user = TestDataUtil.getRegisteredUserB(userService);
-        Event event = eventService.create(TestDataUtil.getEventA(), creator.getUsername());
-        eventService.addEventParticipant(event.getId(), user.getId(), EventRole.ACTIVE, creator.getUsername());
-        String token = jwtUtil.generateToken(user.getUsername());
+        Event event = eventService.create(TestDataUtil.getEventA(), creator.getEmail());
+        eventService.addEventParticipant(event.getId(), user.getId(), EventRole.ACTIVE, creator.getEmail());
+        String token = jwtUtil.generateToken(user.getEmail());
 
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/api/events/" + event.getId() + "/participants/" + user.getId())
@@ -3052,10 +3050,10 @@ public class EventControllerIntegrationTests {
         User creator = TestDataUtil.getRegisteredUserA(userService);
         User admin = TestDataUtil.getRegisteredUserB(userService);
         User targetUser = TestDataUtil.getRegisteredUserC(userService);
-        Event event = eventService.create(TestDataUtil.getEventA(), creator.getUsername());
-        eventService.addEventParticipant(event.getId(), admin.getId(), EventRole.ADMIN, creator.getUsername());
-        eventService.addEventParticipant(event.getId(), targetUser.getId(), EventRole.ACTIVE, creator.getUsername());
-        String token = jwtUtil.generateToken(admin.getUsername());
+        Event event = eventService.create(TestDataUtil.getEventA(), creator.getEmail());
+        eventService.addEventParticipant(event.getId(), admin.getId(), EventRole.ADMIN, creator.getEmail());
+        eventService.addEventParticipant(event.getId(), targetUser.getId(), EventRole.ACTIVE, creator.getEmail());
+        String token = jwtUtil.generateToken(admin.getEmail());
 
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/api/events/" + event.getId() + "/participants/" + targetUser.getId())
@@ -3071,10 +3069,10 @@ public class EventControllerIntegrationTests {
         User creator = TestDataUtil.getRegisteredUserA(userService);
         User admin1 = TestDataUtil.getRegisteredUserB(userService);
         User admin2 = TestDataUtil.getRegisteredUserC(userService);
-        Event event = eventService.create(TestDataUtil.getEventA(), creator.getUsername());
-        eventService.addEventParticipant(event.getId(), admin1.getId(), EventRole.ADMIN, creator.getUsername());
-        eventService.addEventParticipant(event.getId(), admin2.getId(), EventRole.ADMIN, creator.getUsername());
-        String token = jwtUtil.generateToken(admin1.getUsername());
+        Event event = eventService.create(TestDataUtil.getEventA(), creator.getEmail());
+        eventService.addEventParticipant(event.getId(), admin1.getId(), EventRole.ADMIN, creator.getEmail());
+        eventService.addEventParticipant(event.getId(), admin2.getId(), EventRole.ADMIN, creator.getEmail());
+        String token = jwtUtil.generateToken(admin1.getEmail());
 
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/api/events/" + event.getId() + "/participants/" + admin2.getId())
@@ -3090,10 +3088,10 @@ public class EventControllerIntegrationTests {
         User creator = TestDataUtil.getRegisteredUserA(userService);
         User activeUser = TestDataUtil.getRegisteredUserB(userService);
         User targetUser = TestDataUtil.getRegisteredUserC(userService);
-        Event event = eventService.create(TestDataUtil.getEventA(), creator.getUsername());
-        eventService.addEventParticipant(event.getId(), activeUser.getId(), EventRole.ACTIVE, creator.getUsername());
-        eventService.addEventParticipant(event.getId(), targetUser.getId(), EventRole.PASSIVE, creator.getUsername());
-        String token = jwtUtil.generateToken(activeUser.getUsername());
+        Event event = eventService.create(TestDataUtil.getEventA(), creator.getEmail());
+        eventService.addEventParticipant(event.getId(), activeUser.getId(), EventRole.ACTIVE, creator.getEmail());
+        eventService.addEventParticipant(event.getId(), targetUser.getId(), EventRole.PASSIVE, creator.getEmail());
+        String token = jwtUtil.generateToken(activeUser.getEmail());
 
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/api/events/" + event.getId() + "/participants/" + targetUser.getId())
@@ -3109,10 +3107,10 @@ public class EventControllerIntegrationTests {
         User creator = TestDataUtil.getRegisteredUserA(userService);
         User passiveUser = TestDataUtil.getRegisteredUserB(userService);
         User targetUser = TestDataUtil.getRegisteredUserC(userService);
-        Event event = eventService.create(TestDataUtil.getEventA(), creator.getUsername());
-        eventService.addEventParticipant(event.getId(), passiveUser.getId(), EventRole.PASSIVE, creator.getUsername());
-        eventService.addEventParticipant(event.getId(), targetUser.getId(), EventRole.ACTIVE, creator.getUsername());
-        String token = jwtUtil.generateToken(passiveUser.getUsername());
+        Event event = eventService.create(TestDataUtil.getEventA(), creator.getEmail());
+        eventService.addEventParticipant(event.getId(), passiveUser.getId(), EventRole.PASSIVE, creator.getEmail());
+        eventService.addEventParticipant(event.getId(), targetUser.getId(), EventRole.ACTIVE, creator.getEmail());
+        String token = jwtUtil.generateToken(passiveUser.getEmail());
 
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/api/events/" + event.getId() + "/participants/" + targetUser.getId())
@@ -3128,9 +3126,9 @@ public class EventControllerIntegrationTests {
         User creator = TestDataUtil.getRegisteredUserA(userService);
         User stranger = TestDataUtil.getRegisteredUserB(userService);
         User targetUser = TestDataUtil.getRegisteredUserC(userService);
-        Event event = eventService.create(TestDataUtil.getEventA(), creator.getUsername());
-        eventService.addEventParticipant(event.getId(), targetUser.getId(), EventRole.ACTIVE, creator.getUsername());
-        String token = jwtUtil.generateToken(stranger.getUsername());
+        Event event = eventService.create(TestDataUtil.getEventA(), creator.getEmail());
+        eventService.addEventParticipant(event.getId(), targetUser.getId(), EventRole.ACTIVE, creator.getEmail());
+        String token = jwtUtil.generateToken(stranger.getEmail());
 
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/api/events/" + event.getId() + "/participants/" + targetUser.getId())
@@ -3143,14 +3141,14 @@ public class EventControllerIntegrationTests {
     @Test
     public void testUserSeesOnlyTheirOwnEvents() throws Exception {
         User user = TestDataUtil.getRegisteredUserA(userService);
-        Event privateEvent = eventService.create(TestDataUtil.getEventPrivate1(), user.getUsername());
-        Event publicClosedEvent = eventService.create(TestDataUtil.getEventPublicClosed(), user.getUsername());
-        Event publicOpenEvent = eventService.create(TestDataUtil.getEventA(), user.getUsername());
+        Event privateEvent = eventService.create(TestDataUtil.getEventPrivate1(), user.getEmail());
+        Event publicClosedEvent = eventService.create(TestDataUtil.getEventPublicClosed(), user.getEmail());
+        Event publicOpenEvent = eventService.create(TestDataUtil.getEventA(), user.getEmail());
 
         User otherUser = TestDataUtil.getRegisteredUserB(userService);
-        eventService.create(TestDataUtil.getEventPrivate1(), otherUser.getUsername());
+        eventService.create(TestDataUtil.getEventPrivate1(), otherUser.getEmail());
 
-        String token = jwtUtil.generateToken(user.getUsername());
+        String token = jwtUtil.generateToken(user.getEmail());
 
         MvcResult result = mockMvc.perform(
                         MockMvcRequestBuilders.get("/api/events/events-of-user/" + user.getId())
@@ -3170,11 +3168,11 @@ public class EventControllerIntegrationTests {
         User admin = TestDataUtil.getRegisteredUserAdmin1(userService);
         User user = TestDataUtil.getRegisteredUserA(userService);
 
-        Event privateEvent = eventService.create(TestDataUtil.getEventPrivate1(), user.getUsername());
-        Event publicClosedEvent = eventService.create(TestDataUtil.getEventPublicClosed(), user.getUsername());
-        Event publicOpenEvent = eventService.create(TestDataUtil.getEventA(), user.getUsername());
+        Event privateEvent = eventService.create(TestDataUtil.getEventPrivate1(), user.getEmail());
+        Event publicClosedEvent = eventService.create(TestDataUtil.getEventPublicClosed(), user.getEmail());
+        Event publicOpenEvent = eventService.create(TestDataUtil.getEventA(), user.getEmail());
 
-        String token = jwtUtil.generateToken(admin.getUsername());
+        String token = jwtUtil.generateToken(admin.getEmail());
 
         MvcResult result = mockMvc.perform(
                         MockMvcRequestBuilders.get("/api/events/events-of-user/" + user.getId())
@@ -3193,14 +3191,14 @@ public class EventControllerIntegrationTests {
         User creator = TestDataUtil.getRegisteredUserA(userService);
         User otherUser = TestDataUtil.getRegisteredUserB(userService);
 
-        Event privateEvent = eventService.create(TestDataUtil.getEventPrivate1(), creator.getUsername());
-        Event publicClosedEvent = eventService.create(TestDataUtil.getEventPublicClosed(), creator.getUsername());
-        Event publicOpenEvent = eventService.create(TestDataUtil.getEventA(), creator.getUsername());
+        Event privateEvent = eventService.create(TestDataUtil.getEventPrivate1(), creator.getEmail());
+        Event publicClosedEvent = eventService.create(TestDataUtil.getEventPublicClosed(), creator.getEmail());
+        Event publicOpenEvent = eventService.create(TestDataUtil.getEventA(), creator.getEmail());
 
-        eventService.addEventParticipant(publicClosedEvent.getId(), otherUser.getId(), EventRole.ACTIVE, creator.getUsername());
-        eventService.addEventParticipant(publicOpenEvent.getId(), otherUser.getId(), EventRole.ACTIVE, creator.getUsername());
+        eventService.addEventParticipant(publicClosedEvent.getId(), otherUser.getId(), EventRole.ACTIVE, creator.getEmail());
+        eventService.addEventParticipant(publicOpenEvent.getId(), otherUser.getId(), EventRole.ACTIVE, creator.getEmail());
 
-        String token = jwtUtil.generateToken(otherUser.getUsername());
+        String token = jwtUtil.generateToken(otherUser.getEmail());
 
         MvcResult result = mockMvc.perform(
                         MockMvcRequestBuilders.get("/api/events/events-of-user/" + creator.getId())
@@ -3229,15 +3227,15 @@ public class EventControllerIntegrationTests {
         User creator2 = TestDataUtil.getRegisteredUserB(userService);
         User participantUser = TestDataUtil.getRegisteredUserC(userService);
 
-        Event eventCreatedByCreator1 = eventService.create(TestDataUtil.getEventPublicClosed(), creator1.getUsername());
-        Event eventCreatedByCreator2 = eventService.create(TestDataUtil.getEventA(), creator2.getUsername());
-        Event eventNotParticipated = eventService.create(TestDataUtil.getEventB(), creator1.getUsername());
+        Event eventCreatedByCreator1 = eventService.create(TestDataUtil.getEventPublicClosed(), creator1.getEmail());
+        Event eventCreatedByCreator2 = eventService.create(TestDataUtil.getEventA(), creator2.getEmail());
+        Event eventNotParticipated = eventService.create(TestDataUtil.getEventB(), creator1.getEmail());
 
         // Participant joins two events
-        eventService.addEventParticipant(eventCreatedByCreator1.getId(), participantUser.getId(), EventRole.PASSIVE, creator1.getUsername());
-        eventService.addEventParticipant(eventCreatedByCreator2.getId(), participantUser.getId(), EventRole.PASSIVE, creator2.getUsername());
+        eventService.addEventParticipant(eventCreatedByCreator1.getId(), participantUser.getId(), EventRole.PASSIVE, creator1.getEmail());
+        eventService.addEventParticipant(eventCreatedByCreator2.getId(), participantUser.getId(), EventRole.PASSIVE, creator2.getEmail());
 
-        String token = jwtUtil.generateToken(participantUser.getUsername());
+        String token = jwtUtil.generateToken(participantUser.getEmail());
 
         MvcResult result = mockMvc.perform(
                         MockMvcRequestBuilders.get("/api/events/events-of-user/" + participantUser.getId())
@@ -3257,11 +3255,11 @@ public class EventControllerIntegrationTests {
         User creator = TestDataUtil.getRegisteredUserB(userService);
 
         // Creator makes events, but user does not join anything
-        eventService.create(TestDataUtil.getEventPrivate1(), creator.getUsername());
-        eventService.create(TestDataUtil.getEventA(), creator.getUsername());
-        eventService.create(TestDataUtil.getEventPublicClosed(), creator.getUsername());
+        eventService.create(TestDataUtil.getEventPrivate1(), creator.getEmail());
+        eventService.create(TestDataUtil.getEventA(), creator.getEmail());
+        eventService.create(TestDataUtil.getEventPublicClosed(), creator.getEmail());
 
-        String token = jwtUtil.generateToken(user.getUsername());
+        String token = jwtUtil.generateToken(user.getEmail());
 
         MvcResult result = mockMvc.perform(
                         MockMvcRequestBuilders.get("/api/events/events-of-user/" + user.getId())
@@ -3279,11 +3277,11 @@ public class EventControllerIntegrationTests {
         User participantUser = TestDataUtil.getRegisteredUserB(userService);
         User otherUser = TestDataUtil.getRegisteredUserC(userService);
 
-        eventService.create(TestDataUtil.getEventPrivate1(), creator.getUsername());
-        eventService.create(TestDataUtil.getEventPublicClosed(), creator.getUsername());
-        eventService.create(TestDataUtil.getEventA(), creator.getUsername());
+        eventService.create(TestDataUtil.getEventPrivate1(), creator.getEmail());
+        eventService.create(TestDataUtil.getEventPublicClosed(), creator.getEmail());
+        eventService.create(TestDataUtil.getEventA(), creator.getEmail());
 
-        String token = jwtUtil.generateToken(otherUser.getUsername());
+        String token = jwtUtil.generateToken(otherUser.getEmail());
 
         MvcResult result = mockMvc.perform(
                         MockMvcRequestBuilders.get("/api/events/events-of-user/" + participantUser.getId())
