@@ -133,30 +133,30 @@ public class TestDataUtil {
     }
 
     public static User getRegisteredUserA(UserService userService){
-        return userService.registerUser("userTestA", "qwerty", "test", "testowy", "testA@example.example");
+        return userService.registerUser("testA@example.example", "qwerty", "test", "testowy");
     }
 
     public static User getRegisteredUserB(UserService userService){
-        return userService.registerUser("userTestB", "qwerty", "test", "testowy", "testB@example.example");
+        return userService.registerUser("testB@example.example", "qwerty", "test", "testowy");
     }
 
     public static User getRegisteredUserC(UserService userService){
-        return userService.registerUser("userTestC", "qwerty", "test", "testowy", "testC@example.example");
+        return userService.registerUser("testC@example.example", "qwerty", "test", "testowy");
     }
 
     public static User getRegisteredUserD(UserService userService){
-        return userService.registerUser("userTestD", "qwerty", "test", "testowy", "testC@example.example");
+        return userService.registerUser("testC@example.example", "qwerty", "test", "testowy");
     }
 
     @Transactional
     public static User getRegisteredUserAdmin1(UserService userService){
-        User user =  userService.registerUser("userTestAdmin1", "qwerty", "test", "testowy", "testTestAdmin1@example.example");
+        User user =  userService.registerUser("testTestAdmin1@example.example", "qwerty", "test", "testowy");
         return userService.setUserRole(user.getEmail(), Role.ADMIN);
     }
 
     @Transactional
     public static User getRegisteredUserAdmin2(UserService userService){
-        User user =  userService.registerUser("userTestTestAdmin2", "qwerty", "test", "testowy", "testTestAdmin2@example.example");
+        User user =  userService.registerUser("testTestAdmin2@example.example", "qwerty", "test", "testowy");
         return userService.setUserRole(user.getEmail(), Role.ADMIN);
     }
 

@@ -2190,8 +2190,6 @@ public class EventControllerIntegrationTests {
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.user.id").value(2)
         ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.user.username").value(userB.getEmail())
-        ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.user.firstName").value(userB.getFirstName())
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.user.lastName").value(userB.getLastName())
@@ -2279,8 +2277,6 @@ public class EventControllerIntegrationTests {
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.user.id").value(2)
         ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.user.username").value(userB.getEmail())
-        ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.user.firstName").value(userB.getFirstName())
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.user.lastName").value(userB.getLastName())
@@ -2297,8 +2293,6 @@ public class EventControllerIntegrationTests {
                 MockMvcResultMatchers.jsonPath("$.eventRole").value(eventRoleRequest.getRole())
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.user.id").value(3)
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.user.username").value(userC.getEmail())
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.user.firstName").value(userC.getFirstName())
         ).andExpect(
@@ -2387,8 +2381,6 @@ public class EventControllerIntegrationTests {
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.user.id").value(2)
         ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.user.username").value(userB.getEmail())
-        ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.user.firstName").value(userB.getFirstName())
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.user.lastName").value(userB.getLastName())
@@ -2464,8 +2456,6 @@ public class EventControllerIntegrationTests {
                 MockMvcResultMatchers.jsonPath("$.eventRole").value(eventRoleRequest.getRole())
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.user.id").value(2)
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.user.username").value(userB.getEmail())
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.user.firstName").value(userB.getFirstName())
         ).andExpect(
