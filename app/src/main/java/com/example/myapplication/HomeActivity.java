@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
@@ -19,6 +20,15 @@ import android.widget.ImageButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import android.widget.Toast;
 
+import com.example.myapplication.model.PaginatedResponse;
+import com.example.myapplication.network.ApiService;
+import com.example.myapplication.network.RetrofitClient;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+
 
 
 
@@ -27,6 +37,9 @@ public class HomeActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private EventAdapter adapter;
     private List<Event> eventList;
+
+    private ApiService apiService;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,14 +53,23 @@ public class HomeActivity extends AppCompatActivity {
 
         TextView addButton = findViewById(R.id.addEventButton);
         addButton.setOnClickListener(v -> {
-            Toast.makeText(this, "Dodaj nowe wydarzenie", Toast.LENGTH_SHORT).show();
-            // Tu potem: startActivity(new Intent(this, AddEventActivity.class));
+            Intent intent = new Intent(HomeActivity.this, AddEventActivity.class);
+            startActivity(intent);
         });
 
+
         eventList = new ArrayList<>();
-        eventList.add(new Event("15.05–16.05.2025", "Juwenalia", "Święto studentów pełne atrakcji", R.drawable.juwenalia));
-        eventList.add(new Event("19.07–25.07.2025", "Adapciak", "Obóz zerowy dla studentów", R.drawable.adapciak));
-        eventList.add(new Event("19.07–25.07.2025", "koncerty", "Obóz zerowy dla studentów", R.drawable.koncert));
+//        eventList.add(new Event("15.05–16.05.2025", "Juwenalia", "Święto studentów pełne atrakcji", R.drawable.juwenalia));
+//        eventList.add(new Event("19.07–25.07.2025", "Adapciak", "Obóz zerowy dla studentów", R.drawable.adapciak));
+//        eventList.add(new Event("19.07–25.07.2025", "koncerty", "Obóz zerowy dla studentów", R.drawable.koncert));
+
+        apiService = RetrofitClient.getInstance(getApplicationContext()).create(ApiService.class);
+        eventList = new ArrayList<>();
+        adapter = new EventAdapter(eventList);
+        recyclerView.setAdapter(adapter);
+
+// Pobieranie danych z backendu
+        loadEvents(0, 10); // np. pierwsza strona, 10 elementów
 
         adapter = new EventAdapter(eventList);
 
@@ -78,5 +100,28 @@ public class HomeActivity extends AppCompatActivity {
 
         popup.show();
     }
+
+    private void loadEvents(int page, int size) {
+        Call<PaginatedResponse<Event>> call = apiService.getEvents(page, size);
+        call.enqueue(new Callback<PaginatedResponse<Event>>() {
+            @Override
+            public void onResponse(Call<PaginatedResponse<Event>> call, Response<PaginatedResponse<Event>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Event> eventsFromApi = response.body().getContent();
+                    eventList.clear();
+                    eventList.addAll(eventsFromApi);
+                    adapter.notifyDataSetChanged();
+                } else {
+                    Toast.makeText(HomeActivity.this, "Nie udało się pobrać wydarzeń", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PaginatedResponse<Event>> call, Throwable t) {
+                Toast.makeText(HomeActivity.this, "Błąd połączenia: " + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
 
 }

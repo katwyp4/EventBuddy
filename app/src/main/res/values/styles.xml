@@ -14,4 +14,16 @@
         <item name="android:textColor">@color/text_white</item>
     </style>
 
+
+    <string name="app_name">EventBuddy</string>
+    <string name="event_date">2025-05-08</string>
+    <string name="event_title">test</string>
+    <string name="event_description">test</string>
+    <string name="join_button">Wezmę udział</string>
+    <string name="invite_friends">Zaproś znajomych</string>
+    <string name="share">Udostępnij</string>
+    <string name="remind_me">Przypomnij mi</string>
+    <string name="event_image_desc">Zdjęcie wydarzenia</string>
+
+
 </resources>

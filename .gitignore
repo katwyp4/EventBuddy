@@ -17,3 +17,7 @@
 # Pliki systemowe
 .DS_Store
 Thumbs.db
+
+
+app/local.properties
+EventBuddySpring/src/main/resources/application-local.properties
