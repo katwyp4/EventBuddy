@@ -1,12 +1,11 @@
 package com.kompetencyjny.EventBuddySpring.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Data // generuje gettery, settery, equals, hashCode, toString
 @NoArgsConstructor
@@ -27,17 +26,17 @@ public class Event {
     private Double latitude;
     private Double longitude;
     private String shareLink;
+    private EventPrivacy eventPrivacy;
+    @JsonIgnore private Boolean active=true;
+    @JsonIgnore private LocalDate deactivationDate=null;
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Task> tasks = new ArrayList<>();
+    @JsonIgnore
+    private Set<Task> tasks = new HashSet<>();
 
-    @ManyToMany
-    @JoinTable(
-            name = "event_participants",
-            joinColumns = @JoinColumn(name = "event_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private Set<User> participants = new HashSet<>();
+    @OneToMany(mappedBy = "event", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Set<EventParticipant> participants = new HashSet<>();
 
     // Metody pomocnicze do obsługi listy Task
     public void addTask(Task task) {
@@ -51,11 +50,23 @@ public class Event {
     }
 
     // Metody pomocnicze do obsługi uczestników
-    public void addParticipant(User user) {
-        participants.add(user);
+    public EventParticipant addParticipant(User user, EventRole role) {
+        EventParticipant eventParticipant = new EventParticipant(this, user, role);
+        participants.add(eventParticipant);
+        return eventParticipant;
+    }
+
+    public EventParticipant addParticipant(User user) {
+        EventParticipant eventParticipant = new EventParticipant(this, user);
+        participants.add(eventParticipant);
+        return eventParticipant;
     }
 
     public void removeParticipant(User user) {
-        participants.remove(user);
+        participants.remove(new EventParticipant(this, user));
+    }
+
+    public boolean isParticipant(User user){
+        return participants.contains(new EventParticipant(this, user));
     }
 }

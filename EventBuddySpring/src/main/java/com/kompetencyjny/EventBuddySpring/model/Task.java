@@ -1,7 +1,10 @@
 package com.kompetencyjny.EventBuddySpring.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -24,4 +27,7 @@ public class Task {
     @ManyToOne
     @JoinColumn(name = "assigned_user_id")
     private User assignedUser;
+
+    @JsonIgnore private Boolean active;
+    @JsonIgnore private LocalDate deactivationDate;
 }

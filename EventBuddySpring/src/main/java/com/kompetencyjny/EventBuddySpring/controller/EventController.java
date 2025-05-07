@@ -1,95 +1,144 @@
 package com.kompetencyjny.EventBuddySpring.controller;
 
+import com.kompetencyjny.EventBuddySpring.dto.EventDto;
+import com.kompetencyjny.EventBuddySpring.dto.EventParticipantDto;
+import com.kompetencyjny.EventBuddySpring.dto.EventRequest;
+import com.kompetencyjny.EventBuddySpring.dto.EventRoleRequest;
+import com.kompetencyjny.EventBuddySpring.mappers.EventMapper;
+import com.kompetencyjny.EventBuddySpring.mappers.EventParticipantMapper;
 import com.kompetencyjny.EventBuddySpring.model.Event;
-import com.kompetencyjny.EventBuddySpring.model.User;
-import com.kompetencyjny.EventBuddySpring.repo.EventRepository;
-import com.kompetencyjny.EventBuddySpring.repo.UserRepository;
+import com.kompetencyjny.EventBuddySpring.model.EventParticipant;
+import com.kompetencyjny.EventBuddySpring.model.EventRole;
+import com.kompetencyjny.EventBuddySpring.service.EventService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/events")
+@RequiredArgsConstructor
 public class EventController {
 
-    private final EventRepository eventRepository;
-    private final UserRepository userRepository;
+    private final EventService eventService;
+    private final EventMapper eventMapper;
+    private final EventParticipantMapper eventParticipantMapper;
 
-    public EventController(EventRepository eventRepository,
-                           UserRepository userRepository) {
-        this.eventRepository = eventRepository;
-        this.userRepository = userRepository;
-    }
 
-    // [GET] /api/events
+    // [GET] /api/events?size={}?page={}
     @GetMapping
-    public List<Event> getAllEvents() {
-        return eventRepository.findAll();
+    public ResponseEntity<Page<EventDto>> getAllEvents(Pageable pageable, @AuthenticationPrincipal UserDetails userDetails) {
+        Page<EventDto> eventDtos;
+        eventDtos = eventService.findAllVisible(pageable, userDetails.getUsername()).map(eventMapper::toDto);
+        return ResponseEntity.ok(eventDtos);
     }
 
     // [GET] /api/events/{id}
     @GetMapping("/{id}")
-    public ResponseEntity<Event> getEventById(@PathVariable Long id) {
-        Optional<Event> event = eventRepository.findById(id);
-        return event.map(ResponseEntity::ok)
+    public ResponseEntity<EventDto> getEventById(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
+        Optional<Event> eventOpt;
+        eventOpt = eventService.findVisibleById(id, userDetails.getUsername());
+
+        return eventOpt.map(event_ -> ResponseEntity.ok(eventMapper.toDto(event_)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     // [POST] /api/events
+    @ResponseBody
     @PostMapping
-    public Event createEvent(@RequestBody Event event) {
-        return eventRepository.save(event);
+    public ResponseEntity<EventDto> createEvent(@Valid @RequestBody EventRequest eventRequest, @AuthenticationPrincipal UserDetails userDetails) {
+        Event event = eventMapper.toEntity(eventRequest);
+        event = eventService.create(event, userDetails.getUsername());
+        return new ResponseEntity<>(eventMapper.toDto(event), HttpStatus.CREATED);
     }
 
     // [PUT] /api/events/{id}
     @PutMapping("/{id}")
-    public ResponseEntity<Event> updateEvent(@PathVariable Long id,
-                                             @RequestBody Event updatedEvent) {
-        Optional<Event> eventOpt = eventRepository.findById(id);
-        if (eventOpt.isPresent()) {
-            Event event = eventOpt.get();
-            event.setTitle(updatedEvent.getTitle());
-            event.setDescription(updatedEvent.getDescription());
-            event.setDate(updatedEvent.getDate());
-            event.setLocation(updatedEvent.getLocation());
-            event.setLatitude(updatedEvent.getLatitude());
-            event.setLongitude(updatedEvent.getLongitude());
-            event.setShareLink(updatedEvent.getShareLink());
-            return ResponseEntity.ok(eventRepository.save(event));
+    public ResponseEntity<EventDto> updateEvent(@PathVariable Long id,
+                                                @Valid @RequestBody EventRequest eventRequest,
+                                                @AuthenticationPrincipal UserDetails userDetails) {
+        if (! eventService.existsById(id)){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return ResponseEntity.notFound().build();
+        Event updatedEvent = eventService.fullUpdate(id, eventMapper.toEntity(eventRequest), userDetails.getUsername());
+        return ResponseEntity.ok(eventMapper.toDto(updatedEvent));
     }
 
     // [DELETE] /api/events/{id}
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteEvent(@PathVariable Long id) {
-        if (eventRepository.existsById(id)) {
-            eventRepository.deleteById(id);
+    public ResponseEntity<Void> deleteEvent(@PathVariable Long id,
+                                            @AuthenticationPrincipal UserDetails userDetails) {
+        if (eventService.existsById(id)) {
+            eventService.deleteById(id, userDetails.getUsername());
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
     }
 
     // Dodanie uczestnika (userId) do wydarzenia (eventId)
-    // [POST] /api/events/{eventId}/participants/{userId}
-    @PostMapping("/{eventId}/participants/{userId}")
-    public ResponseEntity<Event> addParticipantToEvent(@PathVariable Long eventId,
-                                                       @PathVariable Long userId) {
-        Optional<Event> eventOpt = eventRepository.findById(eventId);
-        Optional<User> userOpt = userRepository.findById(userId);
+    // [PUT] /api/events/{eventId}/participants/{userId}?role={eventRole}
+    @PutMapping("/{eventId}/participants/{userId}")
+    public ResponseEntity<EventParticipantDto> setEventParticipantRole(@PathVariable Long eventId,
+                                                                       @PathVariable Long userId,
+                                                                       @Valid @RequestBody(required = false) EventRoleRequest role,
+                                                                       @AuthenticationPrincipal UserDetails userDetails) {
 
-        if (eventOpt.isEmpty() || userOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
 
-        Event event = eventOpt.get();
-        User user = userOpt.get();
+        EventRole eventRole;
+        if (role==null) eventRole = EventRole.PASSIVE;
+        else eventRole = role.toEventRoleEnum();
 
-        event.addParticipant(user);
-        eventRepository.save(event);
-
-        return ResponseEntity.ok(event);
+        EventParticipant eventParticipant = eventService.updateEventParticipantRole(eventId, userId, eventRole, userDetails.getUsername());
+        return ResponseEntity.ok(eventParticipantMapper.toDto(eventParticipant));
     }
+    // Informacje o uczestniku (userId) z wydarzenia (eventId)
+    // [GET] /api/events/{eventId}/participants/{userId}
+    @GetMapping("/{eventId}/participants/{userId}")
+    public ResponseEntity<EventParticipantDto> getParticipant(@PathVariable Long eventId,
+                                                              @PathVariable Long userId,
+                                                              @AuthenticationPrincipal UserDetails userDetails
+    ){
+        Optional<EventParticipant> eventParticipantOpt =  eventService.getEventParticipant(eventId, userId,userDetails.getUsername());
+        if (eventParticipantOpt.isEmpty()) return ResponseEntity.notFound().build();
+
+        return ResponseEntity.ok(eventParticipantMapper.toDto(eventParticipantOpt.get()));
+    }
+
+    // Informacje o uczestnikach (userId) z wydarzenia (eventId)
+    // [GET] /api/events/{eventId}/participants/
+    @GetMapping("/{eventId}/participants")
+    public ResponseEntity<Page<EventParticipantDto>> getParticipants(Pageable pageable,
+                                                                    @PathVariable Long eventId,
+                                                                    @AuthenticationPrincipal UserDetails userDetails
+    ){
+        return ResponseEntity.ok(eventService.findAllEventParticipants(pageable, eventId, userDetails.getUsername()).map(eventParticipantMapper::toDto));
+    }
+
+    // Usuwanie uczestnika (userId) z wydarzenia (eventId)
+    // [DELETE] /api/events/{eventId}/participants/{userId}
+    @DeleteMapping("/{eventId}/participants/{userId}")
+    public ResponseEntity<Void> removeParticipantFromEvent(@PathVariable Long eventId,
+                                                           @PathVariable Long userId,
+                                                           @AuthenticationPrincipal UserDetails userDetails
+                                                         ){
+        eventService.removeEventParticipant(eventId,userId, userDetails.getUsername());
+        return null;
+    }
+
+    // Wyświetlanie eventów dla danego użytkownika
+    @GetMapping("/events-of-user/{userId}")
+    public ResponseEntity<Page<EventDto>> getEventsOfUser(Pageable pageable,
+                                                                     @PathVariable Long userId,
+                                                                     @AuthenticationPrincipal UserDetails userDetails
+    ){
+        return ResponseEntity.ok(eventService.findAllEventsOfUser(pageable, userId, userDetails.getUsername()).map(eventMapper::toDto));
+    }
+
 }
