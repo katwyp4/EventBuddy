@@ -25,4 +25,5 @@ public class EventRequest {
     private Double longitude;
     @Pattern(regexp = "(PRIVATE|PUBLIC_OPEN|PUBLIC_CLOSED)")
     private String eventPrivacy;
+    private String imageUrl;
 }

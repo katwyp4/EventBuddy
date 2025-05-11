@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">My Application</string>
+
     <string name="login_button">Zaloguj się</string>
     <string name="register_button">Zarejestruj się</string>
 </resources>

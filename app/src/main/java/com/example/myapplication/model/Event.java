@@ -1,20 +1,22 @@
 package com.example.myapplication.model;
 
 public class Event {
-    private String date;
+    private Long id;
     private String title;
     private String description;
-    private int imageResId;
-    private boolean isPrivate;
+    private String date;
+    private String location;
+    private Double latitude;
+    private Double longitude;
 
-    public Event(String date, String title, String description, int imageResId) {
-        this.date = date;
-        this.title = title;
-        this.description = description;
-        this.imageResId = imageResId;
-    }
-    public String getDate() {
-        return  date;
+    private String deactivationDate;
+    private String shareLink;
+    private String eventPrivacy; // lub enum jeśli chcesz
+
+    private String imageUrl;
+
+    public Long getId() {
+        return id;
     }
 
     public String getTitle() {
@@ -25,7 +27,49 @@ public class Event {
         return description;
     }
 
-    public int getImageResId() {
-        return imageResId;
+    public String getDate() {
+        return date;
     }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public String getShareLink() {
+        return shareLink;
+    }
+
+    public String getEventPrivacy() {
+        return eventPrivacy;
+    }
+    public String getDeactivationDate() {
+        return deactivationDate;
+    }
+
+    public void setDeactivationDate(String deactivationDate) {
+        this.deactivationDate = deactivationDate;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setId(Long id) { this.id = id; }
+    public void setTitle(String title) { this.title = title; }
+    public void setDescription(String description) { this.description = description; }
+    public void setDate(String date) { this.date = date; }
+    public void setLocation(String location) { this.location = location; }
+    public void setLatitude(Double latitude) { this.latitude = latitude; }
+    public void setLongitude(Double longitude) { this.longitude = longitude; }
+    public void setShareLink(String shareLink) { this.shareLink = shareLink; }
+    public void setEventPrivacy(String eventPrivacy) { this.eventPrivacy = eventPrivacy; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 }

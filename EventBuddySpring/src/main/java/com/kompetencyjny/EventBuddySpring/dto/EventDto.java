@@ -23,4 +23,6 @@ public class EventDto {
     private Double latitude;
     private String shareLink;
     private String eventPrivacy;
+    private String imageUrl;
+
 }

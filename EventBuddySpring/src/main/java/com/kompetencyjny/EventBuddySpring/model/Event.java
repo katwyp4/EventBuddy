@@ -29,6 +29,8 @@ public class Event {
     private EventPrivacy eventPrivacy;
     @JsonIgnore private Boolean active=true;
     @JsonIgnore private LocalDate deactivationDate=null;
+    private String imageUrl;
+
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore

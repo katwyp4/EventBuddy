@@ -1,12 +1,21 @@
 package com.example.myapplication.network;
 
+import com.example.myapplication.model.Event;
 import com.example.myapplication.model.LoginResponse;
+import com.example.myapplication.model.PaginatedResponse;
 import com.example.myapplication.model.RegisterResponse;
 
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.GET;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
+import retrofit2.http.Part;
+import retrofit2.http.Query;
 
 public interface ApiService {
 
@@ -25,4 +34,20 @@ public interface ApiService {
             @Field("email")    String email,
             @Field("password") String password
     );
+
+    @GET("api/events")
+    Call<PaginatedResponse<Event>> getEvents(@Query("page") int page, @Query("size") int size);
+
+    @POST("api/events")
+    Call<Event> createEvent(@Body Event event);
+
+    @Multipart
+    @POST("/api/events/with-image")
+    Call<Event> createEventWithImage(
+            @Part MultipartBody.Part image,
+            @Part("event") RequestBody eventJson
+    );
+
+
+
 }

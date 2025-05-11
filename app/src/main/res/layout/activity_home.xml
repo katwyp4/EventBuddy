@@ -13,6 +13,24 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"/>
 
+    <TextView
+        android:id="@+id/addEventButton"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:text="+"
+        android:textSize="32sp"
+        android:gravity="center"
+        android:textColor="@android:color/white"
+        android:backgroundTint="@color/button_purple"
+        android:background="@drawable/rounded_circle"
+        android:elevation="6dp"
+        android:layout_margin="16dp"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+
 
 
     <androidx.recyclerview.widget.RecyclerView
@@ -26,5 +44,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 
