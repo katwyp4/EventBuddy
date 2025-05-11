@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -40,6 +42,9 @@ public class HomeActivity extends AppCompatActivity {
 
     private ApiService apiService;
 
+    private ActivityResultLauncher<Intent> addEventLauncher;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +59,7 @@ public class HomeActivity extends AppCompatActivity {
         TextView addButton = findViewById(R.id.addEventButton);
         addButton.setOnClickListener(v -> {
             Intent intent = new Intent(HomeActivity.this, AddEventActivity.class);
-            startActivity(intent);
+            addEventLauncher.launch(intent);
         });
 
 
@@ -67,16 +72,20 @@ public class HomeActivity extends AppCompatActivity {
         eventList = new ArrayList<>();
         adapter = new EventAdapter(eventList);
         recyclerView.setAdapter(adapter);
+        addEventLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK) {
+                        loadEvents(0, 10); // refresh list
+                    }
+                }
+        );
 
-// Pobieranie danych z backendu
-        loadEvents(0, 10); // np. pierwsza strona, 10 elementów
-
-        adapter = new EventAdapter(eventList);
-
-
-
-        recyclerView.setAdapter(adapter);
+        loadEvents(0, 10);
     }
+
+
+
 
     private void showPopupMenu(View anchor) {
         PopupMenu popup = new PopupMenu(this, anchor);

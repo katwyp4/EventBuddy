@@ -8,6 +8,8 @@ public class Event {
     private String location;
     private Double latitude;
     private Double longitude;
+
+    private String deactivationDate;
     private String shareLink;
     private String eventPrivacy; // lub enum jeśli chcesz
 
@@ -47,6 +49,13 @@ public class Event {
 
     public String getEventPrivacy() {
         return eventPrivacy;
+    }
+    public String getDeactivationDate() {
+        return deactivationDate;
+    }
+
+    public void setDeactivationDate(String deactivationDate) {
+        this.deactivationDate = deactivationDate;
     }
 
     public String getImageUrl() {

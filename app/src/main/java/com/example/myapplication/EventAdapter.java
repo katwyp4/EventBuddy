@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,8 +57,10 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         holder.eventTitle.setText(event.getTitle());
         holder.eventDescription.setText(event.getDescription());
         Glide.with(holder.itemView.getContext())
-                .load(event.getImageUrl())
+                .load("http://10.0.2.2:8080" + event.getImageUrl())
                 .into(holder.eventImage);
+
+
 
         holder.readMoreBtn.setOnClickListener(v -> {
             Intent intent = new Intent(holder.itemView.getContext(), EventDetailActivity.class);
@@ -65,7 +68,9 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             intent.putExtra("date", event.getDate());
             intent.putExtra("description", event.getDescription());
             intent.putExtra("imageUrl", event.getImageUrl());
+            intent.putExtra("location", event.getLocation());
             holder.itemView.getContext().startActivity(intent);
+
         });
 
     }

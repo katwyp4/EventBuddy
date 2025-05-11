@@ -18,7 +18,7 @@ public class JwtUtil {
 
     private static final long EXPIRATION_TIME = 1000 * 60 * 60; // 1 godzina
 
-    private static final byte[] SECRET_KEY = "eventbuddy-super-secret-key-9876543210".getBytes(StandardCharsets.UTF_8);
+    private static final byte[] SECRET_KEY = "eventbuddyy-super-secret-key-9876543210".getBytes(StandardCharsets.UTF_8);
 
 
 

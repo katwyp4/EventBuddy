@@ -1,0 +1,11 @@
+[
+  {
+    "id": 1715341234567,
+    "title": "Przykład",
+    "description": "Opis wydarzenia",
+    "date": "2025-05-12",
+    "location": "Łódź",
+    "eventPrivacy": "PUBLIC",
+    "imageUrl": "/uploads/juwenalia.png"
+  }
+]

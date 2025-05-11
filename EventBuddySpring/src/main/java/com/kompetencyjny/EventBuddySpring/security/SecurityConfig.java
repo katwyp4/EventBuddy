@@ -28,7 +28,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/register", "/auth/login").permitAll()
+                        .requestMatchers("/auth/register", "/auth/login", "/uploads/**").permitAll() // <-- to dodaj
                         .anyRequest().authenticated()
                 )
                 .csrf(csrf -> csrf.disable())
@@ -37,6 +37,7 @@ public class SecurityConfig {
 
         return http.build();
     }
+
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {

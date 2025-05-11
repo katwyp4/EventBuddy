@@ -6,14 +6,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
+    <!-- Pasek nawigacji -->
+    <include
+        layout="@layout/custom_navbar"
+        android:id="@+id/detailToolbar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="#1E1E1E"
-        app:title="@string/app_name"
-        app:titleTextColor="@android:color/white"
-        android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar" />
+        android:layout_height="wrap_content" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -29,12 +27,13 @@
 
             <TextView
                 android:id="@+id/eventDetailDate"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/event_date"
                 android:textColor="#00BFFF"
                 android:textStyle="bold"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:textAlignment="center" />
 
             <ImageView
                 android:id="@+id/eventDetailImage"
@@ -46,13 +45,24 @@
 
             <TextView
                 android:id="@+id/eventDetailTitle"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/event_title"
                 android:textColor="#FFFFFF"
                 android:textStyle="bold"
                 android:textSize="20sp"
-                android:layout_marginTop="12dp" />
+                android:layout_marginTop="12dp"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/eventDetailLocation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Lokalizacja"
+                android:textColor="#FFFFFF"
+                android:textAlignment="center"
+                android:textStyle="italic"
+                android:layout_marginTop="8dp"/>
 
             <TextView
                 android:id="@+id/eventDetailDescription"
@@ -61,18 +71,20 @@
                 android:text="@string/event_description"
                 android:textColor="#E0E0E0"
                 android:layout_marginTop="8dp"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:textAlignment="center" />
 
             <Button
                 android:id="@+id/btnJoin"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/join_button"
+                android:layout_gravity="center_horizontal"
                 android:layout_marginTop="16dp"
                 android:backgroundTint="#3F51B5"
                 android:textColor="#FFFFFF" />
 
-            <!-- Icons -->
+            <!-- Ikony -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -148,7 +160,6 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Participants -->
             <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

@@ -10,6 +10,8 @@ import com.kompetencyjny.EventBuddySpring.model.Event;
 import com.kompetencyjny.EventBuddySpring.model.EventParticipant;
 import com.kompetencyjny.EventBuddySpring.model.EventRole;
 import com.kompetencyjny.EventBuddySpring.service.EventService;
+import com.kompetencyjny.EventBuddySpring.service.FileStorageService;
+import com.kompetencyjny.EventBuddySpring.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,7 +21,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -30,6 +36,7 @@ public class EventController {
     private final EventService eventService;
     private final EventMapper eventMapper;
     private final EventParticipantMapper eventParticipantMapper;
+    private  final FileStorageService fileStorageService;
 
 
     // [GET] /api/events?size={}?page={}
@@ -57,6 +64,8 @@ public class EventController {
         Event event = eventMapper.toEntity(eventRequest);
         event = eventService.create(event, userDetails.getUsername());
         return new ResponseEntity<>(eventMapper.toDto(event), HttpStatus.CREATED);
+
+
     }
 
     // [PUT] /api/events/{id}
@@ -140,5 +149,25 @@ public class EventController {
     ){
         return ResponseEntity.ok(eventService.findAllEventsOfUser(pageable, userId, userDetails.getUsername()).map(eventMapper::toDto));
     }
+
+    @PostMapping("/with-image")
+    public ResponseEntity<EventDto> createEventWithImage(
+            @RequestPart("event") EventRequest eventRequest,
+            @RequestPart("image") MultipartFile image,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        try {
+            String imagePath = fileStorageService.saveImage(image); // tu zapisuje się zdjęcie do katalogu
+            eventRequest.setImageUrl(imagePath);                    // tylko ścieżka trafia do bazy
+
+            Event event = eventMapper.toEntity(eventRequest);
+            event = eventService.create(event, userDetails.getUsername());
+
+            return new ResponseEntity<>(eventMapper.toDto(event), HttpStatus.CREATED);
+        } catch (IOException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
 }

@@ -34,24 +34,63 @@
             android:textColor="#FFFFFF"
             android:hint="np. Juwenalia Łódzkie"/>
 
-
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Data"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="12dp" />
         <EditText
             android:id="@+id/editDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Data"
             android:textColor="#FFFFFF"
+            android:hint="Wprowadź datę"
             android:background="@drawable/edittext_background"
             android:layout_marginTop="12dp"
             android:inputType="date"/>
-
-        <Button
-            android:id="@+id/btnAddImage"
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Dodaj zdjęcie"
-            android:layout_marginTop="12dp"/>
+            android:text="Lokalizacja"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="12dp" />
 
+        <EditText
+            android:id="@+id/editLocation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="np. Łódź, Piotrkowska 123"
+            android:background="@drawable/edittext_background"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="12dp"/>
+
+
+
+        <Button
+            android:id="@+id/selectImageButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Wybierz zdjęcie z galerii"
+            android:layout_marginTop="12dp" />
+
+        <ImageView
+            android:id="@+id/imagePreview"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:scaleType="centerCrop"
+            android:contentDescription="Podgląd zdjęcia"
+            android:visibility="visible" />
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Opis wydarzenia"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="8dp" />
         <EditText
             android:id="@+id/editDescription"
             android:layout_width="match_parent"
