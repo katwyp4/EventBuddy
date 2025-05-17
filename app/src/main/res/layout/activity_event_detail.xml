@@ -74,6 +74,78 @@
                 android:textSize="14sp"
                 android:textAlignment="center" />
 
+            <!-- Kontener i RadioGroup do głosowania na datę -->
+            <LinearLayout
+                android:id="@+id/dateVotingOptionsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:layout_marginTop="12dp"
+                android:padding="8dp"
+                android:background="@drawable/edittext_background">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Propozycje do głosowania na datę"
+                    android:textColor="#00BFFF"
+                    android:textStyle="bold" />
+
+                <RadioGroup
+                    android:id="@+id/dateVotingRadioGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="8dp" />
+
+                <Button
+                    android:id="@+id/btnVoteDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Głosuj na datę"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="8dp"
+                    android:backgroundTint="#3F51B5"
+                    android:textColor="#FFFFFF" />
+            </LinearLayout>
+
+            <!-- Kontener i RadioGroup do głosowania na lokalizację -->
+            <LinearLayout
+                android:id="@+id/locationVotingOptionsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:layout_marginTop="12dp"
+                android:padding="8dp"
+                android:background="@drawable/edittext_background">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Propozycje do głosowania na lokalizację"
+                    android:textColor="#00BFFF"
+                    android:textStyle="bold" />
+
+                <RadioGroup
+                    android:id="@+id/locationVotingRadioGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="8dp" />
+
+                <Button
+                    android:id="@+id/btnVoteLocation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Głosuj na lokalizację"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="8dp"
+                    android:backgroundTint="#3F51B5"
+                    android:textColor="#FFFFFF" />
+            </LinearLayout>
+
             <Button
                 android:id="@+id/btnJoin"
                 android:layout_width="wrap_content"

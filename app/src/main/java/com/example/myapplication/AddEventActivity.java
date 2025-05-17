@@ -1,24 +1,29 @@
 package com.example.myapplication;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
-import android.provider.OpenableColumns;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.Toast;
+import android.view.View;
+import android.widget.*;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.myapplication.model.Event;
+import com.example.myapplication.model.Poll;
+import com.example.myapplication.model.PollOption;
 import com.example.myapplication.network.ApiService;
 import com.example.myapplication.network.RetrofitClient;
 import com.example.myapplication.util.FileUtils;
 import com.google.gson.Gson;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -26,10 +31,6 @@ import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import android.Manifest;
-import android.content.pm.PackageManager;
-import android.os.Build;
-
 
 public class AddEventActivity extends AppCompatActivity {
 
@@ -39,7 +40,17 @@ public class AddEventActivity extends AppCompatActivity {
     private ImageView imagePreview;
     private Button btnSave, btnSelectImage;
 
+    private CheckBox checkboxDateVoting, checkboxLocationVoting;
 
+    private LinearLayout datePollOptionsContainer, locationPollOptionsContainer;
+    private LinearLayout datePollDynamicOptions, locationPollDynamicOptions;
+
+    private EditText editNewDatePollOption, editNewLocationPollOption;
+    private Button btnAddDatePollOption, btnAddLocationPollOption;
+
+    private List<PollOption> datePollOptionsList = new ArrayList<>();
+    private List<PollOption> locationPollOptionsList = new ArrayList<>();
+    private List<Poll> pollsList = new ArrayList<>();
 
     private Uri selectedImageUri;
     private ApiService apiService;
@@ -60,15 +71,82 @@ public class AddEventActivity extends AppCompatActivity {
         editDate = findViewById(R.id.editDate);
         editLocation = findViewById(R.id.editLocation);
 
-        imagePreview = findViewById(R.id.imagePreview); // dodaj w layout
+        imagePreview = findViewById(R.id.imagePreview);
         btnSave = findViewById(R.id.btnSave);
-        btnSelectImage = findViewById(R.id.selectImageButton); // dodaj w layout
+        btnSelectImage = findViewById(R.id.selectImageButton);
 
-        apiService = RetrofitClient.getInstance(getApplicationContext()).create(ApiService.class);
+        checkboxDateVoting = findViewById(R.id.checkboxDateVoting);
+        checkboxLocationVoting = findViewById(R.id.checkboxLocationVoting);
+
+        datePollOptionsContainer = findViewById(R.id.datePollOptionsContainer);
+        locationPollOptionsContainer = findViewById(R.id.locationPollOptionsContainer);
+
+        datePollDynamicOptions = findViewById(R.id.datePollDynamicOptions);
+        locationPollDynamicOptions = findViewById(R.id.locationPollDynamicOptions);
+
+        editNewDatePollOption = findViewById(R.id.editNewDatePollOption);
+        btnAddDatePollOption = findViewById(R.id.btnAddDatePollOption);
+
+        editNewLocationPollOption = findViewById(R.id.editNewLocationPollOption);
+        btnAddLocationPollOption = findViewById(R.id.btnAddLocationPollOption);
+
+        checkboxDateVoting.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                editDate.setVisibility(View.GONE);
+                datePollOptionsContainer.setVisibility(View.VISIBLE);
+                datePollOptionsList.clear();
+                datePollDynamicOptions.removeAllViews();
+            } else {
+                editDate.setVisibility(View.VISIBLE);
+                datePollOptionsContainer.setVisibility(View.GONE);
+            }
+        });
+
+        checkboxLocationVoting.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                editLocation.setVisibility(View.GONE);
+                locationPollOptionsContainer.setVisibility(View.VISIBLE);
+                locationPollOptionsList.clear();
+                locationPollDynamicOptions.removeAllViews();
+            } else {
+                editLocation.setVisibility(View.VISIBLE);
+                locationPollOptionsContainer.setVisibility(View.GONE);
+            }
+        });
+
+        btnAddDatePollOption.setOnClickListener(v -> {
+            String option = editNewDatePollOption.getText().toString().trim();
+            if (!option.isEmpty()) {
+                PollOption pollOption = new PollOption(option);
+                datePollOptionsList.add(pollOption);
+                addPollOptionView(datePollDynamicOptions, option);
+                editNewDatePollOption.setText("");
+            }
+        });
+
+        btnAddLocationPollOption.setOnClickListener(v -> {
+            String option = editNewLocationPollOption.getText().toString().trim();
+            if (!option.isEmpty()) {
+                PollOption pollOption = new PollOption(option);
+                locationPollOptionsList.add(pollOption);
+                addPollOptionView(locationPollDynamicOptions, option);
+                editNewLocationPollOption.setText("");
+            }
+        });
 
         btnSelectImage.setOnClickListener(v -> openImageChooser());
 
         btnSave.setOnClickListener(v -> createEvent());
+
+        apiService = RetrofitClient.getInstance(getApplicationContext()).create(ApiService.class);
+    }
+
+    private void addPollOptionView(LinearLayout container, String option) {
+        TextView optionView = new TextView(this);
+        optionView.setText(option);
+        optionView.setTextColor(Color.WHITE);
+        optionView.setPadding(8, 8, 8, 8);
+        container.addView(optionView);
     }
 
     private void openImageChooser() {
@@ -90,22 +168,43 @@ public class AddEventActivity extends AppCompatActivity {
     private void createEvent() {
         String title = editTitle.getText().toString().trim();
         String description = editDescription.getText().toString().trim();
-        String date = editDate.getText().toString().trim();
-        String location = editLocation.getText().toString().trim();
+        String date = null;
+        String location = null;
 
-        if (location.isEmpty() ) {
-            Toast.makeText(this, "Wypełnij lokalizację i datę wygaśnięcia", Toast.LENGTH_SHORT).show();
-            return;
+        boolean dateVoting = checkboxDateVoting.isChecked();
+        boolean locationVoting = checkboxLocationVoting.isChecked();
+
+        if (!dateVoting) {
+            date = editDate.getText().toString().trim();
+            if (date.isEmpty()) {
+                Toast.makeText(this, "Wprowadź datę wydarzenia", Toast.LENGTH_SHORT).show();
+                return;
+            }
         }
 
+        if (!locationVoting) {
+            location = editLocation.getText().toString().trim();
+            if (location.isEmpty()) {
+                Toast.makeText(this, "Wprowadź lokalizację wydarzenia", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
 
-        if (title.isEmpty() || description.isEmpty() || date.isEmpty() || selectedImageUri == null) {
+        if (title.isEmpty() || description.isEmpty() || selectedImageUri == null) {
             Toast.makeText(this, "Wypełnij wszystkie pola i wybierz zdjęcie", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        if (dateVoting && datePollOptionsList.isEmpty()) {
+            Toast.makeText(this, "Dodaj propozycje do głosowania nad datą", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (locationVoting && locationPollOptionsList.isEmpty()) {
+            Toast.makeText(this, "Dodaj propozycje do głosowania nad lokalizacją", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         try {
-            // przygotuj dane wydarzenia
             Event event = new Event();
             event.setTitle(title);
             event.setDescription(description);
@@ -113,12 +212,29 @@ public class AddEventActivity extends AppCompatActivity {
             event.setLocation(location);
             event.setEventPrivacy("PUBLIC_CLOSED");
 
-            // JSON do @Part("event")
+            pollsList.clear();
+
+            if (dateVoting) {
+                Poll datePoll = new Poll();
+                datePoll.setQuestion("Głosowanie na datę wydarzenia");
+                datePoll.setPollOptions(datePollOptionsList);
+                pollsList.add(datePoll);
+            }
+            if (locationVoting) {
+                Poll locationPoll = new Poll();
+                locationPoll.setQuestion("Głosowanie na lokalizację wydarzenia");
+                locationPoll.setPollOptions(locationPollOptionsList);
+                pollsList.add(locationPoll);
+            }
+
+            if (!pollsList.isEmpty()) {
+                event.setPolls(pollsList);
+            }
+
             Gson gson = new Gson();
             String eventJson = gson.toJson(event);
             RequestBody eventPart = RequestBody.create(eventJson, MediaType.parse("application/json"));
 
-            // Obrazek do @Part MultipartBody
             File imageFile = new File(FileUtils.getPath(this, selectedImageUri));
             RequestBody imageBody = RequestBody.create(imageFile, MediaType.parse("image/*"));
             MultipartBody.Part imagePart = MultipartBody.Part.createFormData("image", imageFile.getName(), imageBody);
@@ -130,7 +246,6 @@ public class AddEventActivity extends AppCompatActivity {
                         Toast.makeText(AddEventActivity.this, "Dodano wydarzenie!", Toast.LENGTH_SHORT).show();
                         setResult(RESULT_OK);
                         finish();
-
                     } else {
                         Toast.makeText(AddEventActivity.this, "Błąd dodawania wydarzenia", Toast.LENGTH_SHORT).show();
                     }

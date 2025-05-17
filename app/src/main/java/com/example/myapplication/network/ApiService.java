@@ -3,7 +3,10 @@ package com.example.myapplication.network;
 import com.example.myapplication.model.Event;
 import com.example.myapplication.model.LoginResponse;
 import com.example.myapplication.model.PaginatedResponse;
+import com.example.myapplication.model.PollOption;
 import com.example.myapplication.model.RegisterResponse;
+
+import java.util.List;
 
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -15,6 +18,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface ApiService {
@@ -47,6 +51,16 @@ public interface ApiService {
             @Part MultipartBody.Part image,
             @Part("event") RequestBody eventJson
     );
+
+    @GET("api/events/{eventId}/datePollOptions")
+    Call<List<PollOption>> getDatePollOptions(@Path("eventId") Long eventId);
+
+    @GET("api/events/{eventId}/locationPollOptions")
+    Call<List<PollOption>> getLocationPollOptions(@Path("eventId") Long eventId);
+
+    @POST("api/pollOptions/{pollOptionId}/vote")
+    Call<Void> vote(@Path("pollOptionId") Long pollOptionId);
+
 
 
 

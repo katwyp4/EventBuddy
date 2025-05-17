@@ -21,3 +21,5 @@ Thumbs.db
 
 app/local.properties
 EventBuddySpring/src/main/resources/application-local.properties
+
+EventBuddySpring/uploads/*
