@@ -1,5 +1,8 @@
 package com.example.myapplication.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Event {
     private Long id;
     private String title;
@@ -11,9 +14,12 @@ public class Event {
 
     private String deactivationDate;
     private String shareLink;
-    private String eventPrivacy; // lub enum jeśli chcesz
+
+    private String eventPrivacy;
 
     private String imageUrl;
+
+    private List<Poll> polls;
 
     public Long getId() {
         return id;
@@ -72,4 +78,35 @@ public class Event {
     public void setShareLink(String shareLink) { this.shareLink = shareLink; }
     public void setEventPrivacy(String eventPrivacy) { this.eventPrivacy = eventPrivacy; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    public List<Poll> getPolls() {
+        return polls;
+    }
+
+    public void setPolls(List<Poll> polls) {
+        this.polls = polls;
+    }
+
+    public List<Poll> getDatePollOptions() {
+        if (polls == null) return new ArrayList<>();
+        List<Poll> datePolls = new ArrayList<>();
+        for (Poll poll : polls) {
+            if ("DATE".equalsIgnoreCase(poll.getQuestion())) { // lub inny warunek identyfikujący
+                datePolls.add(poll);
+            }
+        }
+        return datePolls;
+    }
+
+    public List<Poll> getLocationPollOptions() {
+        if (polls == null) return new ArrayList<>();
+        List<Poll> locationPolls = new ArrayList<>();
+        for (Poll poll : polls) {
+            if ("LOCATION".equalsIgnoreCase(poll.getQuestion())) { // lub inny warunek identyfikujący
+                locationPolls.add(poll);
+            }
+        }
+        return locationPolls;
+    }
+
 }
