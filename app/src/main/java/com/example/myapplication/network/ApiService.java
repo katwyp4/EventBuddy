@@ -6,6 +6,12 @@ import com.example.myapplication.model.PaginatedResponse;
 import com.example.myapplication.model.PollOption;
 import com.example.myapplication.model.RegisterResponse;
 
+
+import com.example.myapplication.data.CreateMessageDto;
+import com.example.myapplication.data.MessageDto;
+
+
+
 import java.util.List;
 
 import okhttp3.MultipartBody;
@@ -20,6 +26,10 @@ import retrofit2.http.POST;
 import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
+
+
+
+
 
 public interface ApiService {
 
@@ -63,5 +73,17 @@ public interface ApiService {
 
 
 
+
+
+
+    @GET("/api/messages")
+    Call<List<MessageDto>> getMessages(@Query("eventId") long eventId);
+
+    @GET("/api/messages/latest")
+    Call<List<MessageDto>> getLatest(@Query("eventId") long eventId,
+                                     @Query("after")  String afterIso);
+
+    @POST("/api/messages")
+    Call<MessageDto> sendMessage(@Body CreateMessageDto body);
 
 }
