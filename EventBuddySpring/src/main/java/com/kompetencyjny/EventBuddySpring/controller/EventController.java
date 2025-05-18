@@ -1,14 +1,11 @@
 package com.kompetencyjny.EventBuddySpring.controller;
 
-import com.kompetencyjny.EventBuddySpring.dto.EventDto;
-import com.kompetencyjny.EventBuddySpring.dto.EventParticipantDto;
-import com.kompetencyjny.EventBuddySpring.dto.EventRequest;
-import com.kompetencyjny.EventBuddySpring.dto.EventRoleRequest;
+import com.kompetencyjny.EventBuddySpring.dto.*;
 import com.kompetencyjny.EventBuddySpring.mappers.EventMapper;
 import com.kompetencyjny.EventBuddySpring.mappers.EventParticipantMapper;
-import com.kompetencyjny.EventBuddySpring.model.Event;
-import com.kompetencyjny.EventBuddySpring.model.EventParticipant;
-import com.kompetencyjny.EventBuddySpring.model.EventRole;
+import com.kompetencyjny.EventBuddySpring.model.*;
+import com.kompetencyjny.EventBuddySpring.repo.EventRepository;
+import com.kompetencyjny.EventBuddySpring.repo.PollOptionRepository;
 import com.kompetencyjny.EventBuddySpring.service.EventService;
 import com.kompetencyjny.EventBuddySpring.service.FileStorageService;
 import com.kompetencyjny.EventBuddySpring.service.UserService;
@@ -37,6 +34,8 @@ public class EventController {
     private final EventMapper eventMapper;
     private final EventParticipantMapper eventParticipantMapper;
     private  final FileStorageService fileStorageService;
+    private final PollOptionRepository pollOptionRepository;
+    private final EventRepository eventRepository;
 
 
     // [GET] /api/events?size={}?page={}
@@ -60,13 +59,35 @@ public class EventController {
     // [POST] /api/events
     @ResponseBody
     @PostMapping
-    public ResponseEntity<EventDto> createEvent(@Valid @RequestBody EventRequest eventRequest, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<EventDto> createEvent(
+            @Valid @RequestBody EventRequest eventRequest,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
         Event event = eventMapper.toEntity(eventRequest);
-        event = eventService.create(event, userDetails.getUsername());
+
+        // [1] Jeśli w EventRequest zaznaczono głosowanie na datę – twórz Poll
+        if (eventRequest.isEnableDateVoting()) {
+            Poll datePoll = new Poll();
+            datePoll.setQuestion("Wybierz datę wydarzenia");
+            event.setDatePoll(datePoll);
+        }
+
+        // [2] Analogicznie dla lokalizacji
+        if (eventRequest.isEnableLocationVoting()) {
+            Poll locationPoll = new Poll();
+            locationPoll.setQuestion("Wybierz lokalizację wydarzenia");
+            event.setLocationPoll(locationPoll);
+        }
+
+        // [3] Możesz przypisać użytkownika jeśli masz takie pole
+        // event.setCreator(userRepository.findByEmail(userDetails.getUsername()).orElseThrow());
+
+        // [4] Zapisz w bazie
+        event = eventRepository.save(event);
+
         return new ResponseEntity<>(eventMapper.toDto(event), HttpStatus.CREATED);
-
-
     }
+
 
     // [PUT] /api/events/{id}
     @PutMapping("/{id}")
@@ -167,6 +188,24 @@ public class EventController {
         } catch (IOException e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("/{eventId}/datePollOptions")
+    public ResponseEntity<List<PollOptionDto>> getDatePollOptions(@PathVariable Long eventId) {
+        List<PollOption> options = pollOptionRepository.findDatePollOptionsByEventId(eventId);
+        List<PollOptionDto> dtos = options.stream()
+                .map(o -> new PollOptionDto(o.getId(), o.getValue(), o.getVoteCount(), o.getPoll().getId()))
+                .toList();
+        return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping("/{eventId}/locationPollOptions")
+    public ResponseEntity<List<PollOptionDto>> getLocationPollOptions(@PathVariable Long eventId) {
+        List<PollOption> options = pollOptionRepository.findLocationPollOptionsByEventId(eventId);
+        List<PollOptionDto> dtos = options.stream()
+                .map(o -> new PollOptionDto(o.getId(), o.getValue(), o.getVoteCount(), o.getPoll().getId()))
+                .toList();
+        return ResponseEntity.ok(dtos);
     }
 
 

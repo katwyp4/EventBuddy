@@ -58,10 +58,8 @@ public interface ApiService {
     @GET("api/events/{eventId}/locationPollOptions")
     Call<List<PollOption>> getLocationPollOptions(@Path("eventId") Long eventId);
 
-    @POST("api/pollOptions/{pollOptionId}/vote")
-    Call<Void> vote(@Path("pollOptionId") Long pollOptionId);
-
-
+    @POST("api/polls/{pollId}/options/{optionId}/vote")
+    Call<Void> vote(@Path("pollId") Long pollId, @Path("optionId") Long optionId);
 
 
 }

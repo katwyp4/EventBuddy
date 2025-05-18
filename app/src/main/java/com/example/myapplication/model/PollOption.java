@@ -7,6 +7,8 @@ public class PollOption implements Serializable {
     private String value;
     private int voteCount;
 
+    private Long pollId;
+
     public PollOption() {}
 
     public PollOption(String value) {
@@ -33,5 +35,13 @@ public class PollOption implements Serializable {
     }
     public void setVoteCount(Integer voteCount) {
         this.voteCount = voteCount;
+    }
+
+    public Long getPollId() {
+        return pollId;
+    }
+
+    public void setPollId(Long pollId) {
+        this.pollId = pollId;
     }
 }

@@ -64,7 +64,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
                 .into(holder.eventImage);
 
         // Pokaz informację, czy jest głosowanie na datę
-        if (event.getDatePollOptions() != null && !event.getDatePollOptions().isEmpty()) {
+        if (event.getDatePoll() != null && event.getDatePoll() != null) {
             holder.dateVotingInfo.setText("Głosowanie na datę: TAK");
             holder.dateVotingInfo.setVisibility(View.VISIBLE);
         } else {
@@ -72,7 +72,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         }
 
         // Pokaz informację, czy jest głosowanie na lokalizację
-        if (event.getLocationPollOptions() != null && !event.getLocationPollOptions().isEmpty()) {
+        if (event.getLocationPoll() != null && event.getLocationPoll() != null) {
             holder.locationVotingInfo.setText("Głosowanie na lokalizację: TAK");
             holder.locationVotingInfo.setVisibility(View.VISIBLE);
         } else {
@@ -81,32 +81,33 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
 
         holder.readMoreBtn.setOnClickListener(v -> {
             Intent intent = new Intent(holder.itemView.getContext(), EventDetailActivity.class);
+            intent.putExtra("eventId", event.getId());
             intent.putExtra("title", event.getTitle());
             intent.putExtra("date", event.getDate());
             intent.putExtra("description", event.getDescription());
             intent.putExtra("imageUrl", event.getImageUrl());
             intent.putExtra("location", event.getLocation());
 
-            if (event.getPolls() != null) {
-                ArrayList<String> datePollQuestions = new ArrayList<>();
-                ArrayList<String> locationPollQuestions = new ArrayList<>();
-
-                for (Poll poll : event.getPolls()) {
-                    if (poll.getQuestion().toLowerCase().contains("data")) {
-                        datePollQuestions.add(poll.getQuestion());
-                    }
-                    if (poll.getQuestion().toLowerCase().contains("lokalizację") || poll.getQuestion().toLowerCase().contains("lokalizacje")) {
-                        locationPollQuestions.add(poll.getQuestion());
-                    }
-                }
-
-                if (!datePollQuestions.isEmpty()) {
-                    intent.putStringArrayListExtra("datePollOptions", datePollQuestions);
-                }
-                if (!locationPollQuestions.isEmpty()) {
-                    intent.putStringArrayListExtra("locationPollOptions", locationPollQuestions);
-                }
-            }
+//            if (event.getPolls() != null) {
+//                ArrayList<String> datePollQuestions = new ArrayList<>();
+//                ArrayList<String> locationPollQuestions = new ArrayList<>();
+//
+//                for (Poll poll : event.getPolls()) {
+//                    if (poll.getQuestion().toLowerCase().contains("data")) {
+//                        datePollQuestions.add(poll.getQuestion());
+//                    }
+//                    if (poll.getQuestion().toLowerCase().contains("lokalizację") || poll.getQuestion().toLowerCase().contains("lokalizacje")) {
+//                        locationPollQuestions.add(poll.getQuestion());
+//                    }
+//                }
+//
+//                if (!datePollQuestions.isEmpty()) {
+//                    intent.putExtra("eventId", event.getId());
+//                }
+//                if (!locationPollQuestions.isEmpty()) {
+//                    intent.putExtra("eventId", event.getId());
+//                }
+//            }
 
 
             holder.itemView.getContext().startActivity(intent);

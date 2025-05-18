@@ -2,6 +2,8 @@ package com.example.myapplication;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
@@ -62,8 +64,11 @@ public class EventDetailActivity extends AppCompatActivity {
         String location = getIntent().getStringExtra("location");
 
         // Pobierz listy PollOption (musisz przekazać je jako Parcelable lub JSON i sparsować)
-        datePollOptions = (ArrayList<PollOption>) getIntent().getSerializableExtra("datePollOptions");
-        locationPollOptions = (ArrayList<PollOption>) getIntent().getSerializableExtra("locationPollOptions");
+        Long eventId = getIntent().getLongExtra("eventId", -1);
+        if (eventId != -1) {
+            fetchUpdatedPollOptions(true);  // pobiera daty
+            fetchUpdatedPollOptions(false); // pobiera lokalizacje
+        }
 
         titleText.setText(title);
         dateText.setText(date);
@@ -86,7 +91,8 @@ public class EventDetailActivity extends AppCompatActivity {
             for (PollOption option : datePollOptions) {
                 RadioButton rb = new RadioButton(this);
                 rb.setText(option.getValue() + " (" + option.getVoteCount() + " głosów)");
-                rb.setTag(option.getId()); // zachowaj ID opcji do wysłania
+                Log.d("TAG", "pollId = " + option.getPollId() + ", optionId = " + option.getId());
+                rb.setTag(new Pair<>(option.getPollId(), option.getId()));
                 rb.setTextColor(Color.WHITE);
                 dateVotingRadioGroup.addView(rb);
             }
@@ -101,7 +107,7 @@ public class EventDetailActivity extends AppCompatActivity {
             for (PollOption option : locationPollOptions) {
                 RadioButton rb = new RadioButton(this);
                 rb.setText(option.getValue() + " (" + option.getVoteCount() + " głosów)");
-                rb.setTag(option.getId());
+                rb.setTag(new Pair<>(option.getPollId(), option.getId()));
                 rb.setTextColor(Color.WHITE);
                 locationVotingRadioGroup.addView(rb);
             }
@@ -118,8 +124,8 @@ public class EventDetailActivity extends AppCompatActivity {
                 return;
             }
             RadioButton selectedRadio = findViewById(selectedId);
-            Long pollOptionId = (Long) selectedRadio.getTag();
-            sendVote(pollOptionId, true);
+            Pair<Long, Long> ids = (Pair<Long, Long>) selectedRadio.getTag();
+            sendVote(ids.first, ids.second, true);
         });
 
         btnVoteLocation.setOnClickListener(v -> {
@@ -129,21 +135,18 @@ public class EventDetailActivity extends AppCompatActivity {
                 return;
             }
             RadioButton selectedRadio = findViewById(selectedId);
-            Long pollOptionId = (Long) selectedRadio.getTag();
-            sendVote(pollOptionId, false);
+            Pair<Long, Long> ids = (Pair<Long, Long>) selectedRadio.getTag();
+            sendVote(ids.first, ids.second, false);
         });
     }
 
-    private void sendVote(Long pollOptionId, boolean isDateVote) {
-        // Tutaj wywołujesz endpoint backendu do oddania głosu
-        // Przykład (musisz dostosować wg API backendu)
-        apiService.vote(pollOptionId).enqueue(new Callback<Void>() {
+    private void sendVote(Long pollId, Long optionId, boolean isDateVote) {
+        apiService.vote(pollId, optionId).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
                     Toast.makeText(EventDetailActivity.this, "Głos oddany!", Toast.LENGTH_SHORT).show();
-                    // Po oddaniu głosu, pobierz zaktualizowane wyniki (opcjonalnie)
-                    fetchUpdatedPollOptions(isDateVote);
+                    fetchUpdatedPollOptions(isDateVote); // lub false, jeśli lokalizacja – zależnie od kontekstu
                 } else {
                     Toast.makeText(EventDetailActivity.this, "Błąd oddawania głosu", Toast.LENGTH_SHORT).show();
                 }
@@ -155,6 +158,8 @@ public class EventDetailActivity extends AppCompatActivity {
             }
         });
     }
+
+
 
     private void fetchUpdatedPollOptions(boolean isDateVote) {
         // Pobierz ID eventu z Intentu lub innego źródła
@@ -177,6 +182,9 @@ public class EventDetailActivity extends AppCompatActivity {
             public void onResponse(Call<List<PollOption>> call, Response<List<PollOption>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<PollOption> updatedOptions = response.body();
+
+                    Log.d("PollOptions", "Odebrano " + updatedOptions.size() + " opcji");
+
 
                     if (isDateVote) {
                         datePollOptions = updatedOptions;

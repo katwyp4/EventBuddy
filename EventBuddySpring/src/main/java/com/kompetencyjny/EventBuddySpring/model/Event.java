@@ -40,6 +40,19 @@ public class Event {
     @JsonIgnore
     private Set<EventParticipant> participants = new HashSet<>();
 
+    @OneToOne(cascade = CascadeType.ALL, optional = true)
+    @JoinColumn(name = "date_poll_id")
+    private Poll datePoll;
+
+    @OneToOne(cascade = CascadeType.ALL, optional = true)
+    @JoinColumn(name = "location_poll_id")
+    private Poll locationPoll;
+
+    private Boolean enableDateVoting;
+
+    private Boolean enableLocationVoting;
+
+
     // Metody pomocnicze do obsługi listy Task
     public void addTask(Task task) {
         tasks.add(task);
@@ -70,5 +83,12 @@ public class Event {
 
     public boolean isParticipant(User user){
         return participants.contains(new EventParticipant(this, user));
+    }
+
+    public boolean getEnableDateVoting() {
+        return enableDateVoting;
+    }
+    public boolean getEnableLocationVoting() {
+        return enableLocationVoting;
     }
 }

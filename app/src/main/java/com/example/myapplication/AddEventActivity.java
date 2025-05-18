@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.*;
 
@@ -171,8 +172,8 @@ public class AddEventActivity extends AppCompatActivity {
         String date = null;
         String location = null;
 
-        boolean dateVoting = checkboxDateVoting.isChecked();
-        boolean locationVoting = checkboxLocationVoting.isChecked();
+        Boolean dateVoting = checkboxDateVoting.isChecked();
+        Boolean locationVoting = checkboxLocationVoting.isChecked();
 
         if (!dateVoting) {
             date = editDate.getText().toString().trim();
@@ -211,28 +212,34 @@ public class AddEventActivity extends AppCompatActivity {
             event.setDate(date);
             event.setLocation(location);
             event.setEventPrivacy("PUBLIC_CLOSED");
+            event.setEnableDateVoting(dateVoting);
+            event.setEnableLocationVoting(locationVoting);
+
+            Log.d("EVENT", "enableDateVoting = " + event.getEnableDateVoting());
+
 
             pollsList.clear();
 
             if (dateVoting) {
                 Poll datePoll = new Poll();
-                datePoll.setQuestion("Głosowanie na datę wydarzenia");
-                datePoll.setPollOptions(datePollOptionsList);
-                pollsList.add(datePoll);
+                datePoll.setQuestion("data");
+                datePoll.setOptions(datePollOptionsList);
+                event.setDatePoll(datePoll);
             }
             if (locationVoting) {
                 Poll locationPoll = new Poll();
-                locationPoll.setQuestion("Głosowanie na lokalizację wydarzenia");
-                locationPoll.setPollOptions(locationPollOptionsList);
-                pollsList.add(locationPoll);
+                locationPoll.setQuestion("lokalizacja");
+                locationPoll.setOptions(locationPollOptionsList);
+                event.setLocationPoll(locationPoll);
             }
 
-            if (!pollsList.isEmpty()) {
-                event.setPolls(pollsList);
-            }
+//            if (!pollsList.isEmpty()) {
+//                event.setPolls(pollsList);
+//            }
 
             Gson gson = new Gson();
             String eventJson = gson.toJson(event);
+            Log.d("EVENT_JSON", eventJson);
             RequestBody eventPart = RequestBody.create(eventJson, MediaType.parse("application/json"));
 
             File imageFile = new File(FileUtils.getPath(this, selectedImageUri));
@@ -244,6 +251,7 @@ public class AddEventActivity extends AppCompatActivity {
                 public void onResponse(Call<Event> call, Response<Event> response) {
                     if (response.isSuccessful()) {
                         Toast.makeText(AddEventActivity.this, "Dodano wydarzenie!", Toast.LENGTH_SHORT).show();
+                        Log.d("RESPONSE_OK", "Event added: " + response.body());
                         setResult(RESULT_OK);
                         finish();
                     } else {
@@ -253,6 +261,7 @@ public class AddEventActivity extends AppCompatActivity {
 
                 @Override
                 public void onFailure(Call<Event> call, Throwable t) {
+                    Log.d("BLAD", t.getMessage());
                     Toast.makeText(AddEventActivity.this, "Błąd: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
