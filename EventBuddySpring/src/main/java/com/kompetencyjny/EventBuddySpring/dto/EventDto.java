@@ -1,6 +1,7 @@
 package com.kompetencyjny.EventBuddySpring.dto;
 
 import com.kompetencyjny.EventBuddySpring.model.EventPrivacy;
+import com.kompetencyjny.EventBuddySpring.model.Poll;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,5 +25,6 @@ public class EventDto {
     private String shareLink;
     private String eventPrivacy;
     private String imageUrl;
-
+    private PollDto datePoll;
+    private PollDto locationPoll;
 }

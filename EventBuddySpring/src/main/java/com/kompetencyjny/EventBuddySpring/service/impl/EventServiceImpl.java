@@ -27,13 +27,40 @@ public class EventServiceImpl implements EventService {
     @Override
     public Event create(Event event, String loggedUserName) {
         event.setId(null);
-        Optional<User> loggedUserOpt = userService.findByEmail(loggedUserName);
-        if (loggedUserOpt.isEmpty())
-            throw new NotFoundException("!!! YOU SHOULD NOT SEE THIS !!! Cannot find logged in user! email: \""+loggedUserName+"\".\nThis method expects to get a email of logged in user.");
 
+        Optional<User> loggedUserOpt = userService.findByEmail(loggedUserName);
+        if (loggedUserOpt.isEmpty()) {
+            throw new NotFoundException("!!! YOU SHOULD NOT SEE THIS !!! Cannot find logged in user! email: \"" + loggedUserName + "\".\nThis method expects to get a email of logged in user.");
+        }
+
+        if (event.getEnableDateVoting() && event.getDatePoll() != null) {
+            Poll datePoll = event.getDatePoll();
+            datePoll.setQuestion("Wybierz date wydarzenia");
+            datePoll.setEvent(event);
+            if (datePoll.getOptions() != null) {
+                datePoll.getOptions().forEach(opt -> opt.setPoll(datePoll));
+            }
+            else{
+                datePoll.setQuestion("zle");
+            }
+        }
+
+        if (event.getEnableLocationVoting() && event.getLocationPoll() != null) {
+            Poll locationPoll = event.getLocationPoll();
+            locationPoll.setQuestion("Wybierz lokalizacje wydarzenia");
+            locationPoll.setEvent(event);
+            if (locationPoll.getOptions() != null) {
+                locationPoll.getOptions().forEach(opt -> opt.setPoll(locationPoll));
+            }
+        }
+
+        // 👥 Dodanie autora jako ADMIN
         event.addParticipant(loggedUserOpt.get(), EventRole.ADMIN);
+
+        // 💾 Zapisz
         return this.eventRepository.save(event);
     }
+
 
 
 

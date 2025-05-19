@@ -31,7 +31,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/register", "/auth/login", "/uploads/**", "/api/messages",
                                 "/api/polls","api/polls/{pollId}/options","api/polls/{pollId}",
                                 "api/polls/{pollId}/options/{optionId}/vote","api/polls/{pollId}/results").permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))

@@ -76,12 +76,12 @@ public class HomeActivity extends AppCompatActivity {
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == RESULT_OK) {
-                        loadEvents(0, 10); // refresh list
+                        loadEvents(0, 20); // refresh list
                     }
                 }
         );
 
-        loadEvents(0, 10);
+        loadEvents(0, 20);
     }
 
 
