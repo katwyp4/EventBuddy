@@ -41,6 +41,11 @@ public class AddEventActivity extends AppCompatActivity {
     private ImageView imagePreview;
     private Button btnSave, btnSelectImage;
 
+
+
+
+    private EditText editBudgetDeadline;
+
     private CheckBox checkboxDateVoting, checkboxLocationVoting;
 
     private LinearLayout datePollOptionsContainer, locationPollOptionsContainer;
@@ -90,6 +95,11 @@ public class AddEventActivity extends AppCompatActivity {
 
         editNewLocationPollOption = findViewById(R.id.editNewLocationPollOption);
         btnAddLocationPollOption = findViewById(R.id.btnAddLocationPollOption);
+
+        editBudgetDeadline = findViewById(R.id.editBudgetDeadline);
+
+
+
 
         checkboxDateVoting.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
@@ -214,6 +224,12 @@ public class AddEventActivity extends AppCompatActivity {
             event.setEventPrivacy("PUBLIC_CLOSED");
             event.setEnableDateVoting(dateVoting);
             event.setEnableLocationVoting(locationVoting);
+
+            // 1. odczytaj termin z pola
+            String budgetDeadline = editBudgetDeadline.getText().toString().trim();
+            // 2. ustaw w obiekcie Event
+            event.setBudgetDeadline(budgetDeadline);
+
 
             Log.d("EVENT", "enableDateVoting = " + event.getEnableDateVoting());
 

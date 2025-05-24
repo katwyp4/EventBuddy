@@ -1,17 +1,28 @@
 package com.example.myapplication;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.widget.*;
+
+
+
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
+
 import com.bumptech.glide.Glide;
-import com.example.myapplication.model.Event;
+
 import com.example.myapplication.model.PollOption;
 import com.example.myapplication.network.ApiService;
 import com.example.myapplication.network.RetrofitClient;
+
+import com.example.myapplication.budget.BudgetActivity;
+
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,10 +45,19 @@ public class EventDetailActivity extends AppCompatActivity {
     List<PollOption> datePollOptions = new ArrayList<>();
     List<PollOption> locationPollOptions = new ArrayList<>();
 
+    private Button btnOpenBudget;
+
+    private boolean isParticipant = true;           // mock; backend/intent ustawi prawdę
+    //private boolean isParticipant = false;
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_detail);
+
+
 
         apiService = RetrofitClient.getInstance(this).create(ApiService.class);
 
@@ -50,12 +70,30 @@ public class EventDetailActivity extends AppCompatActivity {
         dateVotingOptionsContainer = findViewById(R.id.dateVotingOptionsContainer);
         locationVotingOptionsContainer = findViewById(R.id.locationVotingOptionsContainer);
 
-        // Dodaj RadioGroup i Button do layoutu (dodaj w XML lub dynamicznie, tutaj zakładam, że masz je w XML)
+
         dateVotingRadioGroup = findViewById(R.id.dateVotingRadioGroup);
         locationVotingRadioGroup = findViewById(R.id.locationVotingRadioGroup);
 
         btnVoteDate = findViewById(R.id.btnVoteDate);
         btnVoteLocation = findViewById(R.id.btnVoteLocation);
+        btnOpenBudget = findViewById(R.id.btnOpenBudget);
+
+        // odczyt
+        isParticipant = getIntent().getBooleanExtra("IS_PARTICIPANT", true); // wyswietlanie przycisku budzet czy user jest w evencie
+        if (!isParticipant) {
+            btnOpenBudget.setVisibility(View.GONE);
+        } else {
+            btnOpenBudget.setOnClickListener(v -> {
+                Intent i = new Intent(this, BudgetActivity.class);
+                i.putExtra("EVENT_ID", getIntent().getLongExtra("eventId", -1));
+                startActivity(i);
+            });
+        }
+
+
+
+
+
 
         String title = getIntent().getStringExtra("title");
         String date = getIntent().getStringExtra("date");
@@ -78,6 +116,25 @@ public class EventDetailActivity extends AppCompatActivity {
         Glide.with(this)
                 .load("http://10.0.2.2:8080" + imageUrl)
                 .into(eventImage);
+
+
+
+
+
+
+
+
+
+
+
+
+        btnOpenBudget.setOnClickListener(v -> {
+            Intent i = new Intent(this, BudgetActivity.class);
+            i.putExtra("EVENT_ID", getIntent().getLongExtra("eventId", -1));
+            startActivity(i);
+        });
+
+
 
         setupVotingOptions();
         setupVoteButtons();
@@ -115,6 +172,9 @@ public class EventDetailActivity extends AppCompatActivity {
             locationVotingOptionsContainer.setVisibility(View.GONE);
         }
     }
+
+
+
 
     private void setupVoteButtons() {
         btnVoteDate.setOnClickListener(v -> {
@@ -204,5 +264,16 @@ public class EventDetailActivity extends AppCompatActivity {
             }
         });
     }
+
+
+    private void showSettlementDialog() {
+        // TODO: retrofit -> api.getSettlement(eventId)
+        new AlertDialog.Builder(this)
+                .setTitle("Rozliczenie")
+                .setMessage("Jan ➜ Piotr : 25 zł\nPiotr ➜ Ola : 10 zł")
+                .setPositiveButton("OK", null)
+                .show();
+    }
+
 
 }

@@ -36,6 +36,11 @@
         <activity android:name=".EventDetailActivity" />
         <activity android:name=".AddEventActivity" />
 
+        <activity android:name=".EventDetailActivity"/>
+        <activity android:name=".budget.BudgetActivity"
+              android:exported="false"/>
+
+
 
         <activity
             android:name=".chat.ChatActivity"

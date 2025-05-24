@@ -114,6 +114,17 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         });
     }
 
+
+
+
+
+
+
+
+
+
+
+
     @Override
     public int getItemCount() {
         return eventList.size();

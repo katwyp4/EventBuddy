@@ -20,6 +20,19 @@ public class Event {
     private String imageUrl;
 
 
+    // → deadline na dodawanie wydatków (ISO yyyy-MM-dd), będzie wysyłany w JSON
+    private String budgetDeadline;
+
+    public String getBudgetDeadline() {
+        return budgetDeadline;
+    }
+
+    public void setBudgetDeadline(String budgetDeadline) {
+        this.budgetDeadline = budgetDeadline;
+    }
+
+
+
     public Long getId() {
         return id;
     }

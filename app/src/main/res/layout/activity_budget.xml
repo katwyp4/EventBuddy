@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <include layout="@layout/custom_navbar"
+        android:id="@+id/budgetToolbar"/>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:padding="16dp">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvExpenses"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <Button
+            android:id="@+id/btnAddExpense"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:text="Dodaj wydatek"
+            android:layout_gravity="center_horizontal"
+            android:backgroundTint="#673AB7"
+            android:textColor="#FFFFFF"/>
+
+        <Button
+            android:id="@+id/btnShowSettlement"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:text="Pokaż rozliczenie"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:visibility="gone"
+            android:backgroundTint="#3F51B5"
+            android:textColor="#FFFFFF"/>
+
+
+    </LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
