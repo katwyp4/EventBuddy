@@ -26,6 +26,7 @@ import com.example.myapplication.budget.BudgetActivity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -47,8 +48,7 @@ public class EventDetailActivity extends AppCompatActivity {
 
     private Button btnOpenBudget;
 
-    private boolean isParticipant = true;           // mock; backend/intent ustawi prawdę
-    //private boolean isParticipant = false;
+    private boolean isParticipant = true;
 
 
 
@@ -57,8 +57,6 @@ public class EventDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_detail);
 
-
-
         apiService = RetrofitClient.getInstance(this).create(ApiService.class);
 
         titleText = findViewById(R.id.eventDetailTitle);
@@ -66,79 +64,68 @@ public class EventDetailActivity extends AppCompatActivity {
         descText = findViewById(R.id.eventDetailDescription);
         eventImage = findViewById(R.id.eventDetailImage);
         locationText = findViewById(R.id.eventDetailLocation);
-
         dateVotingOptionsContainer = findViewById(R.id.dateVotingOptionsContainer);
         locationVotingOptionsContainer = findViewById(R.id.locationVotingOptionsContainer);
-
-
         dateVotingRadioGroup = findViewById(R.id.dateVotingRadioGroup);
         locationVotingRadioGroup = findViewById(R.id.locationVotingRadioGroup);
-
         btnVoteDate = findViewById(R.id.btnVoteDate);
         btnVoteLocation = findViewById(R.id.btnVoteLocation);
         btnOpenBudget = findViewById(R.id.btnOpenBudget);
 
-        // odczyt
-        isParticipant = getIntent().getBooleanExtra("IS_PARTICIPANT", true); // wyswietlanie przycisku budzet czy user jest w evencie
-        if (!isParticipant) {
-            btnOpenBudget.setVisibility(View.GONE);
-        } else {
-            btnOpenBudget.setOnClickListener(v -> {
-                Intent i = new Intent(this, BudgetActivity.class);
-                i.putExtra("EVENT_ID", getIntent().getLongExtra("eventId", -1));
-                startActivity(i);
+        Long eventId = getIntent().getLongExtra("eventId", -1);
+
+        if (eventId != -1) {
+            apiService.getEvent(eventId).enqueue(new Callback<com.example.myapplication.model.Event>() {
+                @Override
+                public void onResponse(Call<com.example.myapplication.model.Event> call, Response<com.example.myapplication.model.Event> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        com.example.myapplication.model.Event event = response.body();
+
+                        isParticipant = event.isParticipant();
+                        Log.d("PARTICIPANT", "Z backendu: " + isParticipant);
+
+                        if (!isParticipant) {
+                            btnOpenBudget.setVisibility(View.GONE);
+                        } else {
+                            btnOpenBudget.setVisibility(View.VISIBLE); // just in case
+                            btnOpenBudget.setOnClickListener(v -> {
+                                Intent i = new Intent(EventDetailActivity.this, BudgetActivity.class);
+                                i.putExtra("EVENT_ID", event.getId());
+                                i.putExtra("BUDGET_DEADLINE", event.getBudgetDeadline());
+                                startActivity(i);
+                            });
+                        }
+
+                        // Ustaw dane na ekranie
+                        titleText.setText(event.getTitle());
+                        dateText.setText(event.getDate());
+                        descText.setText(event.getDescription());
+                        locationText.setText(event.getLocation());
+
+                        Glide.with(EventDetailActivity.this)
+                                .load("http://10.0.2.2:8080" + event.getImageUrl())
+                                .into(eventImage);
+
+                        // POBIERZ POLLE
+                        fetchUpdatedPollOptions(true);
+                        fetchUpdatedPollOptions(false);
+
+                        // ← PRZENIESIONE TUTAJ
+                        setupVotingOptions();
+                        setupVoteButtons();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<com.example.myapplication.model.Event> call, Throwable t) {
+                    Toast.makeText(EventDetailActivity.this, "Błąd ładowania wydarzenia", Toast.LENGTH_SHORT).show();
+                }
             });
         }
 
 
-
-
-
-
-        String title = getIntent().getStringExtra("title");
-        String date = getIntent().getStringExtra("date");
-        String desc = getIntent().getStringExtra("description");
-        String imageUrl = getIntent().getStringExtra("imageUrl");
-        String location = getIntent().getStringExtra("location");
-
-        // Pobierz listy PollOption (musisz przekazać je jako Parcelable lub JSON i sparsować)
-        Long eventId = getIntent().getLongExtra("eventId", -1);
-        if (eventId != -1) {
-            fetchUpdatedPollOptions(true);  // pobiera daty
-            fetchUpdatedPollOptions(false); // pobiera lokalizacje
-        }
-
-        titleText.setText(title);
-        dateText.setText(date);
-        descText.setText(desc);
-        locationText.setText(location);
-
-        Glide.with(this)
-                .load("http://10.0.2.2:8080" + imageUrl)
-                .into(eventImage);
-
-
-
-
-
-
-
-
-
-
-
-
-        btnOpenBudget.setOnClickListener(v -> {
-            Intent i = new Intent(this, BudgetActivity.class);
-            i.putExtra("EVENT_ID", getIntent().getLongExtra("eventId", -1));
-            startActivity(i);
-        });
-
-
-
-        setupVotingOptions();
-        setupVoteButtons();
     }
+
 
     private void setupVotingOptions() {
         // Data poll options
@@ -267,12 +254,33 @@ public class EventDetailActivity extends AppCompatActivity {
 
 
     private void showSettlementDialog() {
-        // TODO: retrofit -> api.getSettlement(eventId)
-        new AlertDialog.Builder(this)
-                .setTitle("Rozliczenie")
-                .setMessage("Jan ➜ Piotr : 25 zł\nPiotr ➜ Ola : 10 zł")
-                .setPositiveButton("OK", null)
-                .show();
+        Long eventId = getIntent().getLongExtra("eventId", -1);
+        if (eventId == -1) {
+            Toast.makeText(this, "Brak ID wydarzenia", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        apiService.getSettlement(eventId).enqueue(new Callback<Map<String, Double>>() {
+            @Override
+            public void onResponse(Call<Map<String, Double>> call, Response<Map<String, Double>> response) {
+                if (response.isSuccessful()) {
+                    StringBuilder sb = new StringBuilder();
+                    for (Map.Entry<String, Double> entry : response.body().entrySet()) {
+                        double balance = entry.getValue();
+                        if (balance < 0) sb.append(entry.getKey()).append(" ➜ do zapłaty: ").append(-balance).append(" zł\n");
+                        else if (balance > 0) sb.append(entry.getKey()).append(" ➜ do otrzymania: ").append(balance).append(" zł\n");
+                    }
+                    new AlertDialog.Builder(EventDetailActivity.this)
+                            .setTitle("Rozliczenie")
+                            .setMessage(sb.toString())
+                            .setPositiveButton("OK", null)
+                            .show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Map<String, Double>> call, Throwable t) {}
+        });
+
     }
 
 

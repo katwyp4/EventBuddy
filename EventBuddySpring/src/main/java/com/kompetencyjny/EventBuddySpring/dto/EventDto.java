@@ -27,4 +27,6 @@ public class EventDto {
     private String imageUrl;
     private PollDto datePoll;
     private PollDto locationPoll;
+    private LocalDate budgetDeadline;
+    private boolean participant;
 }

@@ -87,42 +87,13 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             intent.putExtra("description", event.getDescription());
             intent.putExtra("imageUrl", event.getImageUrl());
             intent.putExtra("location", event.getLocation());
-
-//            if (event.getPolls() != null) {
-//                ArrayList<String> datePollQuestions = new ArrayList<>();
-//                ArrayList<String> locationPollQuestions = new ArrayList<>();
-//
-//                for (Poll poll : event.getPolls()) {
-//                    if (poll.getQuestion().toLowerCase().contains("data")) {
-//                        datePollQuestions.add(poll.getQuestion());
-//                    }
-//                    if (poll.getQuestion().toLowerCase().contains("lokalizację") || poll.getQuestion().toLowerCase().contains("lokalizacje")) {
-//                        locationPollQuestions.add(poll.getQuestion());
-//                    }
-//                }
-//
-//                if (!datePollQuestions.isEmpty()) {
-//                    intent.putExtra("eventId", event.getId());
-//                }
-//                if (!locationPollQuestions.isEmpty()) {
-//                    intent.putExtra("eventId", event.getId());
-//                }
-//            }
+            intent.putExtra("budgetDeadline", event.getBudgetDeadline());
+            intent.putExtra("IS_PARTICIPANT", event.isParticipant());
 
 
             holder.itemView.getContext().startActivity(intent);
         });
     }
-
-
-
-
-
-
-
-
-
-
 
 
     @Override

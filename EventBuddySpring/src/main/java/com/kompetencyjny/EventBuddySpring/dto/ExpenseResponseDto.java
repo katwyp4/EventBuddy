@@ -11,4 +11,5 @@ public class ExpenseResponseDto {
     private BigDecimal amount;
     private Long payerId;
     private Long eventId;
+    private String payerFullName;
 }

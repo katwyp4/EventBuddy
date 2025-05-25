@@ -31,6 +31,7 @@ public class EventRequest {
     private boolean enableLocationVoting;
     private PollDto datePoll;
     private PollDto locationPoll;
+    private LocalDate budgetDeadline;
     public boolean isEnableDateVoting() { return enableDateVoting; }
     public void setEnableDateVoting(boolean enableDateVoting) { this.enableDateVoting = enableDateVoting; }
 

@@ -10,5 +10,6 @@ public interface ExpenseMapper {
 
     @Mapping(source = "payer.id", target = "payerId")
     @Mapping(source = "event.id", target = "eventId")
+    @Mapping(expression = "java(expense.getPayer().getFirstName() + \" \" + expense.getPayer().getLastName())", target = "payerFullName")
     ExpenseResponseDto toDto(Expense expense);
 }
