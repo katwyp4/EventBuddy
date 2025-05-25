@@ -19,6 +19,8 @@ public class Event {
 
     private String imageUrl;
 
+    private boolean participant;
+
 
     // → deadline na dodawanie wydatków (ISO yyyy-MM-dd), będzie wysyłany w JSON
     private String budgetDeadline;
@@ -126,4 +128,11 @@ public class Event {
         return enableLocationVoting;
     }
 
+    public boolean isParticipant() {
+        return participant;
+    }
+
+    public void setParticipant(boolean participant) {
+        participant = participant;
+    }
 }

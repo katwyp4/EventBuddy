@@ -24,14 +24,12 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.VH> {
 
     /*────────────────────────  API publiczne  ──────────────────────────────*/
 
-    /** Nadpisz całą listę wydatków (np. po pobraniu z backendu). */
     public void setData(List<ExpenseDto> list) {
         items.clear();
         items.addAll(list);
         notifyDataSetChanged();
     }
 
-    /** Dodaj pojedynczy wydatek (np. po udanym POST /expenses). */
     public void add(ExpenseDto e) {
         items.add(e);
         notifyItemInserted(items.size() - 1);
@@ -52,7 +50,7 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.VH> {
         ExpenseDto e = items.get(position);
         h.desc.setText(e.getDescription());
         h.amount.setText(String.format(Locale.getDefault(), "%.2f zł", e.getAmount()));
-        h.payer.setText(e.getPayerFullName());                 // NEW – imię i nazwisko
+        h.payer.setText(e.getPayerFullName());
     }
 
     @Override

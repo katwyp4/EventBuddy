@@ -1,5 +1,6 @@
 package com.example.myapplication.network;
 
+import com.example.myapplication.data.ExpenseDto;
 import com.example.myapplication.model.Event;
 import com.example.myapplication.model.LoginResponse;
 import com.example.myapplication.model.PaginatedResponse;
@@ -9,10 +10,12 @@ import com.example.myapplication.model.RegisterResponse;
 
 import com.example.myapplication.data.CreateMessageDto;
 import com.example.myapplication.data.MessageDto;
+import com.example.myapplication.data.CreateExpenseDto;
 
 
 
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -55,6 +58,9 @@ public interface ApiService {
     @POST("api/events")
     Call<Event> createEvent(@Body Event event);
 
+    @GET("/api/events/{id}")
+    Call<Event> getEvent(@Path("id") Long eventId);
+
     @Multipart
     @POST("/api/events/with-image")
     Call<Event> createEventWithImage(
@@ -83,5 +89,14 @@ public interface ApiService {
 
     @POST("/api/messages")
     Call<MessageDto> sendMessage(@Body CreateMessageDto body);
+
+    @GET("/api/expenses/event/{eventId}")
+    Call<List<ExpenseDto>> getExpensesForEvent(@Path("eventId") Long eventId);
+
+    @GET("/api/expenses/{eventId}/balances")
+    Call<Map<String, Double>> getSettlement(@Path("eventId") Long eventId);
+
+    @POST("/api/expenses")
+    Call<ExpenseDto> addExpense(@Body CreateExpenseDto dto);
 
 }

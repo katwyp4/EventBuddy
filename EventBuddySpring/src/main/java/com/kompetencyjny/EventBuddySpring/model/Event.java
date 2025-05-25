@@ -30,6 +30,7 @@ public class Event {
     @JsonIgnore private Boolean active=true;
     @JsonIgnore private LocalDate deactivationDate=null;
     private String imageUrl;
+    private LocalDate budgetDeadline;
 
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)

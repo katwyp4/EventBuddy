@@ -1,6 +1,7 @@
 package com.example.myapplication.budget;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -14,27 +15,30 @@ import com.example.myapplication.R;
 import com.example.myapplication.data.CreateExpenseDto;
 import com.example.myapplication.data.ExpenseDto;
 import com.example.myapplication.event.ExpenseAdapter;
+import com.example.myapplication.network.ApiService;
+import com.example.myapplication.network.RetrofitClient;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class BudgetActivity extends AppCompatActivity {
 
     /*────────────────────────────  POLA  ────────────────────────────*/
     private ExpenseAdapter adapter;
 
-    private long eventId       = -1;
-    private long currentUserId = 1;          // TODO: pobierz z auth
+    private long eventId = -1;
 
-    //private LocalDate deadline = LocalDate.now().minusDays(1); // TODO: z backendu
-    private LocalDate deadline = LocalDate.now().plusDays(1);
-
-    //private LocalDate deadline = LocalDate.now().plusDays(7);
-
+    private LocalDate deadline;
     private View btnAddExpense;
     private View btnShowSettlement;
+    private ApiService apiService;
 
     /*────────────────────────────  LIFE-CYCLE  ──────────────────────*/
     @Override
@@ -42,8 +46,22 @@ public class BudgetActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_budget);
 
+        apiService = RetrofitClient.getInstance(getApplicationContext()).create(ApiService.class);
+
         /* --- odbiór danych z Intentu --- */
         eventId = getIntent().getLongExtra("EVENT_ID", -1);
+
+        String deadlineStr = getIntent().getStringExtra("BUDGET_DEADLINE");
+        Log.d("DEBUG_BUDGET", "Odebrany deadline: " + deadlineStr);
+        if (deadlineStr != null && !deadlineStr.isEmpty()) {
+            deadline = LocalDate.parse(deadlineStr);  // tylko jeśli format "yyyy-MM-dd"
+        } else {
+            deadline = LocalDate.MAX; // fallback: pozwala dodawać zawsze
+        }
+
+        Log.d("DEBUG_BUDGET2", "Odebrany deadline: " + deadline);
+
+
 
         /* --- RecyclerView & adapter --- */
         RecyclerView rv = findViewById(R.id.rvExpenses);
@@ -58,8 +76,26 @@ public class BudgetActivity extends AppCompatActivity {
         btnAddExpense.setOnClickListener(v -> openAddExpenseSheet());
         btnShowSettlement.setOnClickListener(v -> showSettlementDialog());
 
-        /* --- mock listy wydatków --- */
-        adapter.setData(new ArrayList<>());        // TODO: Retrofit -> api.getExpenses(eventId)
+        Log.d("DEBUG", "apiService: " + apiService); // powinno dać null lub instancję
+        Log.d("BUDGET", "Event ID: " + eventId);
+        apiService.getExpensesForEvent(eventId).enqueue(new Callback<List<ExpenseDto>>() {
+            @Override
+            public void onResponse(Call<List<ExpenseDto>> call, Response<List<ExpenseDto>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    adapter.setData(response.body());
+                } else {
+                    Log.d("DEBUG2", "BudgetActivity: " + BudgetActivity.this);
+                    Toast.makeText(BudgetActivity.this, "Brak danych lub błąd serwera", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<ExpenseDto>> call, Throwable t) {
+                Log.d("DEBUG3", "BudgetActivity: " + BudgetActivity.this + "Błąd sieci: " + t.getMessage());
+                Toast.makeText(BudgetActivity.this, "Błąd sieci: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
 
         toggleButtons();
     }
@@ -88,18 +124,25 @@ public class BudgetActivity extends AppCompatActivity {
 
             double amt = Double.parseDouble(amtStr);
 
-            CreateExpenseDto dto = new CreateExpenseDto(desc, amt, currentUserId, eventId);
-            // TODO: Retrofit -> api.addExpense(dto)
-            // onResponse: adapter.add(response.body());
+            CreateExpenseDto dto = new CreateExpenseDto(desc, amt, eventId);
 
-            /* --- MOCK lokalny --- */
-            ExpenseDto mock = new ExpenseDto();
-            mock.setDescription(desc);
-            mock.setAmount(amt);
-            mock.setPayerFullName("Ja");
-            adapter.add(mock);
+            apiService.addExpense(dto).enqueue(new Callback<ExpenseDto>() {
+                @Override
+                public void onResponse(Call<ExpenseDto> call, Response<ExpenseDto> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        adapter.add(response.body());  // dodaj do listy
+                        sheet.dismiss();               // zamknij bottom sheet
+                    } else {
+                        Toast.makeText(BudgetActivity.this, "Błąd dodawania wydatku", Toast.LENGTH_SHORT).show();
+                    }
+                }
 
-            sheet.dismiss();
+                @Override
+                public void onFailure(Call<ExpenseDto> call, Throwable t) {
+                    Toast.makeText(BudgetActivity.this, "Błąd sieci: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+
         });
 
         sheet.setContentView(v);
@@ -108,13 +151,39 @@ public class BudgetActivity extends AppCompatActivity {
 
     /*────────────────────  Dialog rozliczenia  ─────────────────────*/
     private void showSettlementDialog() {
-        // TODO: Retrofit -> api.getSettlement(eventId)
-        String msg = "Jan ➜ Piotr : 25 zł\nPiotr ➜ Ola : 10 zł";
+        if (eventId == -1) {
+            Toast.makeText(this, "Brak ID wydarzenia", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        new AlertDialog.Builder(this)
-                .setTitle("Rozliczenie")
-                .setMessage(msg)
-                .setPositiveButton("OK", null)
-                .show();
+        apiService.getSettlement(eventId).enqueue(new Callback<Map<String, Double>>() {
+            @Override
+            public void onResponse(Call<Map<String, Double>> call, Response<Map<String, Double>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    StringBuilder sb = new StringBuilder();
+                    for (Map.Entry<String, Double> entry : response.body().entrySet()) {
+                        double balance = entry.getValue();
+                        if (balance < 0)
+                            sb.append(entry.getKey()).append(" ➜ do zapłaty: ").append(String.format("%.2f zł", -balance)).append("\n");
+                        else if (balance > 0)
+                            sb.append(entry.getKey()).append(" ➜ do otrzymania: ").append(String.format("%.2f zł", balance)).append("\n");
+                    }
+
+                    new AlertDialog.Builder(BudgetActivity.this)
+                            .setTitle("Rozliczenie")
+                            .setMessage(sb.toString().isEmpty() ? "Brak rozliczeń do wyświetlenia." : sb.toString())
+                            .setPositiveButton("OK", null)
+                            .show();
+                } else {
+                    Toast.makeText(BudgetActivity.this, "Błąd wczytywania rozliczenia", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Map<String, Double>> call, Throwable t) {
+                Toast.makeText(BudgetActivity.this, "Błąd sieci: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
+
 }
