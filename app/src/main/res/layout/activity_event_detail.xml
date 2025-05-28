@@ -158,16 +158,44 @@
 
 
 
-            <!-- przycisk otwierający ekran budżetu -->
-            <Button
-                android:id="@+id/btnOpenBudget"
-                android:layout_width="wrap_content"
+            <!-- 2) Kontener dwóch guzików (Budżet + Czat) -->
+            <LinearLayout
+                android:layout_width="200dp"
                 android:layout_height="48dp"
-                android:text="Budżet"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="16dp"
-                android:backgroundTint="#673AB7"
-                android:textColor="#FFFFFF"/>
+                android:orientation="horizontal"
+                android:layout_marginTop="12dp">
+
+                <!-- Budżet (lewa połowa) -->
+                <Button
+                    android:id="@+id/btnOpenBudget"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:text="Budżet"
+                    android:background="@drawable/rounded_button_purple"
+                    android:textColor="#FFFFFF"/>
+
+                <!-- ODSTĘP między guzikami -->
+                <Space
+                    android:layout_width="8dp"
+                    android:layout_height="match_parent"/>
+
+                <!-- Czat (prawa połowa) -->
+                <ImageButton
+                    android:id="@+id/btnOpenChat"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_chat"
+                    android:tint="#FFFFFF"
+                    android:background="@drawable/rounded_button_purple"
+                    android:contentDescription="@string/chat"/>
+
+            </LinearLayout>
+
+
+
 
 
 

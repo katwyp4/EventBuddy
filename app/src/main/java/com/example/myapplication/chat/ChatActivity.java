@@ -1,92 +1,91 @@
 package com.example.myapplication.chat;
 
-import android.os.*;
-import android.widget.*;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.*;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.myapplication.R;
-import com.example.myapplication.data.*;
-import com.example.myapplication.network.*;
-import retrofit2.*;
+import com.example.myapplication.data.CreateMessageDto;
+import com.example.myapplication.data.MessageDto;
+import com.example.myapplication.network.ApiService;
+import com.example.myapplication.network.RetrofitClient;
+
+import java.util.ArrayList;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ChatActivity extends AppCompatActivity {
 
-    private MessageAdapter adapter;
-    private ApiService api;
-    private long eventId, userId;
-    private final Handler ui = new Handler(Looper.getMainLooper());
+    private RecyclerView rvMessages;
+    private EditText   etMessage;
+    private Button     btnSend;
 
-    @Override protected void onCreate(Bundle s){
-        super.onCreate(s);
+    private long   eventId;
+    private long   userId = 1;        // TODO: pobierz z auth
+    private ChatAdapter  adapter;
+    private ApiService   api;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        /* parametry */
-        eventId = getIntent().getLongExtra("EVENT_ID",1);
+        // 1. Intent extras
+        eventId = getIntent().getLongExtra("EVENT_ID", -1);
         userId  = getIntent().getLongExtra("USER_ID", 1);
 
-        /* Retrofit → ApiService */
-        Retrofit retrofit = RetrofitClient.getInstance(this);
-        api = retrofit.create(ApiService.class);
+        // 2. Retrofit
+        api = RetrofitClient.getInstance(this).create(ApiService.class);
 
-        /* RecyclerView */
-        adapter = new MessageAdapter();
-        RecyclerView rv = findViewById(R.id.rvMessages);
-        rv.setLayoutManager(new LinearLayoutManager(this));
-        rv.setAdapter(adapter);
+        // 3. View binding
+        rvMessages = findViewById(R.id.rvMessages);
+        etMessage  = findViewById(R.id.etMessage);
+        btnSend    = findViewById(R.id.btnSend);
 
-        EditText et = findViewById(R.id.etMessage);
-        Button   bt = findViewById(R.id.btnSend);
+        // 4. RecyclerView + adapter
+        rvMessages.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new ChatAdapter(new ArrayList<>());
+        rvMessages.setAdapter(adapter);
 
-        /* 1. Historia */
-        api.getMessages(eventId).enqueue(new Callback<>() {
-            @Override public void onResponse(Call<List<MessageDto>> c, Response<List<MessageDto>> r){
-                if(r.isSuccessful() && r.body()!=null){
-                    adapter.addAll(r.body());
-                    rv.scrollToPosition(adapter.getItemCount()-1);
+        // 5. Load existing messages
+        loadMessages();
+
+        // 6. Send button
+        btnSend.setOnClickListener(v -> {
+            String content = etMessage.getText().toString().trim();
+            if (content.isEmpty()) return;
+
+            CreateMessageDto dto = new CreateMessageDto(userId, eventId, content);
+            api.sendMessage(dto).enqueue(new Callback<MessageDto>() {
+                @Override public void onResponse(Call<MessageDto> c, Response<MessageDto> r) {
+                    if (r.isSuccessful() && r.body() != null) {
+                        adapter.add(r.body());
+                        rvMessages.scrollToPosition(adapter.getItemCount() - 1);
+                        etMessage.setText("");
+                    }
+                }
+                @Override public void onFailure(Call<MessageDto> c, Throwable t) { /* TODO: obsługa błędów */ }
+            });
+        });
+    }
+
+    private void loadMessages() {
+        api.getMessages(eventId).enqueue(new Callback<List<MessageDto>>() {
+            @Override public void onResponse(Call<List<MessageDto>> c, Response<List<MessageDto>> r) {
+                if (r.isSuccessful() && r.body() != null) {
+                    adapter.setData(r.body());
+                    rvMessages.scrollToPosition(adapter.getItemCount() - 1);
                 }
             }
-            @Override public void onFailure(Call<List<MessageDto>> c, Throwable t){}
+            @Override public void onFailure(Call<List<MessageDto>> c, Throwable t) { /* TODO */ }
         });
-
-        /* 2. Wysyłanie */
-        bt.setOnClickListener(v -> {
-            String text = et.getText().toString().trim();
-            if(text.isEmpty()) return;
-            et.setText("");
-            api.sendMessage(new CreateMessageDto(userId,eventId,text))
-                    .enqueue(new Callback<>() {
-                        @Override public void onResponse(Call<MessageDto> c, Response<MessageDto> r){
-                            if(r.isSuccessful() && r.body()!=null){
-                                adapter.add(r.body());
-                                rv.scrollToPosition(adapter.getItemCount()-1);
-                            }
-                        }
-                        @Override public void onFailure(Call<MessageDto> c, Throwable t){}
-                    });
-        });
-
-        /* 3. Polling */
-        ui.postDelayed(new Runnable(){
-            @Override public void run(){
-                String after = adapter.items.isEmpty()
-                        ? "1970-01-01T00:00:00"
-                        : adapter.items.get(adapter.items.size()-1).getSentAt();
-                api.getLatest(eventId, after).enqueue(new Callback<>() {
-                    @Override public void onResponse(Call<List<MessageDto>> c, Response<List<MessageDto>> r){
-                        if(r.isSuccessful() && r.body()!=null && !r.body().isEmpty()){
-                            adapter.addAll(r.body());
-                            rv.scrollToPosition(adapter.getItemCount()-1);
-                        }
-                    }
-                    @Override public void onFailure(Call<List<MessageDto>> c, Throwable t){}
-                });
-                ui.postDelayed(this,3000);
-            }
-        },3000);
-    }
-    @Override protected void onDestroy(){
-        super.onDestroy();
-        ui.removeCallbacksAndMessages(null);
     }
 }

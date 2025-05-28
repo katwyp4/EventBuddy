@@ -2,4 +2,6 @@
 
     <string name="login_button">Zaloguj się</string>
     <string name="register_button">Zarejestruj się</string>
+    <string name="chat">Chat</string>
+
 </resources>

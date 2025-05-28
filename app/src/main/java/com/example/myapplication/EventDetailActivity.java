@@ -21,7 +21,7 @@ import com.example.myapplication.network.ApiService;
 import com.example.myapplication.network.RetrofitClient;
 
 import com.example.myapplication.budget.BudgetActivity;
-
+import com.example.myapplication.chat.ChatActivity;
 
 
 import java.util.ArrayList;
@@ -48,6 +48,8 @@ public class EventDetailActivity extends AppCompatActivity {
 
     private Button btnOpenBudget;
 
+    private ImageButton btnOpenChat;
+
     private boolean isParticipant = true;
 
 
@@ -71,6 +73,14 @@ public class EventDetailActivity extends AppCompatActivity {
         btnVoteDate = findViewById(R.id.btnVoteDate);
         btnVoteLocation = findViewById(R.id.btnVoteLocation);
         btnOpenBudget = findViewById(R.id.btnOpenBudget);
+        btnOpenChat  = findViewById(R.id.btnOpenChat);
+
+        btnOpenChat.setOnClickListener(v -> {
+            Intent i = new Intent(this, ChatActivity.class);
+            i.putExtra("EVENT_ID", getIntent().getLongExtra("eventId", -1));
+            startActivity(i);
+        });
+
 
         Long eventId = getIntent().getLongExtra("eventId", -1);
 
