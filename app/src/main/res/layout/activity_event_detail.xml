@@ -92,6 +92,16 @@
                     android:textColor="#00BFFF"
                     android:textStyle="bold" />
 
+                <!-- TU DODANE! -->
+                <TextView
+                    android:id="@+id/textDateVotingEnd"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FF0000"
+                    android:text=""
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="4dp"/>
+
                 <RadioGroup
                     android:id="@+id/dateVotingRadioGroup"
                     android:layout_width="match_parent"
@@ -127,6 +137,16 @@
                     android:text="Propozycje do głosowania na lokalizację"
                     android:textColor="#00BFFF"
                     android:textStyle="bold" />
+
+                <!-- TU DODANE! -->
+                <TextView
+                    android:id="@+id/textLocationVotingEnd"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FF0000"
+                    android:text=""
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="4dp"/>
 
                 <RadioGroup
                     android:id="@+id/locationVotingRadioGroup"

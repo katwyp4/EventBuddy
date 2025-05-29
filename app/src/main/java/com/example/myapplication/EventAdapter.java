@@ -87,30 +87,23 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             intent.putExtra("imageUrl", event.getImageUrl());
             intent.putExtra("location", event.getLocation());
 
-            if (event.getPolls() != null) {
-                ArrayList<String> datePollQuestions = new ArrayList<>();
-                ArrayList<String> locationPollQuestions = new ArrayList<>();
-
-                for (Poll poll : event.getPolls()) {
-                    if (poll.getQuestion().toLowerCase().contains("data")) {
-                        datePollQuestions.add(poll.getQuestion());
-                    }
-                    if (poll.getQuestion().toLowerCase().contains("lokalizację") || poll.getQuestion().toLowerCase().contains("lokalizacje")) {
-                        locationPollQuestions.add(poll.getQuestion());
-                    }
-                }
-
-                if (!datePollQuestions.isEmpty()) {
-                    intent.putStringArrayListExtra("datePollOptions", datePollQuestions);
-                }
-                if (!locationPollQuestions.isEmpty()) {
-                    intent.putStringArrayListExtra("locationPollOptions", locationPollQuestions);
-                }
+            if (event.getDatePollOptions() != null && !event.getDatePollOptions().isEmpty()) {
+                intent.putExtra("datePollOptions", new ArrayList<>(event.getDatePollOptions())); // <--- TUTAJ
+            }
+            if (event.getLocationPollOptions() != null && !event.getLocationPollOptions().isEmpty()) {
+                intent.putExtra("locationPollOptions", new ArrayList<>(event.getLocationPollOptions())); // <--- TUTAJ
             }
 
+            if (event.getDateVotingEndDate() != null) {
+                intent.putExtra("dateVotingEndDate", event.getDateVotingEndDate());
+            }
+            if (event.getLocationVotingEndDate() != null) {
+                intent.putExtra("locationVotingEndDate", event.getLocationVotingEndDate());
+            }
 
             holder.itemView.getContext().startActivity(intent);
         });
+
     }
 
     @Override

@@ -109,4 +109,23 @@ public class Event {
         return locationPolls;
     }
 
+    public String getDateVotingEndDate() {
+        if (polls == null) return null;
+        for (Poll poll : polls) {
+            if (poll.getQuestion() != null && poll.getQuestion().toLowerCase().contains("data")) {
+                return poll.getEndDate();
+            }
+        }
+        return null;
+    }
+    public String getLocationVotingEndDate() {
+        if (polls == null) return null;
+        for (Poll poll : polls) {
+            if (poll.getQuestion() != null && poll.getQuestion().toLowerCase().contains("lokalizac")) {
+                return poll.getEndDate();
+            }
+        }
+        return null;
+    }
+
 }
