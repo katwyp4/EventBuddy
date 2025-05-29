@@ -58,6 +58,14 @@ public class AddEventActivity extends AppCompatActivity {
     private List<PollOption> locationPollOptionsList = new ArrayList<>();
     private List<Poll> pollsList = new ArrayList<>();
 
+    private LinearLayout dateVotingEndDateContainer;
+    private EditText editDateVotingEndDate;
+
+    private LinearLayout locationVotingEndDateContainer;
+    private EditText editLocationVotingEndDate;
+
+
+
     private Uri selectedImageUri;
     private ApiService apiService;
 
@@ -96,22 +104,42 @@ public class AddEventActivity extends AppCompatActivity {
         editNewLocationPollOption = findViewById(R.id.editNewLocationPollOption);
         btnAddLocationPollOption = findViewById(R.id.btnAddLocationPollOption);
 
+        dateVotingEndDateContainer = findViewById(R.id.dateVotingEndDateContainer);
+        editDateVotingEndDate = findViewById(R.id.editDateVotingEndDate);
+
         editBudgetDeadline = findViewById(R.id.editBudgetDeadline);
-
-
-
 
         checkboxDateVoting.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 editDate.setVisibility(View.GONE);
                 datePollOptionsContainer.setVisibility(View.VISIBLE);
+                dateVotingEndDateContainer.setVisibility(View.VISIBLE); // POKAŻ pole końca głosowania
                 datePollOptionsList.clear();
                 datePollDynamicOptions.removeAllViews();
             } else {
                 editDate.setVisibility(View.VISIBLE);
                 datePollOptionsContainer.setVisibility(View.GONE);
+                dateVotingEndDateContainer.setVisibility(View.GONE); // UKRYJ pole końca głosowania
             }
         });
+
+        locationVotingEndDateContainer = findViewById(R.id.locationVotingEndDateContainer);
+        editLocationVotingEndDate = findViewById(R.id.editLocationVotingEndDate);
+
+        checkboxLocationVoting.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                editLocation.setVisibility(View.GONE);
+                locationPollOptionsContainer.setVisibility(View.VISIBLE);
+                locationVotingEndDateContainer.setVisibility(View.VISIBLE); // POKAŻ pole końca głosowania
+                locationPollOptionsList.clear();
+                locationPollDynamicOptions.removeAllViews();
+            } else {
+                editLocation.setVisibility(View.VISIBLE);
+                locationPollOptionsContainer.setVisibility(View.GONE);
+                locationVotingEndDateContainer.setVisibility(View.GONE); // UKRYJ pole końca głosowania
+            }
+        });
+
 
         checkboxLocationVoting.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
@@ -192,6 +220,26 @@ public class AddEventActivity extends AppCompatActivity {
                 return;
             }
         }
+
+        String dateVotingEndDate = null;
+        if (dateVotingEndDateContainer.getVisibility() == View.VISIBLE) {
+            dateVotingEndDate = editDateVotingEndDate.getText().toString().trim();
+            if (dateVotingEndDate.isEmpty()) {
+                Toast.makeText(this, "Podaj datę końca głosowania na datę wydarzenia", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
+        String locationVotingEndDate = null;
+        if (locationVotingEndDateContainer.getVisibility() == View.VISIBLE) {
+            locationVotingEndDate = editLocationVotingEndDate.getText().toString().trim();
+            if (locationVotingEndDate.isEmpty()) {
+                Toast.makeText(this, "Podaj datę końca głosowania na lokalizację wydarzenia", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
+
 
         if (!locationVoting) {
             location = editLocation.getText().toString().trim();

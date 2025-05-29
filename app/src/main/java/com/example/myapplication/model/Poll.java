@@ -9,6 +9,8 @@ public class Poll implements Serializable {
     private Long eventId;
     private List<PollOption> options;
 
+    private String endDate;
+
     public Long getId() {
         return id;
     }
@@ -30,6 +32,10 @@ public class Poll implements Serializable {
         this.eventId = eventId;
     }
 
+    public String getEndDate() { return endDate; } // <-- Getter
+    public void setEndDate(String endDate) { this.endDate = endDate; }
+    public List<PollOption> getPollOptions() {
+        return pollOptions;
     public List<PollOption> getOptions() {
         return options;
     }

@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
@@ -20,9 +21,9 @@ import com.example.myapplication.model.PollOption;
 import com.example.myapplication.network.ApiService;
 import com.example.myapplication.network.RetrofitClient;
 
+import java.time.LocalDate;
 import com.example.myapplication.budget.BudgetActivity;
 import com.example.myapplication.chat.ChatActivity;
-
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +35,7 @@ import retrofit2.Response;
 
 public class EventDetailActivity extends AppCompatActivity {
 
-    TextView titleText, dateText, descText, locationText;
+    TextView titleText, dateText, descText, locationText, textDateVotingEnd, textLocationVotingEnd;
     ImageView eventImage;
 
     LinearLayout dateVotingOptionsContainer, locationVotingOptionsContainer;
@@ -83,6 +84,19 @@ public class EventDetailActivity extends AppCompatActivity {
 
 
         Long eventId = getIntent().getLongExtra("eventId", -1);
+
+        datePollOptions = (ArrayList<PollOption>) getIntent().getSerializableExtra("datePollOptions");
+        locationPollOptions = (ArrayList<PollOption>) getIntent().getSerializableExtra("locationPollOptions");
+        textDateVotingEnd = findViewById(R.id.textDateVotingEnd);
+        textLocationVotingEnd = findViewById(R.id.textLocationVotingEnd);
+
+// Pobierz z Intentu lub Eventa (przekazujesz te daty!)
+        String dateVotingEndDate = getIntent().getStringExtra("dateVotingEndDate");
+        String locationVotingEndDate = getIntent().getStringExtra("locationVotingEndDate");
+
+// Wyświetl daty i ew. zablokuj głosowanie
+        handleVotingEnd(textDateVotingEnd, btnVoteDate, dateVotingEndDate);
+        handleVotingEnd(textLocationVotingEnd, btnVoteLocation, locationVotingEndDate);
 
         if (eventId != -1) {
             apiService.getEvent(eventId).enqueue(new Callback<com.example.myapplication.model.Event>() {
@@ -170,6 +184,31 @@ public class EventDetailActivity extends AppCompatActivity {
         }
     }
 
+    private void handleVotingEnd(TextView endTextView, Button voteButton, String endDate) {
+        if (endDate != null && !endDate.isEmpty()) {
+            endTextView.setVisibility(View.VISIBLE);
+            endTextView.setText("Głosowanie do: " + endDate);
+            java.time.LocalDate today = null;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                today = LocalDate.now();
+            }
+            LocalDate end = null;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                end = LocalDate.parse(endDate);
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if (today.isAfter(end)) {
+                    endTextView.setText("Głosowanie zakończone");
+                    voteButton.setEnabled(false);
+                } else {
+                    voteButton.setEnabled(true);
+                }
+            }
+        } else {
+            endTextView.setVisibility(View.GONE);
+            voteButton.setEnabled(true);
+        }
+    }
 
 
 

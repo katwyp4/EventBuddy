@@ -87,12 +87,27 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             intent.putExtra("description", event.getDescription());
             intent.putExtra("imageUrl", event.getImageUrl());
             intent.putExtra("location", event.getLocation());
+
+            if (event.getDatePollOptions() != null && !event.getDatePollOptions().isEmpty()) {
+                intent.putExtra("datePollOptions", new ArrayList<>(event.getDatePollOptions())); // <--- TUTAJ
+            }
+            if (event.getLocationPollOptions() != null && !event.getLocationPollOptions().isEmpty()) {
+                intent.putExtra("locationPollOptions", new ArrayList<>(event.getLocationPollOptions())); // <--- TUTAJ
+            }
+
             intent.putExtra("budgetDeadline", event.getBudgetDeadline());
             intent.putExtra("IS_PARTICIPANT", event.isParticipant());
 
+            if (event.getDateVotingEndDate() != null) {
+                intent.putExtra("dateVotingEndDate", event.getDateVotingEndDate());
+            }
+            if (event.getLocationVotingEndDate() != null) {
+                intent.putExtra("locationVotingEndDate", event.getLocationVotingEndDate());
+            }
 
             holder.itemView.getContext().startActivity(intent);
         });
+
     }
 
 
