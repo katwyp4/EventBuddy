@@ -1,20 +1,33 @@
 package com.example.myapplication;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.widget.*;
+
+
+
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
+
 import com.bumptech.glide.Glide;
-import com.example.myapplication.model.Event;
+
 import com.example.myapplication.model.PollOption;
 import com.example.myapplication.network.ApiService;
 import com.example.myapplication.network.RetrofitClient;
 
 import java.time.LocalDate;
+import com.example.myapplication.budget.BudgetActivity;
+import com.example.myapplication.chat.ChatActivity;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -34,6 +47,14 @@ public class EventDetailActivity extends AppCompatActivity {
     List<PollOption> datePollOptions = new ArrayList<>();
     List<PollOption> locationPollOptions = new ArrayList<>();
 
+    private Button btnOpenBudget;
+
+    private ImageButton btnOpenChat;
+
+    private boolean isParticipant = true;
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,24 +67,24 @@ public class EventDetailActivity extends AppCompatActivity {
         descText = findViewById(R.id.eventDetailDescription);
         eventImage = findViewById(R.id.eventDetailImage);
         locationText = findViewById(R.id.eventDetailLocation);
-
         dateVotingOptionsContainer = findViewById(R.id.dateVotingOptionsContainer);
         locationVotingOptionsContainer = findViewById(R.id.locationVotingOptionsContainer);
-
-        // Dodaj RadioGroup i Button do layoutu (dodaj w XML lub dynamicznie, tutaj zakładam, że masz je w XML)
         dateVotingRadioGroup = findViewById(R.id.dateVotingRadioGroup);
         locationVotingRadioGroup = findViewById(R.id.locationVotingRadioGroup);
-
         btnVoteDate = findViewById(R.id.btnVoteDate);
         btnVoteLocation = findViewById(R.id.btnVoteLocation);
+        btnOpenBudget = findViewById(R.id.btnOpenBudget);
+        btnOpenChat  = findViewById(R.id.btnOpenChat);
 
-        String title = getIntent().getStringExtra("title");
-        String date = getIntent().getStringExtra("date");
-        String desc = getIntent().getStringExtra("description");
-        String imageUrl = getIntent().getStringExtra("imageUrl");
-        String location = getIntent().getStringExtra("location");
+        btnOpenChat.setOnClickListener(v -> {
+            Intent i = new Intent(this, ChatActivity.class);
+            i.putExtra("EVENT_ID", getIntent().getLongExtra("eventId", -1));
+            startActivity(i);
+        });
 
-        // Pobierz listy PollOption (musisz przekazać je jako Parcelable lub JSON i sparsować)
+
+        Long eventId = getIntent().getLongExtra("eventId", -1);
+
         datePollOptions = (ArrayList<PollOption>) getIntent().getSerializableExtra("datePollOptions");
         locationPollOptions = (ArrayList<PollOption>) getIntent().getSerializableExtra("locationPollOptions");
         textDateVotingEnd = findViewById(R.id.textDateVotingEnd);
@@ -77,19 +98,58 @@ public class EventDetailActivity extends AppCompatActivity {
         handleVotingEnd(textDateVotingEnd, btnVoteDate, dateVotingEndDate);
         handleVotingEnd(textLocationVotingEnd, btnVoteLocation, locationVotingEndDate);
 
+        if (eventId != -1) {
+            apiService.getEvent(eventId).enqueue(new Callback<com.example.myapplication.model.Event>() {
+                @Override
+                public void onResponse(Call<com.example.myapplication.model.Event> call, Response<com.example.myapplication.model.Event> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        com.example.myapplication.model.Event event = response.body();
 
-        titleText.setText(title);
-        dateText.setText(date);
-        descText.setText(desc);
-        locationText.setText(location);
+                        isParticipant = event.isParticipant();
+                        Log.d("PARTICIPANT", "Z backendu: " + isParticipant);
 
-        Glide.with(this)
-                .load("http://10.0.2.2:8080" + imageUrl)
-                .into(eventImage);
+                        if (!isParticipant) {
+                            btnOpenBudget.setVisibility(View.GONE);
+                        } else {
+                            btnOpenBudget.setVisibility(View.VISIBLE); // just in case
+                            btnOpenBudget.setOnClickListener(v -> {
+                                Intent i = new Intent(EventDetailActivity.this, BudgetActivity.class);
+                                i.putExtra("EVENT_ID", event.getId());
+                                i.putExtra("BUDGET_DEADLINE", event.getBudgetDeadline());
+                                startActivity(i);
+                            });
+                        }
 
-        setupVotingOptions();
-        setupVoteButtons();
+                        // Ustaw dane na ekranie
+                        titleText.setText(event.getTitle());
+                        dateText.setText(event.getDate());
+                        descText.setText(event.getDescription());
+                        locationText.setText(event.getLocation());
+
+                        Glide.with(EventDetailActivity.this)
+                                .load("http://10.0.2.2:8080" + event.getImageUrl())
+                                .into(eventImage);
+
+                        // POBIERZ POLLE
+                        fetchUpdatedPollOptions(true);
+                        fetchUpdatedPollOptions(false);
+
+                        // ← PRZENIESIONE TUTAJ
+                        setupVotingOptions();
+                        setupVoteButtons();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<com.example.myapplication.model.Event> call, Throwable t) {
+                    Toast.makeText(EventDetailActivity.this, "Błąd ładowania wydarzenia", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+
     }
+
 
     private void setupVotingOptions() {
         // Data poll options
@@ -99,7 +159,8 @@ public class EventDetailActivity extends AppCompatActivity {
             for (PollOption option : datePollOptions) {
                 RadioButton rb = new RadioButton(this);
                 rb.setText(option.getValue() + " (" + option.getVoteCount() + " głosów)");
-                rb.setTag(option.getId()); // zachowaj ID opcji do wysłania
+                Log.d("TAG", "pollId = " + option.getPollId() + ", optionId = " + option.getId());
+                rb.setTag(new Pair<>(option.getPollId(), option.getId()));
                 rb.setTextColor(Color.WHITE);
                 dateVotingRadioGroup.addView(rb);
             }
@@ -114,7 +175,7 @@ public class EventDetailActivity extends AppCompatActivity {
             for (PollOption option : locationPollOptions) {
                 RadioButton rb = new RadioButton(this);
                 rb.setText(option.getValue() + " (" + option.getVoteCount() + " głosów)");
-                rb.setTag(option.getId());
+                rb.setTag(new Pair<>(option.getPollId(), option.getId()));
                 rb.setTextColor(Color.WHITE);
                 locationVotingRadioGroup.addView(rb);
             }
@@ -150,6 +211,7 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
 
+
     private void setupVoteButtons() {
         btnVoteDate.setOnClickListener(v -> {
             int selectedId = dateVotingRadioGroup.getCheckedRadioButtonId();
@@ -158,8 +220,8 @@ public class EventDetailActivity extends AppCompatActivity {
                 return;
             }
             RadioButton selectedRadio = findViewById(selectedId);
-            Long pollOptionId = (Long) selectedRadio.getTag();
-            sendVote(pollOptionId, true);
+            Pair<Long, Long> ids = (Pair<Long, Long>) selectedRadio.getTag();
+            sendVote(ids.first, ids.second, true);
         });
 
         btnVoteLocation.setOnClickListener(v -> {
@@ -169,21 +231,18 @@ public class EventDetailActivity extends AppCompatActivity {
                 return;
             }
             RadioButton selectedRadio = findViewById(selectedId);
-            Long pollOptionId = (Long) selectedRadio.getTag();
-            sendVote(pollOptionId, false);
+            Pair<Long, Long> ids = (Pair<Long, Long>) selectedRadio.getTag();
+            sendVote(ids.first, ids.second, false);
         });
     }
 
-    private void sendVote(Long pollOptionId, boolean isDateVote) {
-        // Tutaj wywołujesz endpoint backendu do oddania głosu
-        // Przykład (musisz dostosować wg API backendu)
-        apiService.vote(pollOptionId).enqueue(new Callback<Void>() {
+    private void sendVote(Long pollId, Long optionId, boolean isDateVote) {
+        apiService.vote(pollId, optionId).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
                     Toast.makeText(EventDetailActivity.this, "Głos oddany!", Toast.LENGTH_SHORT).show();
-                    // Po oddaniu głosu, pobierz zaktualizowane wyniki (opcjonalnie)
-                    fetchUpdatedPollOptions(isDateVote);
+                    fetchUpdatedPollOptions(isDateVote); // lub false, jeśli lokalizacja – zależnie od kontekstu
                 } else {
                     Toast.makeText(EventDetailActivity.this, "Błąd oddawania głosu", Toast.LENGTH_SHORT).show();
                 }
@@ -195,6 +254,8 @@ public class EventDetailActivity extends AppCompatActivity {
             }
         });
     }
+
+
 
     private void fetchUpdatedPollOptions(boolean isDateVote) {
         // Pobierz ID eventu z Intentu lub innego źródła
@@ -218,6 +279,9 @@ public class EventDetailActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     List<PollOption> updatedOptions = response.body();
 
+                    Log.d("PollOptions", "Odebrano " + updatedOptions.size() + " opcji");
+
+
                     if (isDateVote) {
                         datePollOptions = updatedOptions;
                     } else {
@@ -236,5 +300,37 @@ public class EventDetailActivity extends AppCompatActivity {
             }
         });
     }
+
+
+    private void showSettlementDialog() {
+        Long eventId = getIntent().getLongExtra("eventId", -1);
+        if (eventId == -1) {
+            Toast.makeText(this, "Brak ID wydarzenia", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        apiService.getSettlement(eventId).enqueue(new Callback<Map<String, Double>>() {
+            @Override
+            public void onResponse(Call<Map<String, Double>> call, Response<Map<String, Double>> response) {
+                if (response.isSuccessful()) {
+                    StringBuilder sb = new StringBuilder();
+                    for (Map.Entry<String, Double> entry : response.body().entrySet()) {
+                        double balance = entry.getValue();
+                        if (balance < 0) sb.append(entry.getKey()).append(" ➜ do zapłaty: ").append(-balance).append(" zł\n");
+                        else if (balance > 0) sb.append(entry.getKey()).append(" ➜ do otrzymania: ").append(balance).append(" zł\n");
+                    }
+                    new AlertDialog.Builder(EventDetailActivity.this)
+                            .setTitle("Rozliczenie")
+                            .setMessage(sb.toString())
+                            .setPositiveButton("OK", null)
+                            .show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Map<String, Double>> call, Throwable t) {}
+        });
+
+    }
+
 
 }

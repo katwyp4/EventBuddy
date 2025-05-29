@@ -55,6 +55,34 @@
             android:inputType="date"
             android:layout_marginTop="4dp"/>
 
+
+
+
+        <!-- ⬇⬇⬇ NOWOŚĆ – termin dodawania wydatków ⬇⬇⬇ -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Termin dodawania wydatków"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="12dp"/>
+
+        <EditText
+            android:id="@+id/editBudgetDeadline"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Wprowadź datę (YYYY-MM-DD)"
+            android:background="@drawable/edittext_background"
+            android:textColor="#FFFFFF"
+            android:inputType="date"
+            android:layout_marginTop="4dp"/>
+        <!-- ⬆⬆⬆ KONIEC wstawki ⬆⬆⬆ -->
+
+
+
+
+
+
+
         <!-- Checkbox - głosowanie na datę -->
         <CheckBox
             android:id="@+id/checkboxDateVoting"

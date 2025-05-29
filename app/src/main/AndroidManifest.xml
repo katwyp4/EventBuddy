@@ -37,7 +37,21 @@
         <activity android:name=".AddEventActivity" />
 
 
+        <activity android:name=".budget.BudgetActivity"
+              android:exported="false"/>
+
+
+
+
+
+
+        <activity
+            android:name=".chat.ChatActivity"
+            android:exported="true" />
+
+
     </application>
     <uses-permission android:name="android.permission.INTERNET"/>
+
 
 </manifest>

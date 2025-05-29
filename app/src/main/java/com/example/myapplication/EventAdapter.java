@@ -64,7 +64,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
                 .into(holder.eventImage);
 
         // Pokaz informację, czy jest głosowanie na datę
-        if (event.getDatePollOptions() != null && !event.getDatePollOptions().isEmpty()) {
+        if (event.getDatePoll() != null && event.getDatePoll() != null) {
             holder.dateVotingInfo.setText("Głosowanie na datę: TAK");
             holder.dateVotingInfo.setVisibility(View.VISIBLE);
         } else {
@@ -72,7 +72,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         }
 
         // Pokaz informację, czy jest głosowanie na lokalizację
-        if (event.getLocationPollOptions() != null && !event.getLocationPollOptions().isEmpty()) {
+        if (event.getLocationPoll() != null && event.getLocationPoll() != null) {
             holder.locationVotingInfo.setText("Głosowanie na lokalizację: TAK");
             holder.locationVotingInfo.setVisibility(View.VISIBLE);
         } else {
@@ -81,6 +81,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
 
         holder.readMoreBtn.setOnClickListener(v -> {
             Intent intent = new Intent(holder.itemView.getContext(), EventDetailActivity.class);
+            intent.putExtra("eventId", event.getId());
             intent.putExtra("title", event.getTitle());
             intent.putExtra("date", event.getDate());
             intent.putExtra("description", event.getDescription());
@@ -94,6 +95,9 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
                 intent.putExtra("locationPollOptions", new ArrayList<>(event.getLocationPollOptions())); // <--- TUTAJ
             }
 
+            intent.putExtra("budgetDeadline", event.getBudgetDeadline());
+            intent.putExtra("IS_PARTICIPANT", event.isParticipant());
+
             if (event.getDateVotingEndDate() != null) {
                 intent.putExtra("dateVotingEndDate", event.getDateVotingEndDate());
             }
@@ -105,6 +109,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         });
 
     }
+
 
     @Override
     public int getItemCount() {

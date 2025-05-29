@@ -7,7 +7,7 @@ public class Poll implements Serializable {
     private Long id;
     private String question;
     private Long eventId;
-    private List<PollOption> pollOptions;
+    private List<PollOption> options;
 
     private String endDate;
 
@@ -36,8 +36,10 @@ public class Poll implements Serializable {
     public void setEndDate(String endDate) { this.endDate = endDate; }
     public List<PollOption> getPollOptions() {
         return pollOptions;
+    public List<PollOption> getOptions() {
+        return options;
     }
-    public void setPollOptions(List<PollOption> pollOptions) {
-        this.pollOptions = pollOptions;
+    public void setOptions(List<PollOption> options) {
+        this.options = options;
     }
 }

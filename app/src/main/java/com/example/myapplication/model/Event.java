@@ -19,7 +19,21 @@ public class Event {
 
     private String imageUrl;
 
-    private List<Poll> polls;
+    private boolean participant;
+
+
+    // → deadline na dodawanie wydatków (ISO yyyy-MM-dd), będzie wysyłany w JSON
+    private String budgetDeadline;
+
+    public String getBudgetDeadline() {
+        return budgetDeadline;
+    }
+
+    public void setBudgetDeadline(String budgetDeadline) {
+        this.budgetDeadline = budgetDeadline;
+    }
+
+
 
     public Long getId() {
         return id;
@@ -79,34 +93,43 @@ public class Event {
     public void setEventPrivacy(String eventPrivacy) { this.eventPrivacy = eventPrivacy; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
-    public List<Poll> getPolls() {
-        return polls;
+
+    private Poll datePoll;
+
+    private Poll locationPoll;
+
+    private Boolean enableDateVoting;
+    private Boolean enableLocationVoting;
+
+    public void setDatePoll(Poll poll){
+        datePoll = poll;
+    }
+    public void setLocationPoll(Poll poll){
+        locationPoll = poll;
     }
 
-    public void setPolls(List<Poll> polls) {
-        this.polls = polls;
+    public Poll getDatePoll(){
+        return datePoll;
+    }
+    public Poll getLocationPoll(){
+        return locationPoll;
+    }
+    public void setEnableDateVoting(Boolean value){
+        enableDateVoting = value;
+    }
+    public void setEnableLocationVoting(Boolean value){
+        enableLocationVoting = value;
     }
 
-    public List<Poll> getDatePollOptions() {
-        if (polls == null) return new ArrayList<>();
-        List<Poll> datePolls = new ArrayList<>();
-        for (Poll poll : polls) {
-            if ("DATE".equalsIgnoreCase(poll.getQuestion())) { // lub inny warunek identyfikujący
-                datePolls.add(poll);
-            }
-        }
-        return datePolls;
+    public Boolean getEnableDateVoting(){
+        return enableDateVoting;
+    }
+    public Boolean getEnableLocationVoting(){
+        return enableLocationVoting;
     }
 
-    public List<Poll> getLocationPollOptions() {
-        if (polls == null) return new ArrayList<>();
-        List<Poll> locationPolls = new ArrayList<>();
-        for (Poll poll : polls) {
-            if ("LOCATION".equalsIgnoreCase(poll.getQuestion())) { // lub inny warunek identyfikujący
-                locationPolls.add(poll);
-            }
-        }
-        return locationPolls;
+    public boolean isParticipant() {
+        return participant;
     }
 
     public String getDateVotingEndDate() {
@@ -128,4 +151,7 @@ public class Event {
         return null;
     }
 
+    public void setParticipant(boolean participant) {
+        participant = participant;
+    }
 }

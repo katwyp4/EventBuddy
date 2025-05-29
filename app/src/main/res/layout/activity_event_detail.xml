@@ -176,6 +176,49 @@
                 android:backgroundTint="#3F51B5"
                 android:textColor="#FFFFFF" />
 
+
+
+            <!-- 2) Kontener dwóch guzików (Budżet + Czat) -->
+            <LinearLayout
+                android:layout_width="200dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center_horizontal"
+                android:orientation="horizontal"
+                android:layout_marginTop="12dp">
+
+                <!-- Budżet (lewa połowa) -->
+                <Button
+                    android:id="@+id/btnOpenBudget"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:text="Budżet"
+                    android:background="@drawable/rounded_button_purple"
+                    android:textColor="#FFFFFF"/>
+
+                <!-- ODSTĘP między guzikami -->
+                <Space
+                    android:layout_width="8dp"
+                    android:layout_height="match_parent"/>
+
+                <!-- Czat (prawa połowa) -->
+                <ImageButton
+                    android:id="@+id/btnOpenChat"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_chat"
+                    android:tint="#FFFFFF"
+                    android:background="@drawable/rounded_button_purple"
+                    android:contentDescription="@string/chat"/>
+
+            </LinearLayout>
+
+
+
+
+
+
             <!-- Ikony -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -251,6 +294,14 @@
                         android:layout_marginStart="8dp" />
                 </LinearLayout>
             </LinearLayout>
+
+
+
+
+
+
+
+
 
             <HorizontalScrollView
                 android:layout_width="match_parent"

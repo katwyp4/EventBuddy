@@ -5,6 +5,7 @@ import com.kompetencyjny.EventBuddySpring.exception.ForbiddenException;
 import com.kompetencyjny.EventBuddySpring.model.*;
 import com.kompetencyjny.EventBuddySpring.repo.EventParticipantRepository;
 import com.kompetencyjny.EventBuddySpring.repo.EventRepository;
+import com.kompetencyjny.EventBuddySpring.repo.ExpenseRepository;
 import com.kompetencyjny.EventBuddySpring.service.EventService;
 import com.kompetencyjny.EventBuddySpring.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -13,8 +14,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -22,18 +25,89 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final UserService userService;
     private final EventParticipantRepository eventParticipantRepository;
+    private final ExpenseRepository expenseRepository;
 
     @Transactional
     @Override
     public Event create(Event event, String loggedUserName) {
         event.setId(null);
-        Optional<User> loggedUserOpt = userService.findByEmail(loggedUserName);
-        if (loggedUserOpt.isEmpty())
-            throw new NotFoundException("!!! YOU SHOULD NOT SEE THIS !!! Cannot find logged in user! email: \""+loggedUserName+"\".\nThis method expects to get a email of logged in user.");
 
+        Optional<User> loggedUserOpt = userService.findByEmail(loggedUserName);
+        if (loggedUserOpt.isEmpty()) {
+            throw new NotFoundException("!!! YOU SHOULD NOT SEE THIS !!! Cannot find logged in user! email: \"" + loggedUserName + "\".\nThis method expects to get a email of logged in user.");
+        }
+
+        if (event.getEnableDateVoting() && event.getDatePoll() != null) {
+            Poll datePoll = event.getDatePoll();
+            datePoll.setQuestion("Wybierz date wydarzenia");
+            datePoll.setEvent(event);
+            if (datePoll.getOptions() != null) {
+                datePoll.getOptions().forEach(opt -> opt.setPoll(datePoll));
+            }
+            else{
+                datePoll.setQuestion("zle");
+            }
+        }
+
+        if (event.getEnableLocationVoting() && event.getLocationPoll() != null) {
+            Poll locationPoll = event.getLocationPoll();
+            locationPoll.setQuestion("Wybierz lokalizacje wydarzenia");
+            locationPoll.setEvent(event);
+            if (locationPoll.getOptions() != null) {
+                locationPoll.getOptions().forEach(opt -> opt.setPoll(locationPoll));
+            }
+        }
+
+        // 👥 Dodanie autora jako ADMIN
         event.addParticipant(loggedUserOpt.get(), EventRole.ADMIN);
+
+        // 💾 Zapisz
         return this.eventRepository.save(event);
     }
+
+    @Override
+    public Map<String, BigDecimal> calculateBalances(Long eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event not found"));
+
+        Set<EventParticipant> participants = event.getParticipants();
+        if (participants.isEmpty()) {
+            return Map.of();
+        }
+
+        List<Expense> expenses = expenseRepository.findByEventId(eventId);
+
+        // 1. Oblicz ile wydał każdy użytkownik
+        Map<User, BigDecimal> totalPaidByUser = new HashMap<>();
+        for (Expense expense : expenses) {
+            User payer = expense.getPayer();
+            totalPaidByUser.put(payer,
+                    totalPaidByUser.getOrDefault(payer, BigDecimal.ZERO).add(expense.getAmount()));
+        }
+
+        // 2. Oblicz całkowity koszt i średni koszt na osobę
+        BigDecimal totalAmount = expenses.stream()
+                .map(Expense::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        int numParticipants = participants.size();
+        BigDecimal sharePerUser = numParticipants > 0
+                ? totalAmount.divide(BigDecimal.valueOf(numParticipants), 2, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO;
+
+        // 3. Oblicz saldo każdego uczestnika
+        Map<String, BigDecimal> balances = new HashMap<>();
+        for (EventParticipant ep : participants) {
+            User user = ep.getUser();
+            BigDecimal paid = totalPaidByUser.getOrDefault(user, BigDecimal.ZERO);
+            BigDecimal balance = paid.subtract(sharePerUser);
+            balances.put(user.getEmail(), balance); // możesz też użyć ID albo imienia
+        }
+
+        return balances;
+    }
+
+
 
 
 
