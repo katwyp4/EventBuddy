@@ -70,8 +70,6 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         } else {
             holder.dateVotingInfo.setVisibility(View.GONE);
         }
-
-        // Pokaz informację, czy jest głosowanie na lokalizację
         if (event.getLocationPoll() != null && event.getLocationPoll() != null) {
             holder.locationVotingInfo.setText("Głosowanie na lokalizację: TAK");
             holder.locationVotingInfo.setVisibility(View.VISIBLE);
@@ -89,6 +87,8 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             intent.putExtra("location", event.getLocation());
             intent.putExtra("budgetDeadline", event.getBudgetDeadline());
             intent.putExtra("IS_PARTICIPANT", event.isParticipant());
+            intent.putExtra("dateVotingEnd", event.getDateVotingEnd());
+            intent.putExtra("locationVotingEnd", event.getLocationVotingEnd());
 
 
             holder.itemView.getContext().startActivity(intent);

@@ -19,10 +19,11 @@ public class Event {
 
     private String imageUrl;
 
+    private String dateVotingEnd;
+    private String locationVotingEnd;
+
     private boolean participant;
 
-
-    // → deadline na dodawanie wydatków (ISO yyyy-MM-dd), będzie wysyłany w JSON
     private String budgetDeadline;
 
     public String getBudgetDeadline() {
@@ -134,5 +135,21 @@ public class Event {
 
     public void setParticipant(boolean participant) {
         participant = participant;
+    }
+
+    public String getDateVotingEnd() {
+        return dateVotingEnd;
+    }
+
+    public void setDateVotingEnd(String dateVotingEnd) {
+        this.dateVotingEnd = dateVotingEnd;
+    }
+
+    public String getLocationVotingEnd() {
+        return locationVotingEnd;
+    }
+
+    public void setLocationVotingEnd(String locationVotingEnd) {
+        this.locationVotingEnd = locationVotingEnd;
     }
 }
