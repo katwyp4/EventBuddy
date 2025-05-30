@@ -12,10 +12,14 @@ public interface EventMapper {
     @Mapping(target = "datePoll", source = "datePoll")
     @Mapping(target = "locationPoll", source = "locationPoll")
     @Mapping(target = "budgetDeadline", source = "budgetDeadline")
+    @Mapping(target = "datePollDeadline", source = "datePollDeadline")
+    @Mapping(target = "locationPollDeadline", source = "locationPollDeadline")
     EventDto toDto(Event event);
 
     @Mapping(target = "datePoll", source = "datePoll")
     @Mapping(target = "locationPoll", source = "locationPoll")
     @Mapping(target = "budgetDeadline", source = "budgetDeadline")
+    @Mapping(target = "datePollDeadline", source = "datePollDeadline")
+    @Mapping(target = "locationPollDeadline", source = "locationPollDeadline")
     Event toEntity(EventRequest eventRequest);
 }

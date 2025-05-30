@@ -26,6 +26,9 @@ public class Event {
 
     private String budgetDeadline;
 
+    private String datePollDeadline;
+    private String locationPollDeadline;
+
     public String getBudgetDeadline() {
         return budgetDeadline;
     }
@@ -151,5 +154,19 @@ public class Event {
 
     public void setLocationVotingEnd(String locationVotingEnd) {
         this.locationVotingEnd = locationVotingEnd;
+    }
+
+    public String getDatePollDeadline() {
+        return datePollDeadline;
+    }
+    public String getLocationPollDeadline() {
+        return locationPollDeadline;
+    }
+
+    public void setDatePollDeadline(String datePollDeadline){
+        this.datePollDeadline = datePollDeadline;
+    }
+    public void setLocationPollDeadline(String locationPollDeadline){
+        this.locationPollDeadline = locationPollDeadline;
     }
 }

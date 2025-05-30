@@ -78,8 +78,6 @@ public interface ApiService {
     Call<Void> vote(@Path("pollId") Long pollId, @Path("optionId") Long optionId);
 
 
-
-
     @GET("/api/messages")
     Call<List<MessageDto>> getMessages(@Query("eventId") long eventId);
 

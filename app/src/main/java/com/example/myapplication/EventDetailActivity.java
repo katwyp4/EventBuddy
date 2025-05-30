@@ -96,9 +96,6 @@ public class EventDetailActivity extends AppCompatActivity {
 
 
         Long eventId = getIntent().getLongExtra("eventId", -1);
-        dateVotingEnd = getIntent().getStringExtra("dateVotingEnd");
-        locationVotingEnd = getIntent().getStringExtra("locationVotingEnd");
-
 
         if (eventId != -1) {
             apiService.getEvent(eventId).enqueue(new Callback<com.example.myapplication.model.Event>() {
@@ -107,8 +104,10 @@ public class EventDetailActivity extends AppCompatActivity {
                     if (response.isSuccessful() && response.body() != null) {
                         com.example.myapplication.model.Event event = response.body();
 
+                        dateVotingEnd = event.getDatePollDeadline();
+                        locationVotingEnd = event.getLocationPollDeadline();
+
                         isParticipant = event.isParticipant();
-                        Log.d("PARTICIPANT", "Z backendu: " + isParticipant);
 
                         if (!isParticipant) {
                             btnOpenBudget.setVisibility(View.GONE);
@@ -136,7 +135,6 @@ public class EventDetailActivity extends AppCompatActivity {
                         fetchUpdatedPollOptions(true);
                         fetchUpdatedPollOptions(false);
 
-                        // ← PRZENIESIONE TUTAJ
                         setupVotingOptions();
                         setupVoteButtons();
                     }
@@ -152,16 +150,26 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     private boolean isVotingActive(String endDateString) {
-        if (endDateString == null || endDateString.isEmpty()) return true;
+        if (endDateString == null || endDateString.isEmpty()) {
+            return true;
+        }
         try {
-            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.getDefault());
-            java.util.Date endDate = sdf.parse(endDateString);
+            java.util.Date endDate;
+            if (endDateString.length() == 10) { // yyyy-MM-dd
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
+                endDate = sdf.parse(endDateString);
+            } else { // yyyy-MM-dd HH:mm
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.getDefault());
+                endDate = sdf.parse(endDateString);
+            }
+
             java.util.Date now = new java.util.Date();
             return now.before(endDate);
         } catch (Exception e) {
-            return true;
+            return true; // Jeśli błąd – domyślnie aktywne
         }
     }
+
 
 
     private void setupVotingOptions() {
@@ -204,9 +212,6 @@ public class EventDetailActivity extends AppCompatActivity {
         } else {
             dateVotingOptionsContainer.setVisibility(View.GONE);
             btnVoteDate.setVisibility(View.GONE);
-            if (datePollOptions != null && !datePollOptions.isEmpty() && !isVotingActive(dateVotingEnd)) {
-                Toast.makeText(this, "Głosowanie na datę już zakończone.", Toast.LENGTH_SHORT).show();
-            }
         }
         if (locationPollOptions != null && !locationPollOptions.isEmpty() && isVotingActive(locationVotingEnd)) {
             locationVotingOptionsContainer.setVisibility(View.VISIBLE);
@@ -223,13 +228,8 @@ public class EventDetailActivity extends AppCompatActivity {
         } else {
             locationVotingOptionsContainer.setVisibility(View.GONE);
             btnVoteLocation.setVisibility(View.GONE);
-            if (datePollOptions != null && !datePollOptions.isEmpty() && !isVotingActive(dateVotingEnd)) {
-                Toast.makeText(this, "Głosowanie na datę już zakończone.", Toast.LENGTH_SHORT).show();
-            }
         }
     }
-
-
 
 
 

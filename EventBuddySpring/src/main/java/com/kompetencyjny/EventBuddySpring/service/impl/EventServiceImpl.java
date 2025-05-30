@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 @Service
@@ -108,8 +109,12 @@ public class EventServiceImpl implements EventService {
     }
 
 
-
-
+    public boolean hasDateVotingEnded(Event event) {
+        return event.getDatePollDeadline() != null && LocalDate.now().isAfter(event.getDatePollDeadline());
+    }
+    public boolean hasLocationVotingEnded(Event event) {
+        return event.getLocationPollDeadline() != null && LocalDate.now().isAfter(event.getLocationPollDeadline());
+    }
 
     @Override
     public Page<Event> findAllVisible(Pageable pageable, String loggedUserName) {

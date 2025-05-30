@@ -73,7 +73,7 @@ public class LoginActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     String token = response.body().getToken();
                     tokenManager.saveToken(token);
-                    Toast.makeText(LoginActivity.this, "Zalogowano. Token: " + token, Toast.LENGTH_LONG).show();
+                    Toast.makeText(LoginActivity.this, "Zalogowano", Toast.LENGTH_LONG).show();
 
                     Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // Czyści stos, nie wrócisz do loginu
