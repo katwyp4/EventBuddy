@@ -28,10 +28,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/register", "/auth/login", "/uploads/**", "/api/messages",
-                                "/api/polls","api/polls/{pollId}/options","api/polls/{pollId}",
-                                "api/polls/{pollId}/options/{optionId}/vote","api/polls/{pollId}/results").permitAll()
-                        .anyRequest().permitAll()
+                        .requestMatchers("/auth/register", "/auth/login").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
