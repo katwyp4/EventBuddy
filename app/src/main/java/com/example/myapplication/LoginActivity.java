@@ -49,6 +49,14 @@ public class LoginActivity extends AppCompatActivity {
 
         loginButton.setOnClickListener(v -> loginUser());
 
+        if (tokenManager.getToken() != null) {
+            // Użytkownik jest już zalogowany, przekieruj go dalej
+            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            return;
+        }
+
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
