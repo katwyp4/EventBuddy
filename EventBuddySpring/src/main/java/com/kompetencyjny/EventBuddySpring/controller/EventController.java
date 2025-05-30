@@ -11,6 +11,7 @@ import com.kompetencyjny.EventBuddySpring.repo.PollOptionRepository;
 import com.kompetencyjny.EventBuddySpring.repo.UserRepository;
 import com.kompetencyjny.EventBuddySpring.service.EventService;
 import com.kompetencyjny.EventBuddySpring.service.FileStorageService;
+import com.kompetencyjny.EventBuddySpring.service.PollService;
 import com.kompetencyjny.EventBuddySpring.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,7 +46,7 @@ public class EventController {
     private final UserRepository userRepository;
     private final ExpenseRepository expenseRepository;
     private final ExpenseMapper expenseMapper;
-
+    private final PollService pollService;
 
     // [GET] /api/events?size={}?page={}
     @GetMapping
@@ -55,22 +57,29 @@ public class EventController {
 
         Page<EventDto> dtoPage = eventsPage.map(event -> {
 
-            System.out.println("Sprawdzam, czy " + email + " jest uczestnikiem wydarzenia " + event.getId());
-
-            for (EventParticipant p : event.getParticipants()) {
-                System.out.println(" → uczestnik: " + p.getUser().getEmail());
+            if (event.getDate() == null && event.getDatePoll() != null && eventService.hasDateVotingEnded(event)) {
+                PollOption winner = pollService.getWinner(event.getDatePoll());
+                if (winner != null) {
+                    event.setDate(LocalDate.parse(winner.getValue()));
+                    eventRepository.save(event);
+                }
             }
+            if (event.getLocation() == null && event.getLocationPoll() != null && eventService.hasLocationVotingEnded(event)) {
+                PollOption locationWinner = pollService.getWinner(event.getLocationPoll());
+                if (locationWinner != null) {
+                    event.setLocation(locationWinner.getValue());
+                    eventRepository.save(event);
+                }
+            }
+
 
             EventDto dto = eventMapper.toDto(event);
             boolean isParticipant = event.getParticipants().stream()
                     .anyMatch(p -> {
                         String participantEmail = p.getUser().getEmail();
-                        System.out.println("Porównuję " + email + " == " + participantEmail);
                         return email.equals(participantEmail);
                     });
             dto.setParticipant(isParticipant);
-            System.out.println("TUTAJ " + isParticipant + " TUTAJ");
-            System.out.println("TUTAJ2 " + dto.isParticipant() + " TUTAJ2");
             return dto;
         });
         return ResponseEntity.ok(dtoPage);
@@ -112,24 +121,20 @@ public class EventController {
 
         Event event = eventMapper.toEntity(eventRequest);
 
-        // [1] Jeśli w EventRequest zaznaczono głosowanie na datę – twórz Poll
+        // Jeśli w EventRequest zaznaczono głosowanie na datę – twórz Poll
         if (eventRequest.isEnableDateVoting()) {
             Poll datePoll = new Poll();
             datePoll.setQuestion("Wybierz datę wydarzenia");
             event.setDatePoll(datePoll);
         }
 
-        // [2] Analogicznie dla lokalizacji
+        // Analogicznie dla lokalizacji
         if (eventRequest.isEnableLocationVoting()) {
             Poll locationPoll = new Poll();
             locationPoll.setQuestion("Wybierz lokalizację wydarzenia");
             event.setLocationPoll(locationPoll);
         }
 
-        // [3] Możesz przypisać użytkownika jeśli masz takie pole
-        // event.setCreator(userRepository.findByEmail(userDetails.getUsername()).orElseThrow());
-
-        // [4] Zapisz w bazie
         event = eventRepository.save(event);
 
         return new ResponseEntity<>(eventMapper.toDto(event), HttpStatus.CREATED);
@@ -255,6 +260,5 @@ public class EventController {
                 .toList();
         return ResponseEntity.ok(dtos);
     }
-
 
 }

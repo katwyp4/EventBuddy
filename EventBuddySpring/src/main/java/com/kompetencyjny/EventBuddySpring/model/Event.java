@@ -31,6 +31,8 @@ public class Event {
     @JsonIgnore private LocalDate deactivationDate=null;
     private String imageUrl;
     private LocalDate budgetDeadline;
+    private LocalDate datePollDeadline;
+    private LocalDate locationPollDeadline;
 
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)

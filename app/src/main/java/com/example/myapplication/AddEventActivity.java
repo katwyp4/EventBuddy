@@ -245,9 +245,10 @@ public class AddEventActivity extends AppCompatActivity {
                 event.setLocationPoll(locationPoll);
             }
 
-//            if (!pollsList.isEmpty()) {
-//                event.setPolls(pollsList);
-//            }
+            String dateVotingEnd = editDateVotingEnd.getText().toString().trim();
+            String locationVotingEnd = editLocationVotingEnd.getText().toString().trim();
+            event.setDatePollDeadline(dateVotingEnd);
+            event.setLocationPollDeadline(locationVotingEnd);
 
             Gson gson = new Gson();
             String eventJson = gson.toJson(event);

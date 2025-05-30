@@ -29,4 +29,6 @@ public class EventDto {
     private PollDto locationPoll;
     private LocalDate budgetDeadline;
     private boolean participant;
+    private LocalDate datePollDeadline;
+    private LocalDate locationPollDeadline;
 }

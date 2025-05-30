@@ -50,4 +50,8 @@ public interface EventService {
     Page<Event> findAllEventsOfUser(Pageable pageable, Long userId, String username);
 
     Map<String, BigDecimal> calculateBalances(Long eventId);
+
+    public boolean hasDateVotingEnded(Event event);
+
+    public boolean hasLocationVotingEnded(Event event);
 }
