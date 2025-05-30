@@ -39,25 +39,13 @@ public class AddEventActivity extends AppCompatActivity {
 
     private EditText editTitle, editDescription, editDate, editLocation;
     private ImageView imagePreview;
-    private Button btnSave, btnSelectImage;
-
-
-
-
-    private EditText editBudgetDeadline;
-
+    private Button btnSave, btnSelectImage, btnAddDatePollOption, btnAddLocationPollOption;
+    private EditText editBudgetDeadline, editDateVotingEnd, editNewDatePollOption, editNewLocationPollOption, editLocationVotingEnd;
     private CheckBox checkboxDateVoting, checkboxLocationVoting;
-
-    private LinearLayout datePollOptionsContainer, locationPollOptionsContainer;
-    private LinearLayout datePollDynamicOptions, locationPollDynamicOptions;
-
-    private EditText editNewDatePollOption, editNewLocationPollOption;
-    private Button btnAddDatePollOption, btnAddLocationPollOption;
-
+    private LinearLayout datePollOptionsContainer, locationPollOptionsContainer, datePollDynamicOptions, locationPollDynamicOptions, dateVotingEndContainer, locationVotingEndContainer;
     private List<PollOption> datePollOptionsList = new ArrayList<>();
     private List<PollOption> locationPollOptionsList = new ArrayList<>();
     private List<Poll> pollsList = new ArrayList<>();
-
     private Uri selectedImageUri;
     private ApiService apiService;
 
@@ -98,18 +86,24 @@ public class AddEventActivity extends AppCompatActivity {
 
         editBudgetDeadline = findViewById(R.id.editBudgetDeadline);
 
+        dateVotingEndContainer = findViewById(R.id.dateVotingEndContainer);
+        editDateVotingEnd = findViewById(R.id.editDateVotingEnd);
 
+        locationVotingEndContainer = findViewById(R.id.locationVotingEndContainer);
+        editLocationVotingEnd = findViewById(R.id.editLocationVotingEnd);
 
 
         checkboxDateVoting.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 editDate.setVisibility(View.GONE);
                 datePollOptionsContainer.setVisibility(View.VISIBLE);
+                dateVotingEndContainer.setVisibility(View.VISIBLE);
                 datePollOptionsList.clear();
                 datePollDynamicOptions.removeAllViews();
             } else {
                 editDate.setVisibility(View.VISIBLE);
                 datePollOptionsContainer.setVisibility(View.GONE);
+                dateVotingEndContainer.setVisibility(View.GONE);
             }
         });
 
@@ -117,11 +111,13 @@ public class AddEventActivity extends AppCompatActivity {
             if (isChecked) {
                 editLocation.setVisibility(View.GONE);
                 locationPollOptionsContainer.setVisibility(View.VISIBLE);
+                locationVotingEndContainer.setVisibility(View.VISIBLE);
                 locationPollOptionsList.clear();
                 locationPollDynamicOptions.removeAllViews();
             } else {
                 editLocation.setVisibility(View.VISIBLE);
                 locationPollOptionsContainer.setVisibility(View.GONE);
+                locationVotingEndContainer.setVisibility(View.GONE);
             }
         });
 

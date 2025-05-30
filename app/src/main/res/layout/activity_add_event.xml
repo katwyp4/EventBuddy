@@ -10,7 +10,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!-- Tytuł wydarzenia -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -21,7 +20,6 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="16dp"/>
 
-        <!-- Pole tytułu -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -37,7 +35,6 @@
             android:background="@drawable/edittext_background"
             android:textColor="#FFFFFF" />
 
-        <!-- Pole daty -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -55,35 +52,7 @@
             android:inputType="date"
             android:layout_marginTop="4dp"/>
 
-
-
-
-        <!-- ⬇⬇⬇ NOWOŚĆ – termin dodawania wydatków ⬇⬇⬇ -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Termin dodawania wydatków"
-            android:textColor="#FFFFFF"
-            android:layout_marginTop="12dp"/>
-
-        <EditText
-            android:id="@+id/editBudgetDeadline"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Wprowadź datę (YYYY-MM-DD)"
-            android:background="@drawable/edittext_background"
-            android:textColor="#FFFFFF"
-            android:inputType="date"
-            android:layout_marginTop="4dp"/>
-        <!-- ⬆⬆⬆ KONIEC wstawki ⬆⬆⬆ -->
-
-
-
-
-
-
-
-        <!-- Checkbox - głosowanie na datę -->
+        <!-- Checkbox PRZENIESIONY tutaj -->
         <CheckBox
             android:id="@+id/checkboxDateVoting"
             android:layout_width="wrap_content"
@@ -91,6 +60,28 @@
             android:text="Stwórz głosowanie na datę wydarzenia"
             android:textColor="#FFFFFF"
             android:layout_marginTop="8dp"/>
+
+        <LinearLayout
+            android:id="@+id/dateVotingEndContainer"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginTop="8dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Koniec głosowania nad datą:"
+                android:textColor="#FFFFFF"/>
+            <EditText
+                android:id="@+id/editDateVotingEnd"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="YYYY-MM-DD HH:MM"
+                android:background="@drawable/edittext_background"
+                android:textColor="#FFFFFF"
+                android:inputType="datetime"/>
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/datePollOptionsContainer"
@@ -131,7 +122,6 @@
                     android:text="Dodaj" />
             </LinearLayout>
 
-            <!-- ⬇⬇⬇ TO DODAJ, jeśli brakuje ⬇⬇⬇ -->
             <LinearLayout
                 android:id="@+id/datePollDynamicOptions"
                 android:layout_width="match_parent"
@@ -139,7 +129,26 @@
                 android:orientation="vertical"
                 android:layout_marginTop="8dp" />
         </LinearLayout>
-        <!-- Pole lokalizacji -->
+
+        <!-- POLE: TERMIN DODAWANIA WYDATKÓW -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Termin dodawania wydatków"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="12dp"/>
+
+        <EditText
+            android:id="@+id/editBudgetDeadline"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Wprowadź datę (YYYY-MM-DD)"
+            android:background="@drawable/edittext_background"
+            android:textColor="#FFFFFF"
+            android:inputType="date"
+            android:layout_marginTop="4dp"/>
+
+        <!-- LOKALIZACJA i głosowanie -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -156,7 +165,6 @@
             android:textColor="#FFFFFF"
             android:layout_marginTop="4dp" />
 
-        <!-- Checkbox - głosowanie na lokalizację -->
         <CheckBox
             android:id="@+id/checkboxLocationVoting"
             android:layout_width="wrap_content"
@@ -165,7 +173,28 @@
             android:textColor="#FFFFFF"
             android:layout_marginTop="8dp"/>
 
-        <!-- Kontener na głosowanie nad lokalizacją -->
+        <LinearLayout
+            android:id="@+id/locationVotingEndContainer"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginTop="8dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Koniec głosowania nad lokalizacją:"
+                android:textColor="#FFFFFF"/>
+            <EditText
+                android:id="@+id/editLocationVotingEnd"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="YYYY-MM-DD HH:MM"
+                android:background="@drawable/edittext_background"
+                android:textColor="#FFFFFF"
+                android:inputType="datetime"/>
+        </LinearLayout>
+
         <LinearLayout
             android:id="@+id/locationPollOptionsContainer"
             android:layout_width="match_parent"
@@ -205,7 +234,6 @@
                     android:text="Dodaj" />
             </LinearLayout>
 
-            <!-- Nowe propozycje będą dodawane tutaj -->
             <LinearLayout
                 android:id="@+id/locationPollDynamicOptions"
                 android:layout_width="match_parent"
@@ -214,7 +242,6 @@
                 android:layout_marginTop="8dp" />
         </LinearLayout>
 
-        <!-- Zdjęcie -->
         <Button
             android:id="@+id/selectImageButton"
             android:layout_width="wrap_content"
@@ -232,7 +259,6 @@
             android:contentDescription="Podgląd zdjęcia"
             android:visibility="visible" />
 
-        <!-- Opis -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -251,7 +277,6 @@
             android:inputType="textMultiLine"
             android:layout_marginTop="12dp" />
 
-        <!-- Zapisz -->
         <Button
             android:id="@+id/btnSave"
             android:layout_width="wrap_content"

@@ -109,8 +109,17 @@
                     android:backgroundTint="#3F51B5"
                     android:textColor="#FFFFFF" />
             </LinearLayout>
+            <TextView
+                android:id="@+id/dateVotingEndInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Głosowanie na datę trwa do: ..."
+                android:textColor="#FFA500"
+                android:textStyle="italic"
+                android:textAlignment="center"
+                android:layout_marginTop="4dp"
+                android:visibility="gone" />
 
-            <!-- Kontener i RadioGroup do głosowania na lokalizację -->
             <LinearLayout
                 android:id="@+id/locationVotingOptionsContainer"
                 android:layout_width="match_parent"
@@ -145,6 +154,17 @@
                     android:backgroundTint="#3F51B5"
                     android:textColor="#FFFFFF" />
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/locationVotingEndInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Głosowanie na lokalizację trwa do: ..."
+                android:textColor="#FFA500"
+                android:textStyle="italic"
+                android:textAlignment="center"
+                android:layout_marginTop="4dp"
+                android:visibility="gone" />
 
             <Button
                 android:id="@+id/btnJoin"

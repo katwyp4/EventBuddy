@@ -52,6 +52,14 @@ public class EventDetailActivity extends AppCompatActivity {
 
     private boolean isParticipant = true;
 
+    private String dateVotingEnd;
+    private String locationVotingEnd;
+
+    private TextView dateVotingEndInfo;
+    private TextView locationVotingEndInfo;
+
+
+
 
 
     @Override
@@ -74,6 +82,11 @@ public class EventDetailActivity extends AppCompatActivity {
         btnVoteLocation = findViewById(R.id.btnVoteLocation);
         btnOpenBudget = findViewById(R.id.btnOpenBudget);
         btnOpenChat  = findViewById(R.id.btnOpenChat);
+        dateVotingEndInfo = findViewById(R.id.dateVotingEndInfo);
+        locationVotingEndInfo = findViewById(R.id.locationVotingEndInfo);
+
+
+
 
         btnOpenChat.setOnClickListener(v -> {
             Intent i = new Intent(this, ChatActivity.class);
@@ -83,6 +96,9 @@ public class EventDetailActivity extends AppCompatActivity {
 
 
         Long eventId = getIntent().getLongExtra("eventId", -1);
+        dateVotingEnd = getIntent().getStringExtra("dateVotingEnd");
+        locationVotingEnd = getIntent().getStringExtra("locationVotingEnd");
+
 
         if (eventId != -1) {
             apiService.getEvent(eventId).enqueue(new Callback<com.example.myapplication.model.Event>() {
@@ -133,14 +149,48 @@ public class EventDetailActivity extends AppCompatActivity {
             });
         }
 
+    }
 
+    private boolean isVotingActive(String endDateString) {
+        if (endDateString == null || endDateString.isEmpty()) return true;
+        try {
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.getDefault());
+            java.util.Date endDate = sdf.parse(endDateString);
+            java.util.Date now = new java.util.Date();
+            return now.before(endDate);
+        } catch (Exception e) {
+            return true;
+        }
     }
 
 
     private void setupVotingOptions() {
-        // Data poll options
-        if (datePollOptions != null && !datePollOptions.isEmpty()) {
+
+        if (dateVotingEnd != null && !dateVotingEnd.isEmpty()) {
+            dateVotingEndInfo.setVisibility(View.VISIBLE);
+            if (isVotingActive(dateVotingEnd)) {
+                dateVotingEndInfo.setText("Głosowanie na datę trwa do: " + dateVotingEnd);
+            } else {
+                dateVotingEndInfo.setText("Głosowanie na datę zakończone.");
+            }
+        } else {
+            dateVotingEndInfo.setVisibility(View.GONE);
+        }
+
+        if (locationVotingEnd != null && !locationVotingEnd.isEmpty()) {
+            locationVotingEndInfo.setVisibility(View.VISIBLE);
+            if (isVotingActive(locationVotingEnd)) {
+                locationVotingEndInfo.setText("Głosowanie na lokalizację trwa do: " + locationVotingEnd);
+            } else {
+                locationVotingEndInfo.setText("Głosowanie na lokalizację zakończone.");
+            }
+        } else {
+            locationVotingEndInfo.setVisibility(View.GONE);
+        }
+
+        if (datePollOptions != null && !datePollOptions.isEmpty() && isVotingActive(dateVotingEnd)) {
             dateVotingOptionsContainer.setVisibility(View.VISIBLE);
+            btnVoteDate.setVisibility(View.VISIBLE);
             dateVotingRadioGroup.removeAllViews();
             for (PollOption option : datePollOptions) {
                 RadioButton rb = new RadioButton(this);
@@ -150,13 +200,17 @@ public class EventDetailActivity extends AppCompatActivity {
                 rb.setTextColor(Color.WHITE);
                 dateVotingRadioGroup.addView(rb);
             }
+
         } else {
             dateVotingOptionsContainer.setVisibility(View.GONE);
+            btnVoteDate.setVisibility(View.GONE);
+            if (datePollOptions != null && !datePollOptions.isEmpty() && !isVotingActive(dateVotingEnd)) {
+                Toast.makeText(this, "Głosowanie na datę już zakończone.", Toast.LENGTH_SHORT).show();
+            }
         }
-
-        // Location poll options
-        if (locationPollOptions != null && !locationPollOptions.isEmpty()) {
+        if (locationPollOptions != null && !locationPollOptions.isEmpty() && isVotingActive(locationVotingEnd)) {
             locationVotingOptionsContainer.setVisibility(View.VISIBLE);
+            btnVoteLocation.setVisibility(View.VISIBLE);
             locationVotingRadioGroup.removeAllViews();
             for (PollOption option : locationPollOptions) {
                 RadioButton rb = new RadioButton(this);
@@ -165,10 +219,16 @@ public class EventDetailActivity extends AppCompatActivity {
                 rb.setTextColor(Color.WHITE);
                 locationVotingRadioGroup.addView(rb);
             }
+
         } else {
             locationVotingOptionsContainer.setVisibility(View.GONE);
+            btnVoteLocation.setVisibility(View.GONE);
+            if (datePollOptions != null && !datePollOptions.isEmpty() && !isVotingActive(dateVotingEnd)) {
+                Toast.makeText(this, "Głosowanie na datę już zakończone.", Toast.LENGTH_SHORT).show();
+            }
         }
     }
+
 
 
 
@@ -215,11 +275,7 @@ public class EventDetailActivity extends AppCompatActivity {
             }
         });
     }
-
-
-
     private void fetchUpdatedPollOptions(boolean isDateVote) {
-        // Pobierz ID eventu z Intentu lub innego źródła
         Long eventId = getIntent().getLongExtra("eventId", -1);
         if (eventId == -1) {
             Toast.makeText(this, "Błąd: brak ID wydarzenia", Toast.LENGTH_SHORT).show();
