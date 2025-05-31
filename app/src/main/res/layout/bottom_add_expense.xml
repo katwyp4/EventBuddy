@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <!-- Nagłówek okna -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -14,32 +15,51 @@
         android:textStyle="bold"
         android:textSize="18sp"/>
 
+    <!-- ───── Nazwa wydatku ───── -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Nazwa wydatku"
+        android:textColor="#BB86FC"
+        android:textStyle="bold"
+        android:layout_marginTop="12dp"/>
+
     <EditText
         android:id="@+id/etExpenseDesc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Opis"
+        android:hint="np. Bilet, Przekąski"
         android:textColor="#FFFFFF"
-        android:background="@drawable/edittext_background"
+        android:textColorHint="#808080"
+        android:background="@drawable/edittext_background"/>
+
+    <!-- ───── Zapłacona kwota ───── -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Zapłacona kwota (PLN)"
+        android:textColor="#BB86FC"
+        android:textStyle="bold"
         android:layout_marginTop="12dp"/>
 
     <EditText
         android:id="@+id/etExpenseAmount"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Kwota (PLN)"
+        android:hint="0.00"
         android:inputType="numberDecimal"
         android:textColor="#FFFFFF"
-        android:background="@drawable/edittext_background"
-        android:layout_marginTop="8dp"/>
+        android:textColorHint="#808080"
+        android:background="@drawable/edittext_background"/>
 
+    <!-- Przycisk zapisu -->
     <Button
         android:id="@+id/btnSaveExpense"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
         android:text="Zapisz"
         android:layout_gravity="end"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="16dp"
         android:backgroundTint="#673AB7"
         android:textColor="#FFFFFF"/>
 </LinearLayout>
