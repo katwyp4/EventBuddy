@@ -23,7 +23,7 @@ import com.example.myapplication.network.RetrofitClient;
 import com.example.myapplication.budget.BudgetActivity;
 import com.example.myapplication.chat.ChatActivity;
 
-
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +49,9 @@ public class EventDetailActivity extends AppCompatActivity {
     private Button btnOpenBudget;
 
     private ImageButton btnOpenChat;
+
+    private ImageButton btnOpenTasks;
+
 
     private boolean isParticipant = true;
 
@@ -81,6 +84,28 @@ public class EventDetailActivity extends AppCompatActivity {
         btnVoteDate = findViewById(R.id.btnVoteDate);
         btnVoteLocation = findViewById(R.id.btnVoteLocation);
         btnOpenBudget = findViewById(R.id.btnOpenBudget);
+        btnOpenTasks = findViewById(R.id.btnOpenTasks);
+
+
+
+        /* ─── tymczasowe nazwiska do spinnera w TaskActivity ───────────── */
+        ArrayList<String> dummyNames = new ArrayList<>(Arrays.asList(
+                "Jan Kowalski", "Anna Nowak", "Piotr Zieliński"));
+        /* ─────────────────────────────────────────────────────────────── */
+
+        btnOpenTasks.setOnClickListener(v -> {
+            Intent i = new Intent(EventDetailActivity.this,
+                    com.example.myapplication.task.TaskActivity.class);
+
+            i.putExtra("EVENT_ID",
+                    getIntent().getLongExtra("eventId", -1));     // id eventu
+            i.putStringArrayListExtra("PARTICIPANTS", dummyNames);
+
+            startActivity(i);
+        });
+
+
+
         btnOpenChat  = findViewById(R.id.btnOpenChat);
         dateVotingEndInfo = findViewById(R.id.dateVotingEndInfo);
         locationVotingEndInfo = findViewById(R.id.locationVotingEndInfo);

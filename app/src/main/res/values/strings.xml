@@ -3,5 +3,8 @@
     <string name="login_button">Zaloguj się</string>
     <string name="register_button">Zarejestruj się</string>
     <string name="chat">Chat</string>
+    <string name="tasks">Zadania</string>
+    <string name="task_choose_assignee">Wybierz uczestnika wydarzenia</string>
+
 
 </resources>

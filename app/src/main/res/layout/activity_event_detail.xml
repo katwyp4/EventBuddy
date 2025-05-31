@@ -178,41 +178,55 @@
 
 
 
-            <!-- 2) Kontener dwóch guzików (Budżet + Czat) -->
+            <!-- ░░░ 3 równoległe przyciski ░░░-->
             <LinearLayout
-                android:layout_width="200dp"
+                android:layout_width="358dp"
                 android:layout_height="48dp"
                 android:layout_gravity="center_horizontal"
-                android:orientation="horizontal"
-                android:layout_marginTop="12dp">
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal">
 
-                <!-- Budżet (lewa połowa) -->
+                <!-- Budżet -->
                 <Button
                     android:id="@+id/btnOpenBudget"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:layout_width="50dp"
                     android:layout_height="match_parent"
-                    android:text="Budżet"
+                    android:layout_weight="1"
                     android:background="@drawable/rounded_button_purple"
-                    android:textColor="#FFFFFF"/>
+                    android:text="Budżet"
+                    android:textColor="#FFFFFF" />
 
-                <!-- ODSTĘP między guzikami -->
                 <Space
                     android:layout_width="8dp"
-                    android:layout_height="match_parent"/>
+                    android:layout_height="match_parent" />
 
-                <!-- Czat (prawa połowa) -->
+                <!-- Czat -->
                 <ImageButton
                     android:id="@+id/btnOpenChat"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:layout_width="50dp"
                     android:layout_height="match_parent"
-                    android:src="@drawable/ic_chat"
-                    android:tint="#FFFFFF"
+                    android:layout_weight="1"
                     android:background="@drawable/rounded_button_purple"
-                    android:contentDescription="@string/chat"/>
+                    android:contentDescription="@string/chat"
+                    android:src="@drawable/ic_chat"
+                    app:tint="#FFFFFF" />
 
+                <Space
+                    android:layout_width="8dp"
+                    android:layout_height="match_parent" />
+
+                <!-- Taski -->
+                <ImageButton
+                    android:id="@+id/btnOpenTasks"
+                    android:layout_width="50dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/rounded_button_purple"
+                    android:contentDescription="Taski"
+                    android:src="@drawable/ic_tasks"
+                    app:tint="#FFFFFF" />
             </LinearLayout>
+
 
 
 

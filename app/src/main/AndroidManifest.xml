@@ -41,6 +41,9 @@
               android:exported="false"/>
 
 
+        <activity
+            android:name=".task.TaskActivity"
+            android:label="@string/tasks" />
 
 
 
