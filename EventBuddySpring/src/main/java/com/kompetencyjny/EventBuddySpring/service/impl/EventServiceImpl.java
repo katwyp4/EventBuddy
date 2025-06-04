@@ -5,6 +5,7 @@ import com.kompetencyjny.EventBuddySpring.exception.ForbiddenException;
 import com.kompetencyjny.EventBuddySpring.model.*;
 import com.kompetencyjny.EventBuddySpring.repo.EventParticipantRepository;
 import com.kompetencyjny.EventBuddySpring.repo.EventRepository;
+import com.kompetencyjny.EventBuddySpring.repo.ExpenseRepository;
 import com.kompetencyjny.EventBuddySpring.service.EventService;
 import com.kompetencyjny.EventBuddySpring.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -13,8 +14,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.util.Optional;
+import java.time.format.DateTimeParseException;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -22,24 +26,99 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final UserService userService;
     private final EventParticipantRepository eventParticipantRepository;
+    private final ExpenseRepository expenseRepository;
 
     @Transactional
     @Override
     public Event create(Event event, String loggedUserName) {
         event.setId(null);
-        Optional<User> loggedUserOpt = userService.findByUserName(loggedUserName);
-        if (loggedUserOpt.isEmpty())
-            throw new NotFoundException("!!! YOU SHOULD NOT SEE THIS !!! Cannot find logged in user! username: \""+loggedUserName+"\".\nThis method expects to get a username of logged in user.");
 
+        Optional<User> loggedUserOpt = userService.findByEmail(loggedUserName);
+        if (loggedUserOpt.isEmpty()) {
+            throw new NotFoundException("!!! YOU SHOULD NOT SEE THIS !!! Cannot find logged in user! email: \"" + loggedUserName + "\".\nThis method expects to get a email of logged in user.");
+        }
+
+        if (event.getEnableDateVoting() && event.getDatePoll() != null) {
+            Poll datePoll = event.getDatePoll();
+            datePoll.setQuestion("Wybierz date wydarzenia");
+            datePoll.setEvent(event);
+            if (datePoll.getOptions() != null) {
+                datePoll.getOptions().forEach(opt -> opt.setPoll(datePoll));
+            }
+            else{
+                datePoll.setQuestion("zle");
+            }
+        }
+
+        if (event.getEnableLocationVoting() && event.getLocationPoll() != null) {
+            Poll locationPoll = event.getLocationPoll();
+            locationPoll.setQuestion("Wybierz lokalizacje wydarzenia");
+            locationPoll.setEvent(event);
+            if (locationPoll.getOptions() != null) {
+                locationPoll.getOptions().forEach(opt -> opt.setPoll(locationPoll));
+            }
+        }
+
+        // 👥 Dodanie autora jako ADMIN
         event.addParticipant(loggedUserOpt.get(), EventRole.ADMIN);
+
+        // 💾 Zapisz
         return this.eventRepository.save(event);
     }
 
+    @Override
+    public Map<String, BigDecimal> calculateBalances(Long eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event not found"));
 
+        Set<EventParticipant> participants = event.getParticipants();
+        if (participants.isEmpty()) {
+            return Map.of();
+        }
+
+        List<Expense> expenses = expenseRepository.findByEventId(eventId);
+
+        // 1. Oblicz ile wydał każdy użytkownik
+        Map<User, BigDecimal> totalPaidByUser = new HashMap<>();
+        for (Expense expense : expenses) {
+            User payer = expense.getPayer();
+            totalPaidByUser.put(payer,
+                    totalPaidByUser.getOrDefault(payer, BigDecimal.ZERO).add(expense.getAmount()));
+        }
+
+        // 2. Oblicz całkowity koszt i średni koszt na osobę
+        BigDecimal totalAmount = expenses.stream()
+                .map(Expense::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        int numParticipants = participants.size();
+        BigDecimal sharePerUser = numParticipants > 0
+                ? totalAmount.divide(BigDecimal.valueOf(numParticipants), 2, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO;
+
+        // 3. Oblicz saldo każdego uczestnika
+        Map<String, BigDecimal> balances = new HashMap<>();
+        for (EventParticipant ep : participants) {
+            User user = ep.getUser();
+            BigDecimal paid = totalPaidByUser.getOrDefault(user, BigDecimal.ZERO);
+            BigDecimal balance = paid.subtract(sharePerUser);
+            balances.put(user.getEmail(), balance); // możesz też użyć ID albo imienia
+        }
+
+        return balances;
+    }
+
+
+    public boolean hasDateVotingEnded(Event event) {
+        return event.getDatePollDeadline() != null && LocalDate.now().isAfter(event.getDatePollDeadline());
+    }
+    public boolean hasLocationVotingEnded(Event event) {
+        return event.getLocationPollDeadline() != null && LocalDate.now().isAfter(event.getLocationPollDeadline());
+    }
 
     @Override
     public Page<Event> findAllVisible(Pageable pageable, String loggedUserName) {
-        Optional<User> userOpt = userService.findByUserName(loggedUserName);
+        Optional<User> userOpt = userService.findByEmail(loggedUserName);
         if (userOpt.isEmpty()) {
             throw new NotFoundException("User whith loggedUserName: "+loggedUserName+" does not exist");
         }
@@ -93,7 +172,7 @@ public class EventServiceImpl implements EventService {
     private boolean isEventVisibleToUser(Event event, String userName){
         if (event.getEventPrivacy().equals(EventPrivacy.PUBLIC_CLOSED)) return true;
         if (event.getEventPrivacy().equals(EventPrivacy.PUBLIC_OPEN)) return true;
-        Optional<User> user = userService.findByUserName(userName);
+        Optional<User> user = userService.findByEmail(userName);
         if (user.isEmpty()) return false;
         if (user.get().getRole()==Role.ADMIN) return true;
         return isUserAParticipantOf(event.getId(), user.get().getId());
@@ -140,9 +219,9 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public boolean isUserPermitted(Long eventId, String username, EventRole minRole) {
-        Optional<User> userOpt = userService.findByUserName(username);
-        if (userOpt.isEmpty()) throw new RuntimeException("No user found of username "+username);
+    public boolean isUserPermitted(Long eventId, String email, EventRole minRole) {
+        Optional<User> userOpt = userService.findByEmail(email);
+        if (userOpt.isEmpty()) throw new RuntimeException("No user found of email "+email);
 
         User loggedInUser = userOpt.get();
         if (loggedInUser.getRole() == Role.ADMIN) return true;
@@ -188,7 +267,7 @@ public class EventServiceImpl implements EventService {
         User user = userOpt.get();
         if (!isEventVisibleToUser(event, loggedUserName)) throw new NotFoundException("User or Event does not exists!");
 
-        Optional<User> loggedUserOpt = userService.findByUserName(loggedUserName);
+        Optional<User> loggedUserOpt = userService.findByEmail(loggedUserName);
         if (loggedUserOpt.isEmpty()) throw  new NotFoundException("Logged user does not exist");
         User loggedUser = loggedUserOpt.get();
 
@@ -217,7 +296,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventParticipant updateEventParticipantRole(Long eventId, Long userId, EventRole eventRole, String loggedUserName){
+    public EventParticipant updateEventParticipantRole(Long eventId, Long userId, EventRole eventRole, String loggedEmail){
         Optional<Event> eventOpt = this.findByIdInternal(eventId);
         Optional<User> userOpt = this.userService.findById(userId);
         if (userOpt.isEmpty() || eventOpt.isEmpty()) throw new NotFoundException("Event or user does not exist! eventId: "+eventId+" userId "+ userId);
@@ -225,24 +304,24 @@ public class EventServiceImpl implements EventService {
         Event event = eventOpt.get();
         User user = userOpt.get();
 
-        Optional<User> loggedUserOpt = userService.findByUserName(loggedUserName);
+        Optional<User> loggedUserOpt = userService.findByEmail(loggedEmail);
         if (loggedUserOpt.isEmpty()) throw new NotFoundException("Logged user not found!");
 
         User loggedUser = loggedUserOpt.get();
 
-        if (!isEventVisibleToUser(event, loggedUserName)) throw new NotFoundException("User or Event does not exists! eventId: "+eventId+" userId "+userId);
+        if (!isEventVisibleToUser(event, loggedEmail)) throw new NotFoundException("User or Event does not exists! eventId: "+eventId+" userId "+userId);
 
-        if (!isUserPermitted(eventId, loggedUserName, EventRole.ADMIN) && user != loggedUser)
-            throw new ForbiddenException("User username:"+loggedUserName+" not allowed to change user's role for event "+eventId);
+        if (!isUserPermitted(eventId, loggedEmail, EventRole.ADMIN) && user != loggedUser)
+            throw new ForbiddenException("User username:"+loggedEmail+" not allowed to change user's role for event "+eventId);
 
         if (user == loggedUser && loggedUser.getRole()!=Role.ADMIN) {
             Optional<EventParticipant> eventParticipantOpt = eventParticipantRepository.findById(new UserEventId(userId, eventId));
             if (eventParticipantOpt.isEmpty() && eventRole.compareTo(EventRole.PASSIVE)>0)
-                throw new ForbiddenException("User username:" + loggedUserName + " not allowed to change user's role for event " + eventId);
+                throw new ForbiddenException("User username:" + loggedEmail + " not allowed to change user's role for event " + eventId);
             if (eventParticipantOpt.isEmpty() && !event.getEventPrivacy().equals(EventPrivacy.PUBLIC_OPEN))
-                throw new ForbiddenException("User username:" + loggedUserName + " not allowed to change user's role for event " + eventId);
+                throw new ForbiddenException("User username:" + loggedEmail + " not allowed to change user's role for event " + eventId);
             if (eventParticipantOpt.isPresent() && eventParticipantOpt.get().getEventRole().compareTo(eventRole)<0)
-                throw new ForbiddenException("User username:" + loggedUserName + " not allowed to change user's role for event " + eventId);
+                throw new ForbiddenException("User username:" + loggedEmail + " not allowed to change user's role for event " + eventId);
         }
 
         Optional<EventParticipant> eventParticipantOpt = eventParticipantRepository.findById_EventIdAndId_UserId(eventId, userId);
@@ -261,7 +340,7 @@ public class EventServiceImpl implements EventService {
         Optional<User> userOpt = this.userService.findById(userId);
         if (userOpt.isEmpty()) throw new NotFoundException("User does not exist! UserId: "+ userId);
 
-        Optional<User> loggedInOpt = userService.findByUserName(loggedUserName);
+        Optional<User> loggedInOpt = userService.findByEmail(loggedUserName);
         if (loggedInOpt.isEmpty()) throw new NotFoundException("Logged in user does not exists!");
 
         return eventRepository.findAllEventsOfUser(pageable, userId, loggedInOpt.get().getId());

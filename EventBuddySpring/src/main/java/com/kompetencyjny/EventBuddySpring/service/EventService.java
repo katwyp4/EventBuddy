@@ -6,6 +6,8 @@ import com.kompetencyjny.EventBuddySpring.model.EventRole;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
+import java.util.Map;
 import java.util.Optional;
 
 public interface EventService {
@@ -46,4 +48,10 @@ public interface EventService {
     EventParticipant updateEventParticipantRole(Long eventId, Long userId, EventRole eventRole, String loggedUserName);
 
     Page<Event> findAllEventsOfUser(Pageable pageable, Long userId, String username);
+
+    Map<String, BigDecimal> calculateBalances(Long eventId);
+
+    public boolean hasDateVotingEnded(Event event);
+
+    public boolean hasLocationVotingEnded(Event event);
 }

@@ -15,6 +15,7 @@ import android.widget.Toast;
 import com.example.myapplication.network.ApiService;
 import com.example.myapplication.network.RetrofitClient;
 import com.example.myapplication.model.LoginResponse;
+import com.example.myapplication.network.TokenManager;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -30,6 +31,9 @@ public class LoginActivity extends AppCompatActivity {
     private Button loginButton;
     private ApiService apiService;
 
+    private TokenManager tokenManager;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,9 +44,18 @@ public class LoginActivity extends AppCompatActivity {
         passwordEditText = findViewById(R.id.editTextPassword);
         loginButton = findViewById(R.id.buttonSubmitLogin);
 
-        apiService = RetrofitClient.getInstance().create(ApiService.class);
+        apiService = RetrofitClient.getInstance(getApplicationContext()).create(ApiService.class);
+        tokenManager = new TokenManager(getApplicationContext());
 
         loginButton.setOnClickListener(v -> loginUser());
+
+        if (tokenManager.getToken() != null) {
+            // Użytkownik jest już zalogowany, przekieruj go dalej
+            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            return;
+        }
 
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -67,7 +80,8 @@ public class LoginActivity extends AppCompatActivity {
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     String token = response.body().getToken();
-                    Toast.makeText(LoginActivity.this, "Zalogowano. Token: " + token, Toast.LENGTH_LONG).show();
+                    tokenManager.saveToken(token);
+                    Toast.makeText(LoginActivity.this, "Zalogowano", Toast.LENGTH_LONG).show();
 
                     Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // Czyści stos, nie wrócisz do loginu

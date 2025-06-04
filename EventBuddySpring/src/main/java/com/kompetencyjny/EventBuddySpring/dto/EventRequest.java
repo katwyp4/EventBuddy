@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @Builder
@@ -25,4 +26,18 @@ public class EventRequest {
     private Double longitude;
     @Pattern(regexp = "(PRIVATE|PUBLIC_OPEN|PUBLIC_CLOSED)")
     private String eventPrivacy;
+    private String imageUrl;
+    private boolean enableDateVoting;
+    private boolean enableLocationVoting;
+    private PollDto datePoll;
+    private PollDto locationPoll;
+    private LocalDate budgetDeadline;
+    private LocalDate datePollDeadline;
+    private LocalDate locationPollDeadline;
+    public boolean isEnableDateVoting() { return enableDateVoting; }
+    public void setEnableDateVoting(boolean enableDateVoting) { this.enableDateVoting = enableDateVoting; }
+
+    public boolean isEnableLocationVoting() { return enableLocationVoting; }
+    public void setEnableLocationVoting(boolean enableLocationVoting) { this.enableLocationVoting = enableLocationVoting; }
+
 }

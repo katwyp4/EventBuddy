@@ -1,15 +1,18 @@
 package com.kompetencyjny.EventBuddySpring.controller;
 
-import com.kompetencyjny.EventBuddySpring.dto.EventDto;
-import com.kompetencyjny.EventBuddySpring.dto.EventParticipantDto;
-import com.kompetencyjny.EventBuddySpring.dto.EventRequest;
-import com.kompetencyjny.EventBuddySpring.dto.EventRoleRequest;
+import com.kompetencyjny.EventBuddySpring.dto.*;
 import com.kompetencyjny.EventBuddySpring.mappers.EventMapper;
 import com.kompetencyjny.EventBuddySpring.mappers.EventParticipantMapper;
-import com.kompetencyjny.EventBuddySpring.model.Event;
-import com.kompetencyjny.EventBuddySpring.model.EventParticipant;
-import com.kompetencyjny.EventBuddySpring.model.EventRole;
+import com.kompetencyjny.EventBuddySpring.mappers.ExpenseMapper;
+import com.kompetencyjny.EventBuddySpring.model.*;
+import com.kompetencyjny.EventBuddySpring.repo.EventRepository;
+import com.kompetencyjny.EventBuddySpring.repo.ExpenseRepository;
+import com.kompetencyjny.EventBuddySpring.repo.PollOptionRepository;
+import com.kompetencyjny.EventBuddySpring.repo.UserRepository;
 import com.kompetencyjny.EventBuddySpring.service.EventService;
+import com.kompetencyjny.EventBuddySpring.service.FileStorageService;
+import com.kompetencyjny.EventBuddySpring.service.PollService;
+import com.kompetencyjny.EventBuddySpring.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,7 +22,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -30,34 +40,106 @@ public class EventController {
     private final EventService eventService;
     private final EventMapper eventMapper;
     private final EventParticipantMapper eventParticipantMapper;
-
+    private  final FileStorageService fileStorageService;
+    private final PollOptionRepository pollOptionRepository;
+    private final EventRepository eventRepository;
+    private final UserRepository userRepository;
+    private final ExpenseRepository expenseRepository;
+    private final ExpenseMapper expenseMapper;
+    private final PollService pollService;
 
     // [GET] /api/events?size={}?page={}
     @GetMapping
     public ResponseEntity<Page<EventDto>> getAllEvents(Pageable pageable, @AuthenticationPrincipal UserDetails userDetails) {
         Page<EventDto> eventDtos;
-        eventDtos = eventService.findAllVisible(pageable, userDetails.getUsername()).map(eventMapper::toDto);
-        return ResponseEntity.ok(eventDtos);
+        Page<Event> eventsPage = eventService.findAllVisible(pageable, userDetails.getUsername());
+        String email = userDetails.getUsername();
+
+        Page<EventDto> dtoPage = eventsPage.map(event -> {
+
+            if (event.getDate() == null && event.getDatePoll() != null && eventService.hasDateVotingEnded(event)) {
+                PollOption winner = pollService.getWinner(event.getDatePoll());
+                if (winner != null) {
+                    event.setDate(LocalDate.parse(winner.getValue()));
+                    eventRepository.save(event);
+                }
+            }
+            if (event.getLocation() == null && event.getLocationPoll() != null && eventService.hasLocationVotingEnded(event)) {
+                PollOption locationWinner = pollService.getWinner(event.getLocationPoll());
+                if (locationWinner != null) {
+                    event.setLocation(locationWinner.getValue());
+                    eventRepository.save(event);
+                }
+            }
+
+
+            EventDto dto = eventMapper.toDto(event);
+            boolean isParticipant = event.getParticipants().stream()
+                    .anyMatch(p -> {
+                        String participantEmail = p.getUser().getEmail();
+                        return email.equals(participantEmail);
+                    });
+            dto.setParticipant(isParticipant);
+            return dto;
+        });
+        return ResponseEntity.ok(dtoPage);
     }
 
     // [GET] /api/events/{id}
     @GetMapping("/{id}")
     public ResponseEntity<EventDto> getEventById(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
-        Optional<Event> eventOpt;
-        eventOpt = eventService.findVisibleById(id, userDetails.getUsername());
+        Optional<Event> eventOpt = eventService.findVisibleById(id, userDetails.getUsername());
 
-        return eventOpt.map(event_ -> ResponseEntity.ok(eventMapper.toDto(event_)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        if (eventOpt.isPresent()) {
+            Event event = eventOpt.get();
+            EventDto dto = eventMapper.toDto(event);
+
+            userRepository.findByEmail(userDetails.getUsername()).ifPresent(user -> {
+                dto.setParticipant(event.isParticipant(user));
+            });
+
+            return ResponseEntity.ok(dto);
+        }
+
+        return ResponseEntity.notFound().build();
     }
+
+
+    @GetMapping("/event/{eventId}/settlement")
+    public Map<String, BigDecimal> getSettlement(@PathVariable Long eventId) {
+        return eventService.calculateBalances(eventId);
+    }
+
+
 
     // [POST] /api/events
     @ResponseBody
     @PostMapping
-    public ResponseEntity<EventDto> createEvent(@Valid @RequestBody EventRequest eventRequest, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<EventDto> createEvent(
+            @Valid @RequestBody EventRequest eventRequest,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
         Event event = eventMapper.toEntity(eventRequest);
-        event = eventService.create(event, userDetails.getUsername());
+
+        // Jeśli w EventRequest zaznaczono głosowanie na datę – twórz Poll
+        if (eventRequest.isEnableDateVoting()) {
+            Poll datePoll = new Poll();
+            datePoll.setQuestion("Wybierz datę wydarzenia");
+            event.setDatePoll(datePoll);
+        }
+
+        // Analogicznie dla lokalizacji
+        if (eventRequest.isEnableLocationVoting()) {
+            Poll locationPoll = new Poll();
+            locationPoll.setQuestion("Wybierz lokalizację wydarzenia");
+            event.setLocationPoll(locationPoll);
+        }
+
+        event = eventRepository.save(event);
+
         return new ResponseEntity<>(eventMapper.toDto(event), HttpStatus.CREATED);
     }
+
 
     // [PUT] /api/events/{id}
     @PutMapping("/{id}")
@@ -139,6 +221,44 @@ public class EventController {
                                                                      @AuthenticationPrincipal UserDetails userDetails
     ){
         return ResponseEntity.ok(eventService.findAllEventsOfUser(pageable, userId, userDetails.getUsername()).map(eventMapper::toDto));
+    }
+
+    @PostMapping("/with-image")
+    public ResponseEntity<EventDto> createEventWithImage(
+            @RequestPart("event") EventRequest eventRequest,
+            @RequestPart("image") MultipartFile image,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        try {
+            String imagePath = fileStorageService.saveImage(image); // tu zapisuje się zdjęcie do katalogu
+            eventRequest.setImageUrl(imagePath);                    // tylko ścieżka trafia do bazy
+
+            Event event = eventMapper.toEntity(eventRequest);
+            event.setBudgetDeadline(eventRequest.getBudgetDeadline());
+            event = eventService.create(event, userDetails.getUsername());
+
+            return new ResponseEntity<>(eventMapper.toDto(event), HttpStatus.CREATED);
+        } catch (IOException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/{eventId}/datePollOptions")
+    public ResponseEntity<List<PollOptionDto>> getDatePollOptions(@PathVariable Long eventId) {
+        List<PollOption> options = pollOptionRepository.findDatePollOptionsByEventId(eventId);
+        List<PollOptionDto> dtos = options.stream()
+                .map(o -> new PollOptionDto(o.getId(), o.getValue(), o.getVoteCount(), o.getPoll().getId()))
+                .toList();
+        return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping("/{eventId}/locationPollOptions")
+    public ResponseEntity<List<PollOptionDto>> getLocationPollOptions(@PathVariable Long eventId) {
+        List<PollOption> options = pollOptionRepository.findLocationPollOptionsByEventId(eventId);
+        List<PollOptionDto> dtos = options.stream()
+                .map(o -> new PollOptionDto(o.getId(), o.getValue(), o.getVoteCount(), o.getPoll().getId()))
+                .toList();
+        return ResponseEntity.ok(dtos);
     }
 
 }

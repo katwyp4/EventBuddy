@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Dodaj wydarzenie"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tytuł wydarzenia"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="8dp" />
+
+        <EditText
+            android:id="@+id/editTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="np. Juwenalia Łódzkie"
+            android:background="@drawable/edittext_background"
+            android:textColor="#FFFFFF" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Data"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="12dp" />
+
+        <EditText
+            android:id="@+id/editDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Wprowadź datę"
+            android:background="@drawable/edittext_background"
+            android:textColor="#FFFFFF"
+            android:inputType="date"
+            android:layout_marginTop="4dp"/>
+
+        <!-- Checkbox PRZENIESIONY tutaj -->
+        <CheckBox
+            android:id="@+id/checkboxDateVoting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Stwórz głosowanie na datę wydarzenia"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="8dp"/>
+
+        <LinearLayout
+            android:id="@+id/dateVotingEndContainer"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginTop="8dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Koniec głosowania nad datą:"
+                android:textColor="#FFFFFF"/>
+            <EditText
+                android:id="@+id/editDateVotingEnd"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="YYYY-MM-DD HH:MM"
+                android:background="@drawable/edittext_background"
+                android:textColor="#FFFFFF"
+                android:inputType="datetime"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/datePollOptionsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:background="@drawable/edittext_background"
+            android:padding="8dp"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Propozycje dat do głosowania"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:layout_marginBottom="6dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/editNewDatePollOption"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:hint="Dodaj nową propozycję daty"
+                    android:textColor="#FFFFFF"
+                    android:background="@drawable/edittext_background" />
+
+                <Button
+                    android:id="@+id/btnAddDatePollOption"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Dodaj" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/datePollDynamicOptions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
+
+        <!-- POLE: TERMIN DODAWANIA WYDATKÓW -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Termin dodawania wydatków"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="12dp"/>
+
+        <EditText
+            android:id="@+id/editBudgetDeadline"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Wprowadź datę (YYYY-MM-DD)"
+            android:background="@drawable/edittext_background"
+            android:textColor="#FFFFFF"
+            android:inputType="date"
+            android:layout_marginTop="4dp"/>
+
+        <!-- LOKALIZACJA i głosowanie -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Lokalizacja"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="12dp" />
+
+        <EditText
+            android:id="@+id/editLocation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="np. Łódź, Piotrkowska 123"
+            android:background="@drawable/edittext_background"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="4dp" />
+
+        <CheckBox
+            android:id="@+id/checkboxLocationVoting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Stwórz głosowanie na lokalizację wydarzenia"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="8dp"/>
+
+        <LinearLayout
+            android:id="@+id/locationVotingEndContainer"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginTop="8dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Koniec głosowania nad lokalizacją:"
+                android:textColor="#FFFFFF"/>
+            <EditText
+                android:id="@+id/editLocationVotingEnd"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="YYYY-MM-DD HH:MM"
+                android:background="@drawable/edittext_background"
+                android:textColor="#FFFFFF"
+                android:inputType="datetime"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/locationPollOptionsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:background="@drawable/edittext_background"
+            android:padding="8dp"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Propozycje lokalizacji do głosowania"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:layout_marginBottom="6dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/editNewLocationPollOption"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:hint="Dodaj nową propozycję lokalizacji"
+                    android:textColor="#FFFFFF"
+                    android:background="@drawable/edittext_background" />
+
+                <Button
+                    android:id="@+id/btnAddLocationPollOption"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Dodaj" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/locationPollDynamicOptions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/selectImageButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Wybierz zdjęcie z galerii"
+            android:layout_marginTop="12dp" />
+
+        <ImageView
+            android:id="@+id/imagePreview"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:scaleType="centerCrop"
+            android:contentDescription="Podgląd zdjęcia"
+            android:visibility="visible" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Opis wydarzenia"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="8dp" />
+
+        <EditText
+            android:id="@+id/editDescription"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:hint="Opis..."
+            android:background="@drawable/edittext_background"
+            android:textColor="#FFFFFF"
+            android:gravity="top"
+            android:inputType="textMultiLine"
+            android:layout_marginTop="12dp" />
+
+        <Button
+            android:id="@+id/btnSave"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Zapisz"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="24dp" />
+
+    </LinearLayout>
+</ScrollView>

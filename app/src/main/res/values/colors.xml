@@ -4,4 +4,12 @@
     <color name="text_white">#FFFFFF</color>
     <color name="button_blue">#6087DB</color>
     <color name="button_purple">#4947A6</color>
+    <color name="sender_purple">#BB86FC</color>
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="purple_700">#6200EE</color>
+
+
+
+    <color name="blue">#4947A6</color> //dodalem bo mi nie startowalo
 </resources>
