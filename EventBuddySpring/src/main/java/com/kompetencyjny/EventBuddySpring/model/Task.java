@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Data
 @NoArgsConstructor
@@ -18,7 +19,8 @@ public class Task {
     private Long id;
 
     private String name;
-    private String status; // np. TO_DO, IN_PROGRESS, DONE
+    @Enumerated(EnumType.STRING)
+    private TaskStatus status;
 
     @ManyToOne
     @JoinColumn(name = "event_id")
@@ -28,6 +30,15 @@ public class Task {
     @JoinColumn(name = "assigned_user_id")
     private User assignedUser;
 
-    @JsonIgnore private Boolean active;
-    @JsonIgnore private LocalDate deactivationDate;
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Task that = (Task) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
 }

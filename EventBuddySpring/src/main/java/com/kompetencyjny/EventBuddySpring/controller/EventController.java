@@ -135,7 +135,7 @@ public class EventController {
             event.setLocationPoll(locationPoll);
         }
 
-        event = eventRepository.save(event);
+        event = eventService.create(event, userDetails.getUsername());
 
         return new ResponseEntity<>(eventMapper.toDto(event), HttpStatus.CREATED);
     }
