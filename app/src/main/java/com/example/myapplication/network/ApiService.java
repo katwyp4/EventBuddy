@@ -97,4 +97,15 @@ public interface ApiService {
     @POST("/api/expenses")
     Call<ExpenseDto> addExpense(@Body CreateExpenseDto dto);
 
+
+
+    @GET("/api/events/{eventId}/photos")
+    Call<List<String>> getEventPhotos(@Path("eventId") long eventId);
+
+    @Multipart
+    @POST("/api/events/{eventId}/photos")
+    Call<Void> uploadEventPhoto(@Path("eventId") long eventId,
+                                @Part MultipartBody.Part file);
+
+
 }

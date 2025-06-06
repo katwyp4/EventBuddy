@@ -19,6 +19,8 @@ public class Event {
     private Long id;
 
     private String title;
+
+    @Column(length = 500)
     private String description;
     private LocalDate date;
     private String location;

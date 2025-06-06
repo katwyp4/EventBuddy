@@ -25,5 +25,10 @@ public class FileStorageService {
         Files.copy(file.getInputStream(), filePath);
         return "/uploads/" + filename;
     }
+
+
+    public String store(MultipartFile file) throws IOException {
+        return saveImage(file);
+    }
 }
 

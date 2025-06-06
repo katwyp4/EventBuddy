@@ -52,6 +52,9 @@ public class EventDetailActivity extends AppCompatActivity {
 
     private ImageButton btnOpenTasks;
 
+    private ImageButton btnOpenGallery;
+
+
 
     private boolean isParticipant = true;
 
@@ -85,6 +88,8 @@ public class EventDetailActivity extends AppCompatActivity {
         btnVoteLocation = findViewById(R.id.btnVoteLocation);
         btnOpenBudget = findViewById(R.id.btnOpenBudget);
         btnOpenTasks = findViewById(R.id.btnOpenTasks);
+        btnOpenGallery = findViewById(R.id.btnOpenGallery);
+
 
 
 
@@ -118,6 +123,13 @@ public class EventDetailActivity extends AppCompatActivity {
             i.putExtra("EVENT_ID", getIntent().getLongExtra("eventId", -1));
             startActivity(i);
         });
+
+        btnOpenGallery.setOnClickListener(v -> {
+            Intent i = new Intent(EventDetailActivity.this, com.example.myapplication.gallery.GalleryActivity.class);
+            i.putExtra("EVENT_ID", getIntent().getLongExtra("eventId", -1));
+            startActivity(i);
+        });
+
 
 
         Long eventId = getIntent().getLongExtra("eventId", -1);
