@@ -63,7 +63,9 @@ public class ChatActivity extends AppCompatActivity {
             String content = etMessage.getText().toString().trim();
             if (content.isEmpty()) return;
 
-            CreateMessageDto dto = new CreateMessageDto(userId, eventId, content);
+            CreateMessageDto dto = new CreateMessageDto();
+            dto.setEventId(eventId);
+            dto.setContent(content);
             api.sendMessage(dto).enqueue(new Callback<MessageDto>() {
                 @Override public void onResponse(Call<MessageDto> c, Response<MessageDto> r) {
                     if (r.isSuccessful() && r.body() != null) {

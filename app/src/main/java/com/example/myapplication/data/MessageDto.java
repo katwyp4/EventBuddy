@@ -1,13 +1,16 @@
 package com.example.myapplication.data;
+import com.google.gson.annotations.SerializedName;
 
 public class MessageDto {
     private Long id;
     private String content;
     private String sentAt;          // "2025-05-17T13:55:00"
+
+    @SerializedName("senderFullName")
     private String senderFullName;
     private Long eventId;
 
-    public MessageDto() {}  // potrzebne dla Gson
+    public MessageDto() {}
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

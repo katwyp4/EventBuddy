@@ -8,91 +8,101 @@ import com.kompetencyjny.EventBuddySpring.model.User;
 import com.kompetencyjny.EventBuddySpring.repo.EventRepository;
 import com.kompetencyjny.EventBuddySpring.repo.MessageRepository;
 import com.kompetencyjny.EventBuddySpring.repo.UserRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.Optional;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/messages")
 public class MessageController {
 
     private final MessageRepository messageRepository;
-    private final EventRepository eventRepository;
-    private final UserRepository userRepository;
+    private final EventRepository   eventRepository;
+    private final UserRepository    userRepository;
 
     public MessageController(MessageRepository messageRepository,
-                             EventRepository eventRepository,
-                             UserRepository userRepository) {
+                             EventRepository   eventRepository,
+                             UserRepository    userRepository) {
         this.messageRepository = messageRepository;
-        this.eventRepository = eventRepository;
-        this.userRepository = userRepository;
+        this.eventRepository   = eventRepository;
+        this.userRepository    = userRepository;
     }
 
-    // [GET] /api/messages
-    @CrossOrigin(origins = "*")
-    public List<Message> getAllMessages() {
-        return messageRepository.findAll();
-    }
-
-    // Dodanie wiadomości do czatu
-    // [POST] /api/messages?eventId=...&senderId=...
-    @CrossOrigin(origins = "*")
+    /* -------- POST  /api/messages  -------- */
     @PostMapping
-    public ResponseEntity<MessageDTO> addMessage(@RequestBody CreateMessageDTO dto) {
-        Optional<User> userOpt = userRepository.findById(dto.getSenderId());
-        Optional<Event> eventOpt = eventRepository.findById(dto.getEventId());
+    public ResponseEntity<MessageDTO> addMessage(@AuthenticationPrincipal UserDetails principal,
+                                                 @RequestBody CreateMessageDTO dto) {
 
-        if (userOpt.isEmpty() || eventOpt.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
+        /* 1️⃣  Pobierz zalogowanego użytkownika z JWT */
+        User user = userRepository
+                .findByEmail(principal.getUsername())
+                .orElseThrow();                             // 401/403 obsługuje Spring Security
 
-        Message message = new Message();
-        message.setContent(dto.getContent());
-        message.setSentAt(LocalDateTime.now());
-        message.setSender(userOpt.get());
-        message.setEvent(eventOpt.get());
+        /* 2️⃣  Sprawdź, czy event istnieje */
+        Event event = eventRepository
+                .findById(dto.getEventId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Event not found"));
 
-        Message saved = messageRepository.save(message);
-        return ResponseEntity.ok(mapToDto(saved));  // użyjemy istniejącego mappera
+
+        /* 3️⃣  Zbuduj i zapisz wiadomość */
+        Message msg = new Message();
+        msg.setContent(dto.getContent());
+        msg.setSentAt(LocalDateTime.now());
+        msg.setSender(user);
+        msg.setEvent(event);
+
+        Message saved = messageRepository.save(msg);
+        return ResponseEntity.ok(mapToDto(saved));
     }
 
-    @CrossOrigin(origins = "*")
+    /* -------- GET  /api/messages?eventId=...  -------- */
     @GetMapping
     public ResponseEntity<List<MessageDTO>> getMessagesByEvent(@RequestParam Long eventId) {
         List<Message> messages = messageRepository.findByEventIdOrderBySentAtAsc(eventId);
-        List<MessageDTO> dtoList = messages.stream()
-                .map(this::mapToDto)
-                .toList();
-
-        return ResponseEntity.ok(dtoList);
+        return ResponseEntity.ok(
+                messages.stream().map(this::mapToDto).toList()
+        );
     }
 
-
-    @CrossOrigin(origins = "*")
+    /* -------- GET  /api/messages/latest?eventId=...&after=2025-06-06T08:30:00  -------- */
     @GetMapping("/latest")
-    public ResponseEntity<List<Message>> getLatestMessages(
-            @RequestParam Long eventId,
-            @RequestParam String after) {
+    public ResponseEntity<List<MessageDTO>> getLatestMessages(@RequestParam Long eventId,
+                                                              @RequestParam String after) {
+        LocalDateTime afterTime;
+        try {
+            afterTime = LocalDateTime.parse(after);               // ISO-8601
+        } catch (DateTimeParseException ex) {
+            return ResponseEntity.badRequest().build();
+        }
 
-        LocalDateTime afterTime = LocalDateTime.parse(after);
-        List<Message> messages = messageRepository.findByEventIdAndSentAtAfterOrderBySentAtAsc(eventId, afterTime);
-        return ResponseEntity.ok(messages);
+        List<Message> messages = messageRepository
+                .findByEventIdAndSentAtAfterOrderBySentAtAsc(eventId, afterTime);
+
+        return ResponseEntity.ok(
+                messages.stream().map(this::mapToDto).toList()
+        );
     }
 
-    private MessageDTO mapToDto(Message message) {
+    /* -------- mapper encja ➜ DTO -------- */
+    private MessageDTO mapToDto(Message m) {
         MessageDTO dto = new MessageDTO();
-        dto.setId(message.getId());
-        dto.setContent(message.getContent());
-        dto.setSentAt(message.getSentAt());
+        dto.setId(m.getId());
+        dto.setContent(m.getContent());
+        dto.setSentAt(m.getSentAt());
 
-        User sender = message.getSender();
-        dto.setSenderFullName(sender.getFirstName() + " " + sender.getLastName());
+        User s = m.getSender();
+        dto.setSenderFullName(s.getFirstName() + " " + s.getLastName());
 
-        dto.setEventId(message.getEvent().getId());
+        dto.setEventId(m.getEvent().getId());
         return dto;
     }
-
 }

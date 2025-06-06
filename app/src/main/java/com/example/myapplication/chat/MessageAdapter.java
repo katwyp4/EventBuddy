@@ -29,10 +29,16 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.VH> {
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
         MessageDto m = items.get(position);
-        holder.sender.setText(m.getSenderFullName());
-        holder.content.setText(m.getContent());
-        // wyciągamy HH:mm z sentAt, np. "2025-05-28T14:22:00"
-        holder.time.setText(m.getSentAt().substring(11, 16));
+
+        String fullName = m.getSenderFullName();
+        holder.sender.setText(fullName != null ? fullName : "");
+        String content  = m.getContent();
+        holder.content.setText(content != null ? content : "");
+
+        String sentAt = m.getSentAt();
+        holder.time.setText(
+        sentAt != null && sentAt.length() >= 16 ? sentAt.substring(11, 16) : "");
+
     }
 
     @Override

@@ -45,15 +45,17 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.VH> {
     @Override
     public void onBindViewHolder(@NonNull VH h, int position) {
         MessageDto m = items.get(position);
-        h.sender.setText(m.getSenderFullName());
-        h.content.setText(m.getContent());
 
-        // Przytnij sentAt: "2025-05-28T22:58:25.151967" → "2025-05-28 22:58"
+
+        String fullName = m.getSenderFullName();
+        h.sender.setText(fullName != null ? fullName : "");
+
+        String content = m.getContent();
+        h.content.setText(content != null ? content : "");
+
         String sentAt = m.getSentAt();
         if (sentAt != null && sentAt.length() >= 16) {
-            String date = sentAt.substring(0, 10);
-            String time = sentAt.substring(11, 16);
-            h.time.setText(date + " " + time);
+            h.time.setText(sentAt.substring(0, 10) + " " + sentAt.substring(11, 16));
         } else {
             h.time.setText("");
         }
