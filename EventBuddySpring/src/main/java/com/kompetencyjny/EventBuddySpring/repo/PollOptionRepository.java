@@ -12,10 +12,10 @@ import java.util.List;
 
 @Repository
 public interface PollOptionRepository extends JpaRepository<PollOption, Long> {
-    @Query("SELECT o FROM PollOption o WHERE o.poll.id = (SELECT e.datePoll.id FROM Event e WHERE e.id = :eventId)")
+    @Query("SELECT o FROM PollOption o WHERE o.poll.id = (SELECT e.datePoll.id FROM Event e WHERE e.id = :eventId) ORDER BY o.id ASC")
     List<PollOption> findDatePollOptionsByEventId(@Param("eventId") Long eventId);
 
-    @Query("SELECT o FROM PollOption o WHERE o.poll.id = (SELECT e.locationPoll.id FROM Event e WHERE e.id = :eventId)")
+    @Query("SELECT o FROM PollOption o WHERE o.poll.id = (SELECT e.locationPoll.id FROM Event e WHERE e.id = :eventId) ORDER BY o.id ASC")
     List<PollOption> findLocationPollOptionsByEventId(@Param("eventId") Long eventId);
 
     List<PollOption> findByPoll(Poll poll);
