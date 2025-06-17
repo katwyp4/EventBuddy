@@ -89,9 +89,19 @@ public class HomeActivity extends AppCompatActivity {
         super.onResume();
         loadEvents(0, 40);
     }
+    private void logoutUser() {
+        getSharedPreferences("prefs", MODE_PRIVATE)
+                .edit()
+                .clear()
+                .apply();
 
+        Intent intent = new Intent(HomeActivity.this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
 
-
+        Toast.makeText(this, "Wylogowano pomyślnie", Toast.LENGTH_SHORT).show();
+    }
 
     private void showPopupMenu(View anchor) {
         PopupMenu popup = new PopupMenu(this, anchor);
@@ -107,6 +117,10 @@ public class HomeActivity extends AppCompatActivity {
                 return true;
             } else if (id == R.id.menu_chat) {
                 Toast.makeText(this, "Czat", Toast.LENGTH_SHORT).show();
+                return true;
+            }
+            else if (id == R.id.menu_logout) {
+                logoutUser();
                 return true;
             }
             return false;
