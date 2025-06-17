@@ -77,32 +77,40 @@ public class PollController {
         Optional<PollOption> optionOpt = pollOptionRepository.findById(optionId);
         if (optionOpt.isEmpty()) return ResponseEntity.notFound().build();
 
-        PollOption option = optionOpt.get();
-        Poll poll = option.getPoll();
+        PollOption newOption = optionOpt.get();
+        Poll poll = newOption.getPoll();
 
         if (!poll.getId().equals(pollId)) return ResponseEntity.badRequest().build();
 
         User user = userRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new NotFoundException("Użytkownik nie znaleziony"));
 
-        // Sprawdź, czy użytkownik już głosował
-        Optional<Vote> existingVote = voteRepository.findByUserAndPoll(user, poll);
-        if (existingVote.isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body("Użytkownik już oddał głos w tej ankiecie.");
+        Optional<Vote> existingVoteOpt = voteRepository.findByUserAndPoll(user, poll);
+
+        if (existingVoteOpt.isPresent()) {
+            Vote existingVote = existingVoteOpt.get();
+            PollOption previousOption = existingVote.getOption();
+
+            previousOption.setVoteCount(previousOption.getVoteCount() - 1);
+            pollOptionRepository.save(previousOption);
+
+            newOption.setVoteCount(newOption.getVoteCount() + 1);
+            pollOptionRepository.save(newOption);
+
+            existingVote.setOption(newOption);
+            voteRepository.save(existingVote);
+        } else {
+            newOption.setVoteCount(newOption.getVoteCount() + 1);
+            pollOptionRepository.save(newOption);
+
+            Vote vote = new Vote();
+            vote.setUser(user);
+            vote.setPoll(poll);
+            vote.setOption(newOption);
+            voteRepository.save(vote);
         }
 
-        // Dodaj głos
-        option.setVoteCount(option.getVoteCount() + 1);
-        pollOptionRepository.save(option);
-
-        Vote vote = new Vote();
-        vote.setUser(user);
-        vote.setPoll(poll);
-        vote.setOption(option);
-        voteRepository.save(vote);
-
-        PollOptionDto response = new PollOptionDto(option.getId(), option.getValue(), option.getVoteCount(), pollId);
+        PollOptionDto response = new PollOptionDto(newOption.getId(), newOption.getValue(), newOption.getVoteCount(), pollId);
         return ResponseEntity.ok(response);
     }
 
