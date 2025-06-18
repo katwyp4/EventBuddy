@@ -39,4 +39,7 @@ public class User {
     private Set<EventParticipant> eventParticipants = new HashSet<>();
     @JsonIgnore private Boolean active=true;
     @JsonIgnore private LocalDate deactivationDate=null;
+
+    @Column(name = "fcm_token")
+    private String fcmToken;
 }
