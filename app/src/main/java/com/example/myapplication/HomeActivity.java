@@ -90,7 +90,7 @@ public class HomeActivity extends AppCompatActivity {
         loadEvents(0, 40);
     }
     private void logoutUser() {
-        getSharedPreferences("prefs", MODE_PRIVATE)
+        getSharedPreferences("eventbuddy_prefs", MODE_PRIVATE)
                 .edit()
                 .clear()
                 .apply();

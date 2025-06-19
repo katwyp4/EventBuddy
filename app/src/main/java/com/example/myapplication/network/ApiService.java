@@ -1,6 +1,7 @@
 package com.example.myapplication.network;
 
 import com.example.myapplication.data.ExpenseDto;
+import com.example.myapplication.data.UserDto;
 import com.example.myapplication.model.Event;
 import com.example.myapplication.model.LoginResponse;
 import com.example.myapplication.model.PaginatedResponse;
@@ -106,6 +107,14 @@ public interface ApiService {
     @POST("/api/events/{eventId}/photos")
     Call<Void> uploadEventPhoto(@Path("eventId") long eventId,
                                 @Part MultipartBody.Part file);
+
+
+
+    @POST("/api/notifications/token")
+    Call<Void> sendFcmToken(@Query("token") String token);
+
+    @GET("/api/users/me")
+    Call<UserDto> getCurrentUser();
 
 
 }
