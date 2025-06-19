@@ -11,9 +11,9 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.example.myapplication.R;
-import com.example.myapplication.chat.ChatActivity;   // ← Twój ekran czatu
+import com.example.myapplication.chat.ChatActivity;
 
-/** Statyczne metody do wyświetlania powiadomień czatu. */
+
 public final class NotificationHelper {
 
     private static final String CHANNEL_ID   = "chat_messages";

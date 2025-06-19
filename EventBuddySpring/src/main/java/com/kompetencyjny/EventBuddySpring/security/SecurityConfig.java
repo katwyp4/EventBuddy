@@ -20,6 +20,7 @@ public class SecurityConfig {
 
     private final JwtRequestFilter jwtRequestFilter;
 
+
     public SecurityConfig(JwtRequestFilter jwtRequestFilter) {
         this.jwtRequestFilter = jwtRequestFilter;
     }
