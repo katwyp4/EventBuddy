@@ -62,9 +62,13 @@ public class MessageController {
         event.getParticipants().stream()
                 .map(EventParticipant::getUser)
                 .filter(u -> !u.getId().equals(user.getId()))
+                .peek(u -> System.out.println("[FCM] Kandydat do powiadomienia: " + u.getEmail() + " (token: " + u.getFcmToken() + ")"))
                 .map(User::getFcmToken)
                 .filter(t -> t != null && !t.isBlank())
-                .forEach(token -> pushNotificationService.sendPushNotification(token, title, body));
+                .forEach(token -> {
+                    System.out.println("[FCM] Wysyłam powiadomienie do tokena: " + token);
+                    pushNotificationService.sendPushNotification(token, title, body);
+                });
 
         return ResponseEntity.ok(mapToDto(saved));
     }

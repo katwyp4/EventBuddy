@@ -16,12 +16,13 @@ public class ChatFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage msg) {
         super.onMessageReceived(msg);
+        Log.i("FCM", "ODEBRANO wiadomość FCM: " + msg.getNotification());
 
-        if (msg.getNotification() != null) {
-            String title = msg.getNotification().getTitle() != null
-                    ? msg.getNotification().getTitle() : "EventBuddy";
-            String body  = msg.getNotification().getBody()  != null
-                    ? msg.getNotification().getBody()  : "";
+        if (msg.getData() != null) {
+            String title = msg.getData().get("title");
+            String body  = msg.getData().get("body");
+
+            Log.d("FCM", "ODEBRANO wiadomość typu DATA: " + title + " / " + body);
 
             NotificationHelper.showChatNotification(this, title, body);
         }

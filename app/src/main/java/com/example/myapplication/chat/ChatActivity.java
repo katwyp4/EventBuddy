@@ -15,6 +15,7 @@ import com.example.myapplication.data.CreateMessageDto;
 import com.example.myapplication.data.MessageDto;
 import com.example.myapplication.network.ApiService;
 import com.example.myapplication.network.RetrofitClient;
+import com.example.myapplication.notifications.TokenRepository;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
@@ -48,7 +49,7 @@ public class ChatActivity extends AppCompatActivity {
                     }
                     String token = task.getResult();
                     Log.i("FCM", "Manualnie pobrany token: " + token);
-                    // jeżeli chcesz: TokenRepository.register(token);
+                    TokenRepository.register(token);
                 });
 
 

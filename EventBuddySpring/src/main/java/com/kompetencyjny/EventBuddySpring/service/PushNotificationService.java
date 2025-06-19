@@ -11,10 +11,8 @@ public class PushNotificationService {
     public void sendPushNotification(String token, String title, String body) {
         Message message = Message.builder()
                 .setToken(token)
-                .setNotification(Notification.builder()
-                        .setTitle(title)
-                        .setBody(body)
-                        .build())
+                .putData("title", title)
+                .putData("body", body)
                 .build();
 
         try {
