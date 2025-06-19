@@ -73,8 +73,8 @@ public class TaskService {
 
         if (!eventService.isUserPermitted(task.getEvent().getId(), loggedEmail, EventRole.ACTIVE)) throw new ForbiddenException("User (of email: "+loggedEmail+") not allowed to update tasks of event with id: "+task.getEvent().getId());
 
-        if (updatedTask.getName() != null) task.setName(updatedTask.getName());
-        if (updatedTask.getStatus() != null) task.setStatus(updatedTask.getStatus());
+        if (updatedTask.getTitle() != null) task.setTitle(updatedTask.getTitle());
+        if (updatedTask.getTitle() != null) task.setDone(updatedTask.isDone());
 
         return taskRepository.save(task);
     }

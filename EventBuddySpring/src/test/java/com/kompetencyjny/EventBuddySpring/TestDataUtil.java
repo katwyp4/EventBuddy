@@ -182,40 +182,40 @@ public class TestDataUtil {
     @Transactional
     public static Task getTaskA (TaskService taskService, Long eventId, String loggedEmail){
         Task task = new Task();
-        task.setStatus(TaskStatus.TODO);
-        task.setName("Task A");
+        task.setDone(false);
+        task.setTitle("Task A");
         return taskService.create(eventId, task, loggedEmail);
     }
 
     @Transactional
     public static Task getTaskB (TaskService taskService, Long eventId, String loggedEmail){
         Task task = new Task();
-        task.setStatus(TaskStatus.IN_PROGRESS);
-        task.setName("Task B");
+        task.setDone(false);
+        task.setTitle("Task B");
         return taskService.create(eventId, task, loggedEmail);
     }
 
     @Transactional
     public static Task getTaskC (TaskService taskService, Long eventId, String loggedEmail){
         Task task = new Task();
-        task.setStatus(TaskStatus.DONE);
-        task.setName("Task C");
+        task.setDone(true);
+        task.setTitle("Task C");
         return taskService.create(eventId, task, loggedEmail);
     }
 
     @Transactional
     public static TaskRequest getTaskRequestA(){
-        return new TaskRequest("Task A", "TODO");
+        return new TaskRequest("Task A", false);
     }
 
     @Transactional
     public static TaskRequest getTaskRequestB(){
-        return new TaskRequest("Task B", "IN_PROGRESS");
+        return new TaskRequest("Task B", false);
     }
 
     @Transactional
     public static TaskRequest getTaskRequestC(){
-        return new TaskRequest("Task C", "DONE");
+        return new TaskRequest("Task C", false);
     }
 
 }

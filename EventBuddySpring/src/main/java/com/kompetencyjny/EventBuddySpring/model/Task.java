@@ -18,9 +18,8 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-    @Enumerated(EnumType.STRING)
-    private TaskStatus status;
+    private String title;
+    private boolean done;
 
     @ManyToOne
     @JoinColumn(name = "event_id")

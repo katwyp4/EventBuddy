@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kompetencyjny.EventBuddySpring.TestDataUtil;
 import com.kompetencyjny.EventBuddySpring.dto.TaskRequest;
 import com.kompetencyjny.EventBuddySpring.model.Event;
+import com.kompetencyjny.EventBuddySpring.model.EventRole;
 import com.kompetencyjny.EventBuddySpring.model.Task;
 import com.kompetencyjny.EventBuddySpring.model.User;
 import com.kompetencyjny.EventBuddySpring.repo.EventRepository;
@@ -135,7 +136,7 @@ class TaskControllerIntegrationTest {
                         .header("Authorization", "Bearer " + tokenA))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(taskA.getId().intValue())))
-                .andExpect(jsonPath("$.name", is(taskA.getName())));
+                .andExpect(jsonPath("$.title", is(taskA.getTitle())));
     }
 
     @Test
@@ -151,22 +152,22 @@ class TaskControllerIntegrationTest {
     @DisplayName("Should create task")
     void shouldCreateTask() throws Exception {
         String tokenA = jwtUtil.generateToken(userA.getEmail());
-        TaskRequest request = new TaskRequest("New Task", "TODO");
+        TaskRequest request = new TaskRequest("New Task", false);
         mockMvc.perform(post("/api/tasks")
                         .param("eventId", eventA.getId().toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .header("Authorization", "Bearer " + tokenA))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name", is("New Task")))
-                .andExpect(jsonPath("$.status", is("TODO")));
+                .andExpect(jsonPath("$.title", is("New Task")))
+                .andExpect(jsonPath("$.done", is(false)));
     }
 
     @Test
     @DisplayName("Should not create task for forbidden event")
     void shouldNotCreateTaskForForbiddenEvent() throws Exception {
         String tokenB = jwtUtil.generateToken(userB.getEmail());
-        TaskRequest request = new TaskRequest("Forbidden Task", "TODO");
+        TaskRequest request = new TaskRequest("Forbidden Task", false);
         mockMvc.perform(post("/api/tasks")
                         .param("eventId", eventA.getId().toString())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -179,21 +180,21 @@ class TaskControllerIntegrationTest {
     @DisplayName("Should update task")
     void shouldUpdateTask() throws Exception {
         String tokenA = jwtUtil.generateToken(userA.getEmail());
-        TaskRequest update = new TaskRequest("Updated Task", "DONE");
+        TaskRequest update = new TaskRequest("Updated Task", true);
         mockMvc.perform(put("/api/tasks/{id}", taskA.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(update))
                         .header("Authorization", "Bearer " + tokenA))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name", is("Updated Task")))
-                .andExpect(jsonPath("$.status", is("DONE")));
+                .andExpect(jsonPath("$.title", is("Updated Task")))
+                .andExpect(jsonPath("$.done", is(true)));
     }
 
     @Test
     @DisplayName("Should not update task for forbidden user")
     void shouldNotUpdateTaskForForbiddenUser() throws Exception {
         String tokenB = jwtUtil.generateToken(userB.getEmail());
-        TaskRequest update = new TaskRequest("Updated Task", "DONE");
+        TaskRequest update = new TaskRequest("Updated Task", true);
         mockMvc.perform(put("/api/tasks/{id}", taskA.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(update))
@@ -215,12 +216,17 @@ class TaskControllerIntegrationTest {
     @Test
     @DisplayName("Should not assign user to task for forbidden user")
     void shouldNotAssignUserToTaskForForbiddenUser() throws Exception {
+        eventService.addEventParticipant(eventA.getId(), userB.getId(), EventRole.PASSIVE, userA.getEmail());
         String tokenB = jwtUtil.generateToken(userB.getEmail());
+
         mockMvc.perform(put("/api/tasks/{id}/assign", taskA.getId())
                         .param("assignedUserId", userA.getId().toString())
                         .header("Authorization", "Bearer " + tokenB))
                 .andExpect(status().isForbidden());
     }
+    
+
+
 
     @Test
     @DisplayName("Should delete task")
@@ -241,18 +247,6 @@ class TaskControllerIntegrationTest {
                 .andExpect(status().isForbidden());
     }
 
-    @Test
-    @DisplayName("Should return 400 for invalid status")
-    void shouldReturnBadRequestForInvalidStatus() throws Exception {
-        String tokenA = jwtUtil.generateToken(userA.getEmail());
-        TaskRequest invalid = new TaskRequest("Invalid", "NOT_A_STATUS");
-        mockMvc.perform(post("/api/tasks")
-                        .param("eventId", eventA.getId().toString())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(invalid))
-                        .header("Authorization", "Bearer " + tokenA))
-                .andExpect(status().isBadRequest());
-    }
 
     @Test
     @DisplayName("Should return 401 for unauthenticated access")

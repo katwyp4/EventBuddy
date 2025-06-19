@@ -15,8 +15,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TaskDto {
     private Long id;
-    private String name;
-    private String status;
+    private String title;
+    private boolean done;
     private Long eventId;
     private Long assignedUserId;
 }

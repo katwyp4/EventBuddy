@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TaskRequest {
-    private String name;
-    @Pattern(regexp = "(TODO|IN_PROCESS|DONE)")
-    private String status;
+    private String title;
+    private boolean done;
 }
