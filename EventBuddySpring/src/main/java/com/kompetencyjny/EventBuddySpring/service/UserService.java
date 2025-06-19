@@ -70,4 +70,5 @@ public class UserService {
         user.setRole(role);
         return userRepository.save(user);
     }
+
 }

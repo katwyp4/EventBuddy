@@ -74,6 +74,11 @@ dependencies {
 	testImplementation 'org.testcontainers:postgresql'
 	testImplementation "org.mockito:mockito-inline:5.2.0"
 
+	// Firebase messeging
+	implementation 'com.squareup.okhttp3:okhttp:4.9.3'
+	implementation 'org.json:json:20210307'
+	implementation 'com.google.firebase:firebase-admin:9.1.1'
+
 }
 
 tasks.named('test') {

@@ -178,54 +178,77 @@
 
 
 
-            <!-- ░░░ 3 równoległe przyciski ░░░-->
-            <LinearLayout
-                android:layout_width="358dp"
-                android:layout_height="48dp"
-                android:layout_gravity="center_horizontal"
+
+
+
+            <GridLayout
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/buttonGrid"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
                 android:layout_marginTop="12dp"
-                android:orientation="horizontal">
+                android:alignmentMode="alignMargins"
+                android:columnCount="2"
+                android:columnOrderPreserved="false"
+                android:rowCount="2"
+                android:useDefaultMargins="true">
 
                 <!-- Budżet -->
                 <Button
                     android:id="@+id/btnOpenBudget"
-                    android:layout_width="50dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_rowWeight="1"
+                    android:layout_columnWeight="1"
                     android:background="@drawable/rounded_button_purple"
+                    app:backgroundTint="@null"
                     android:text="Budżet"
                     android:textColor="#FFFFFF" />
-
-                <Space
-                    android:layout_width="8dp"
-                    android:layout_height="match_parent" />
-
-                <!-- Czat -->
-                <ImageButton
-                    android:id="@+id/btnOpenChat"
-                    android:layout_width="50dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@drawable/rounded_button_purple"
-                    android:contentDescription="@string/chat"
-                    android:src="@drawable/ic_chat"
-                    app:tint="#FFFFFF" />
-
-                <Space
-                    android:layout_width="8dp"
-                    android:layout_height="match_parent" />
 
                 <!-- Taski -->
                 <ImageButton
                     android:id="@+id/btnOpenTasks"
-                    android:layout_width="50dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_rowWeight="1"
+                    android:layout_columnWeight="1"
                     android:background="@drawable/rounded_button_purple"
+                    app:backgroundTint="@null"
                     android:contentDescription="Taski"
                     android:src="@drawable/ic_tasks"
                     app:tint="#FFFFFF" />
-            </LinearLayout>
+
+                <!-- Czat -->
+                <ImageButton
+                    android:id="@+id/btnOpenChat"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_rowWeight="1"
+                    android:layout_columnWeight="1"
+                    android:background="@drawable/rounded_button_purple"
+                    app:backgroundTint="@null"
+                    android:contentDescription="Czat"
+                    android:src="@drawable/ic_chat"
+                    app:tint="#FFFFFF" />
+
+                <!-- Galeria -->
+                <ImageButton
+                    android:id="@+id/btnOpenGallery"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_rowWeight="1"
+                    android:layout_columnWeight="1"
+                    android:background="@drawable/rounded_button_purple"
+                    app:backgroundTint="@null"
+                    android:contentDescription="Galeria"
+                    android:src="@drawable/ic_gallery"
+                    app:tint="#FFFFFF" />
+
+            </GridLayout>
+
+
+
 
 
 

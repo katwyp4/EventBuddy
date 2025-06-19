@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 public class TokenManager {
-    private static final String PREF_NAME = "prefs";
+    private static final String PREF_NAME = "eventbuddy_prefs";
     private static final String KEY_TOKEN = "jwt_token";
     private final SharedPreferences prefs;
 
