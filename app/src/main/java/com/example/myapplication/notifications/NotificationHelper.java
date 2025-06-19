@@ -21,6 +21,21 @@ public final class NotificationHelper {
 
     private NotificationHelper() { }
 
+    private static final String EVENT_CHANNEL_ID = "event_reminders";
+    private static final String EVENT_CHANNEL_NAME = "Przypomnienia o wydarzeniach";
+
+    private static void ensureEventChannel(Context ctx) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
+        NotificationManager nm = ctx.getSystemService(NotificationManager.class);
+        if (nm.getNotificationChannel(EVENT_CHANNEL_ID) == null) {
+            NotificationChannel ch = new NotificationChannel(
+                    EVENT_CHANNEL_ID, EVENT_CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH);
+            ch.setDescription("Powiadomienia o zbliżających się wydarzeniach");
+            nm.createNotificationChannel(ch);
+        }
+    }
+
+
     private static void ensureChannel(Context ctx) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
         NotificationManager nm = ctx.getSystemService(NotificationManager.class);
@@ -56,4 +71,17 @@ public final class NotificationHelper {
         NotificationManagerCompat.from(ctx)
                 .notify((int) System.currentTimeMillis(), nb.build());
     }
+
+    public static void showEventNotification(Context ctx, String title, String body) {
+        ensureEventChannel(ctx);
+        NotificationCompat.Builder nb = new NotificationCompat.Builder(ctx, EVENT_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_notifications)
+                .setContentTitle(title)
+                .setContentText(body)
+                .setAutoCancel(true);
+        NotificationManagerCompat.from(ctx)
+                .notify((int) System.currentTimeMillis(), nb.build());
+    }
+
+
 }

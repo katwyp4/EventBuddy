@@ -19,12 +19,18 @@ public class ChatFirebaseMessagingService extends FirebaseMessagingService {
         Log.i("FCM", "ODEBRANO wiadomość FCM: " + msg.getNotification());
 
         if (msg.getData() != null) {
+            String type  = msg.getData().get("type");
             String title = msg.getData().get("title");
             String body  = msg.getData().get("body");
 
-            Log.d("FCM", "ODEBRANO wiadomość typu DATA: " + title + " / " + body);
+            Log.d("FCM", "ODEBRANO wiadomość typu DATA: " + type + " / " + title + " / " + body);
 
-            NotificationHelper.showChatNotification(this, title, body);
+            if ("event".equals(type)) {
+                NotificationHelper.showEventNotification(this, title, body);
+            } else {
+                NotificationHelper.showChatNotification(this, title, body);
+            }
         }
     }
+
 }

@@ -1,5 +1,6 @@
 package com.example.myapplication.network;
 
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import android.content.Context;
@@ -20,44 +21,37 @@ public class RetrofitClient {
 
     private static Retrofit retrofit = null;
 
-    public static Retrofit getInstance(Context context) {
+    public static Retrofit getInstance(Context ctx) {
         if (retrofit == null) {
-            TokenManager tokenManager = new TokenManager(context);
+            SharedPreferences sp = ctx.getSharedPreferences("eventbuddy_prefs",
+                    Context.MODE_PRIVATE);
 
-            OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
+            HttpLoggingInterceptor log = new HttpLoggingInterceptor();
+            log.setLevel(HttpLoggingInterceptor.Level.BODY);
 
-            clientBuilder.addInterceptor(chain -> {
-                Request original = chain.request();
-                Request.Builder requestBuilder = original.newBuilder();
+            OkHttpClient ok = new OkHttpClient.Builder()
+                    .addInterceptor(chain -> {
+                        String jwt = sp.getString("authToken", null);   // <-- identyczny klucz
+                        Request req = chain.request();
+                        if (jwt != null) {
+                            req = req.newBuilder()
+                                    .header("Authorization", "Bearer " + jwt)
+                                    .build();
+                        }
+                        Response rsp = chain.proceed(req);
 
-                String token = tokenManager.getToken();
-                if (token != null) {
-                    requestBuilder.addHeader("Authorization", "Bearer " + token);
-                }
-
-                Request request = requestBuilder.build();
-                Response response = chain.proceed(request);
-
-                // Sprawdź czy odpowiedź to 401 lub 403 - Unauthorized
-                if (response.code() == 401 || response.code() == 403) {
-                    Log.d("LOGOWANIE", "LOGOWANIE");
-                    tokenManager.clearToken();
-
-                    // Przekieruj użytkownika do LoginActivity
-                    new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
-                        Intent intent = new Intent(context, com.example.myapplication.LoginActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        context.startActivity(intent);
-                        Toast.makeText(context, "Sesja wygasła. Zaloguj się ponownie.", Toast.LENGTH_LONG).show();
-                    });
-                }
-
-                return response;
-            });
+                        if (rsp.code() == 401) {        // jeden punkt wyjścia
+                            sp.edit().remove("authToken").apply();
+                            // TODO: broadcast lub eventBus do wylogowania
+                        }
+                        return rsp;
+                    })
+                    .addInterceptor(log)
+                    .build();
 
             retrofit = new Retrofit.Builder()
-                    .baseUrl("http://10.0.2.2:8080/") // lokalny backend
-                    .client(clientBuilder.build())
+                    .baseUrl("http://10.0.2.2:8080/")
+                    .client(ok)
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
         }

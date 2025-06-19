@@ -1,5 +1,8 @@
 package com.example.myapplication;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -16,16 +19,22 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 
+import com.example.myapplication.data.ReminderRequest;
 import com.example.myapplication.model.PollOption;
 import com.example.myapplication.network.ApiService;
 import com.example.myapplication.network.RetrofitClient;
 
 import com.example.myapplication.budget.BudgetActivity;
 import com.example.myapplication.chat.ChatActivity;
+import com.google.firebase.messaging.FirebaseMessaging;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import retrofit2.Call;
@@ -89,6 +98,7 @@ public class EventDetailActivity extends AppCompatActivity {
         btnOpenBudget = findViewById(R.id.btnOpenBudget);
         btnOpenTasks = findViewById(R.id.btnOpenTasks);
         btnOpenGallery = findViewById(R.id.btnOpenGallery);
+        LinearLayout remindMeLayout = findViewById(R.id.remindMeLayout);
 
 
 
@@ -129,6 +139,21 @@ public class EventDetailActivity extends AppCompatActivity {
             i.putExtra("EVENT_ID", getIntent().getLongExtra("eventId", -1));
             startActivity(i);
         });
+
+
+
+        remindMeLayout.setOnClickListener(v -> {
+            final String[] options = {"1 dzień przed", "2 dni przed", "Tydzień przed"};
+            final int[] daysBefore = {1, 2, 7};
+            AlertDialog.Builder builder = new AlertDialog.Builder(EventDetailActivity.this);
+            builder.setTitle("Kiedy przypomnieć?");
+            builder.setItems(options, (dialog, which) -> {
+                sendPushReminderRequest(daysBefore[which]);
+            });
+            builder.show();
+        });
+
+
 
 
 
@@ -185,6 +210,51 @@ public class EventDetailActivity extends AppCompatActivity {
         }
 
     }
+
+    private void sendPushReminderRequest(int daysBefore) {
+        Long eventId = getIntent().getLongExtra("eventId", -1);
+        String fcmToken = getSharedPreferences("eventbuddy_prefs", MODE_PRIVATE).getString("fcmToken", null);
+
+        if (fcmToken == null) {
+            FirebaseMessaging.getInstance().getToken()
+                    .addOnCompleteListener(t -> {
+                        if (t.isSuccessful()) {
+                            String newTok = t.getResult();
+                            getSharedPreferences("eventbuddy_prefs", MODE_PRIVATE)
+                                    .edit().putString("fcmToken", newTok).apply();
+
+                            sendPushReminderRequest(daysBefore);
+                        } else {
+                            Toast.makeText(this, "Token FCM niegotowy – spróbuj za chwilę", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+            return;
+        }
+
+
+        ReminderRequest req = new ReminderRequest();
+        req.eventId = eventId;
+        req.daysBefore = daysBefore;
+        req.fcmToken = fcmToken;
+
+        ApiService api = RetrofitClient.getInstance(this).create(ApiService.class);
+        api.registerReminder(req).enqueue(new retrofit2.Callback<Void>() {
+            @Override
+            public void onResponse(retrofit2.Call<Void> call, retrofit2.Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(EventDetailActivity.this, "Przypomnienie ustawione!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(EventDetailActivity.this, "Błąd ustawiania przypomnienia", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(retrofit2.Call<Void> call, Throwable t) {
+                Toast.makeText(EventDetailActivity.this, "Błąd sieci: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
 
     private boolean isVotingActive(String endDateString) {
         if (endDateString == null || endDateString.isEmpty()) {
