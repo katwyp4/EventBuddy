@@ -1,6 +1,7 @@
 package com.example.myapplication.chat;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -14,6 +15,7 @@ import com.example.myapplication.data.CreateMessageDto;
 import com.example.myapplication.data.MessageDto;
 import com.example.myapplication.network.ApiService;
 import com.example.myapplication.network.RetrofitClient;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +39,18 @@ public class ChatActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+
+        FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Log.w("FCM", "Pobranie tokenu FCM nie powiodło się", task.getException());
+                        return;
+                    }
+                    String token = task.getResult();
+                    Log.i("FCM", "Manualnie pobrany token: " + token);
+                    // jeżeli chcesz: TokenRepository.register(token);
+                });
+
 
         // 1. Intent extras
         eventId = getIntent().getLongExtra("EVENT_ID", -1);

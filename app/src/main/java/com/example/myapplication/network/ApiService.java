@@ -108,4 +108,9 @@ public interface ApiService {
                                 @Part MultipartBody.Part file);
 
 
+
+    @POST("/api/notifications/token")
+    Call<Void> sendFcmToken(@Query("token") String token);
+
+
 }

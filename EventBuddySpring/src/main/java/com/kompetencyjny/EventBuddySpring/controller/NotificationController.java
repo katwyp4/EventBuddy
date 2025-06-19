@@ -19,5 +19,13 @@ public class NotificationController {
                                  @RequestParam String body) {
         pushNotificationService.sendPushNotification(token, title, body);
     }
+
+
+    @PostMapping("/token")
+    public void registerToken(@RequestParam String token) {
+        // TODO: zapisz token w bazie i przypisz do zalogowanego użytkownika
+        System.out.println("Zarejestrowano FCM-token: " + token);
+    }
+
 }
 
