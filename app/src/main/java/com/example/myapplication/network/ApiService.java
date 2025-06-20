@@ -117,4 +117,6 @@ public interface ApiService {
     Call<UserDto> getCurrentUser();
 
 
+    @GET("/api/events/{eventId}/participants")
+    Call<List<String>> getEventParticipants(@Path("eventId") long eventId);
 }

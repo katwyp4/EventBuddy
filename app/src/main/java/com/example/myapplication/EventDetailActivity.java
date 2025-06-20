@@ -8,14 +8,10 @@ import android.util.Pair;
 import android.view.View;
 import android.widget.*;
 
-
-
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-
 import com.bumptech.glide.Glide;
-
 import com.example.myapplication.model.PollOption;
 import com.example.myapplication.network.ApiService;
 import com.example.myapplication.network.RetrofitClient;
@@ -47,16 +43,11 @@ public class EventDetailActivity extends AppCompatActivity {
     List<PollOption> locationPollOptions = new ArrayList<>();
 
     private Button btnOpenBudget;
-
     private ImageButton btnOpenChat;
-
     private ImageButton btnOpenTasks;
-
     private ImageButton btnOpenGallery;
 
-
-
-    private boolean isParticipant = true;
+    private boolean isParticipant = false;
 
     private String dateVotingEnd;
     private String locationVotingEnd;
@@ -64,9 +55,9 @@ public class EventDetailActivity extends AppCompatActivity {
     private TextView dateVotingEndInfo;
     private TextView locationVotingEndInfo;
 
-
-
-
+    private Button btnJoinEvent;
+    private TextView textAlreadyJoined;
+    private LinearLayout layoutParticipants;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,33 +81,25 @@ public class EventDetailActivity extends AppCompatActivity {
         btnOpenTasks = findViewById(R.id.btnOpenTasks);
         btnOpenGallery = findViewById(R.id.btnOpenGallery);
 
+        btnJoinEvent = findViewById(R.id.btnJoinEvent);
+        textAlreadyJoined = findViewById(R.id.textAlreadyJoined);
+        layoutParticipants = findViewById(R.id.layoutParticipants);
 
-
-
-        /* ─── tymczasowe nazwiska do spinnera w TaskActivity ───────────── */
         ArrayList<String> dummyNames = new ArrayList<>(Arrays.asList(
                 "Jan Kowalski", "Anna Nowak", "Piotr Zieliński"));
-        /* ─────────────────────────────────────────────────────────────── */
 
         btnOpenTasks.setOnClickListener(v -> {
             Intent i = new Intent(EventDetailActivity.this,
                     com.example.myapplication.task.TaskActivity.class);
-
             i.putExtra("EVENT_ID",
-                    getIntent().getLongExtra("eventId", -1));     // id eventu
+                    getIntent().getLongExtra("eventId", -1));
             i.putStringArrayListExtra("PARTICIPANTS", dummyNames);
-
             startActivity(i);
         });
-
-
 
         btnOpenChat  = findViewById(R.id.btnOpenChat);
         dateVotingEndInfo = findViewById(R.id.dateVotingEndInfo);
         locationVotingEndInfo = findViewById(R.id.locationVotingEndInfo);
-
-
-
 
         btnOpenChat.setOnClickListener(v -> {
             Intent i = new Intent(this, ChatActivity.class);
@@ -131,6 +114,12 @@ public class EventDetailActivity extends AppCompatActivity {
         });
 
 
+        btnJoinEvent.setOnClickListener(v -> {
+            showRegulaminDialog(() -> {
+                isParticipant = true;
+                updateParticipantViews();
+            });
+        });
 
         Long eventId = getIntent().getLongExtra("eventId", -1);
 
@@ -145,20 +134,8 @@ public class EventDetailActivity extends AppCompatActivity {
                         locationVotingEnd = event.getLocationPollDeadline();
 
                         isParticipant = event.isParticipant();
+                        updateParticipantViews();
 
-                        if (!isParticipant) {
-                            btnOpenBudget.setVisibility(View.GONE);
-                        } else {
-                            btnOpenBudget.setVisibility(View.VISIBLE); // just in case
-                            btnOpenBudget.setOnClickListener(v -> {
-                                Intent i = new Intent(EventDetailActivity.this, BudgetActivity.class);
-                                i.putExtra("EVENT_ID", event.getId());
-                                i.putExtra("BUDGET_DEADLINE", event.getBudgetDeadline());
-                                startActivity(i);
-                            });
-                        }
-
-                        // Ustaw dane na ekranie
                         titleText.setText(event.getTitle());
                         dateText.setText(event.getDate());
                         descText.setText(event.getDescription());
@@ -168,14 +145,19 @@ public class EventDetailActivity extends AppCompatActivity {
                                 .load("http://10.0.2.2:8080" + event.getImageUrl())
                                 .into(eventImage);
 
-                        // POBIERZ POLLE
                         fetchUpdatedPollOptions(true);
                         fetchUpdatedPollOptions(false);
 
                         setupVotingOptions();
                         setupVoteButtons();
+
+                        if (isParticipant) {
+                            fetchAndShowParticipants();
+                        }
                     }
                 }
+
+
 
                 @Override
                 public void onFailure(Call<com.example.myapplication.model.Event> call, Throwable t) {
@@ -183,8 +165,88 @@ public class EventDetailActivity extends AppCompatActivity {
                 }
             });
         }
-
     }
+
+    private void showRegulaminDialog(Runnable onAccept) {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_regulamin, null);
+        CheckBox checkbox = dialogView.findViewById(R.id.checkboxAkceptuje);
+        TextView tvRegulamin = dialogView.findViewById(R.id.tvRegulamin);
+        tvRegulamin.setText("Przystępując do wydarzenia, zobowiązujesz się do przestrzegania zasad ustalonych przez organizatora.\n" +
+                "Nie możesz się później wypisać z wydarzenia. Organizator może kontaktować się z Tobą w sprawie wydarzenia.");
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Regulamin wydarzenia")
+                .setView(dialogView)
+                .setPositiveButton("Potwierdź", null)
+                .setNegativeButton("Anuluj", (d, w) -> d.dismiss())
+                .create();
+
+        dialog.setOnShowListener(d -> {
+            Button pozytywny = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            pozytywny.setEnabled(false);
+            checkbox.setOnCheckedChangeListener((btn, checked) -> pozytywny.setEnabled(checked));
+            pozytywny.setOnClickListener(v -> {
+                dialog.dismiss();
+                onAccept.run();
+            });
+        });
+
+        dialog.show();
+    }
+
+    private void updateParticipantViews() {
+        if (isParticipant) {
+            btnJoinEvent.setVisibility(View.GONE);
+            textAlreadyJoined.setVisibility(View.VISIBLE);
+            layoutParticipants.setVisibility(View.VISIBLE);
+
+            btnOpenBudget.setVisibility(View.VISIBLE);
+            btnOpenChat.setVisibility(View.VISIBLE);
+            btnOpenTasks.setVisibility(View.VISIBLE);
+            btnOpenGallery.setVisibility(View.VISIBLE);
+
+            fetchAndShowParticipants();
+        } else {
+            btnJoinEvent.setVisibility(View.VISIBLE);
+            textAlreadyJoined.setVisibility(View.GONE);
+            layoutParticipants.setVisibility(View.GONE);
+
+            btnOpenBudget.setVisibility(View.GONE);
+            btnOpenChat.setVisibility(View.GONE);
+            btnOpenTasks.setVisibility(View.GONE);
+            btnOpenGallery.setVisibility(View.GONE);
+        }
+    }
+
+    private void fetchAndShowParticipants() {
+        Long eventId = getIntent().getLongExtra("eventId", -1);
+        if (eventId == -1) return;
+        apiService.getEventParticipants(eventId).enqueue(new Callback<List<String>>() {
+            @Override
+            public void onResponse(Call<List<String>> call, Response<List<String>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<String> participants = response.body();
+                    layoutParticipants.removeAllViews();
+                    TextView header = new TextView(EventDetailActivity.this);
+                    header.setText("Uczestnicy wydarzenia (" + participants.size() + "):");
+                    header.setTextColor(Color.WHITE);
+                    header.setTextSize(16);
+                    layoutParticipants.addView(header);
+
+                    for (String name : participants) {
+                        TextView tv = new TextView(EventDetailActivity.this);
+                        tv.setText(name);
+                        tv.setTextColor(Color.WHITE);
+                        layoutParticipants.addView(tv);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<String>> call, Throwable t) {}
+        });
+    }
+
 
     private boolean isVotingActive(String endDateString) {
         if (endDateString == null || endDateString.isEmpty()) {
@@ -195,7 +257,7 @@ public class EventDetailActivity extends AppCompatActivity {
             if (endDateString.length() == 10) { // yyyy-MM-dd
                 java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
                 endDate = sdf.parse(endDateString);
-            } else { // yyyy-MM-dd HH:mm
+            } else {
                 java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.getDefault());
                 endDate = sdf.parse(endDateString);
             }
@@ -203,7 +265,7 @@ public class EventDetailActivity extends AppCompatActivity {
             java.util.Date now = new java.util.Date();
             return now.before(endDate);
         } catch (Exception e) {
-            return true; // Jeśli błąd – domyślnie aktywne
+            return true;
         }
     }
 
@@ -342,7 +404,7 @@ public class EventDetailActivity extends AppCompatActivity {
                         locationPollOptions = updatedOptions;
                     }
 
-                    runOnUiThread(() -> setupVotingOptions()); // odśwież UI z nowymi danymi
+                    runOnUiThread(() -> setupVotingOptions());
                 } else {
                     Toast.makeText(EventDetailActivity.this, "Błąd pobierania wyników", Toast.LENGTH_SHORT).show();
                 }
