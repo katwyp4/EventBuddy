@@ -295,6 +295,25 @@ public class EventServiceImpl implements EventService {
         return eventParticipantRepository.findAllById_EventId(eventId, pageable);
     }
 
+    public EventParticipant joinEvent(Long eventId, String loggedEmail) {
+        User user = userService.findByEmail(loggedEmail)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        Event event = findByIdInternal(eventId)
+                .orElseThrow(() -> new NotFoundException("Event not found"));
+
+        Optional<EventParticipant> existing = eventParticipantRepository.findById(new UserEventId(user.getId(), eventId));
+        if (existing.isPresent()) return existing.get();
+
+        if (event.getEventPrivacy() == EventPrivacy.PRIVATE) {
+            throw new ForbiddenException("Nie można dołączyć do prywatnego wydarzenia.");
+        }
+
+        EventParticipant participant = event.addParticipant(user, EventRole.PASSIVE);
+        eventRepository.save(event);
+        return participant;
+    }
+
     @Override
     public EventParticipant updateEventParticipantRole(Long eventId, Long userId, EventRole eventRole, String loggedEmail){
         Optional<Event> eventOpt = this.findByIdInternal(eventId);

@@ -13,6 +13,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
+import com.example.myapplication.model.EventParticipantDto;
 import com.example.myapplication.model.PollOption;
 import com.example.myapplication.network.ApiService;
 import com.example.myapplication.network.RetrofitClient;
@@ -143,8 +144,35 @@ public class EventDetailActivity extends AppCompatActivity {
 
         btnJoinEvent.setOnClickListener(v -> {
             showRegulaminDialog(() -> {
-                isParticipant = true;
-                updateParticipantViews();
+                Log.d("EVENT_JOIN", "Zaakceptowano regulamin");
+                Long eventId = getIntent().getLongExtra("eventId", -1);
+                if (eventId == -1){
+                    Log.d("EVENT_JOIN", "Brakuje eventId lub userId");
+                    return;
+                }
+
+                RetrofitClient.getCurrentUserId(this, userId -> {
+                    apiService.joinEvent(eventId, userId).enqueue(new Callback<EventParticipantDto>() {
+                        @Override
+                        public void onResponse(Call<EventParticipantDto> call, Response<EventParticipantDto> response) {
+                            if (response.isSuccessful()) {
+                                Log.d("EVENT_JOIN", "Dołączono do wydarzenia: " + response.body());
+                                Toast.makeText(EventDetailActivity.this, "Dołączono do wydarzenia!", Toast.LENGTH_SHORT).show();
+                                isParticipant = true;
+                                updateParticipantViews();
+                            } else {
+                                Log.e("EVENT_JOIN", "Błąd serwera: " + response.code());
+                                Toast.makeText(EventDetailActivity.this, "Nie udało się dołączyć do wydarzenia", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<EventParticipantDto> call, Throwable t) {
+                            Log.e("EVENT_JOIN", "Błąd sieci", t);
+                            Toast.makeText(EventDetailActivity.this, "Błąd sieci: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                });
             });
         });
 

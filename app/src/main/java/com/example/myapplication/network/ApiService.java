@@ -3,6 +3,7 @@ package com.example.myapplication.network;
 import com.example.myapplication.data.ExpenseDto;
 import com.example.myapplication.data.UserDto;
 import com.example.myapplication.model.Event;
+import com.example.myapplication.model.EventParticipantDto;
 import com.example.myapplication.model.LoginResponse;
 import com.example.myapplication.model.PaginatedResponse;
 import com.example.myapplication.model.PollOption;
@@ -27,6 +28,7 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
@@ -109,14 +111,16 @@ public interface ApiService {
                                 @Part MultipartBody.Part file);
 
 
-
     @POST("/api/notifications/token")
     Call<Void> sendFcmToken(@Query("token") String token);
 
     @GET("/api/users/me")
     Call<UserDto> getCurrentUser();
 
-
     @GET("/api/events/{eventId}/participants")
     Call<List<String>> getEventParticipants(@Path("eventId") long eventId);
+
+    @PUT("/api/events/{eventId}/participants/{userId}")
+    Call<EventParticipantDto> joinEvent(@Path("eventId") Long eventId,
+                                        @Path("userId") Long userId);
 }

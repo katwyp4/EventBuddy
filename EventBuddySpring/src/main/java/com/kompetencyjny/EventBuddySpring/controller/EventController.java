@@ -177,7 +177,7 @@ public class EventController {
         if (role==null) eventRole = EventRole.PASSIVE;
         else eventRole = role.toEventRoleEnum();
 
-        EventParticipant eventParticipant = eventService.updateEventParticipantRole(eventId, userId, eventRole, userDetails.getUsername());
+        EventParticipant eventParticipant = eventService.joinEvent(eventId, userDetails.getUsername());
         return ResponseEntity.ok(eventParticipantMapper.toDto(eventParticipant));
     }
     // Informacje o uczestniku (userId) z wydarzenia (eventId)
