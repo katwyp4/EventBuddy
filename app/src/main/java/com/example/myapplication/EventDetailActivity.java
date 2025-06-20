@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
@@ -19,6 +20,7 @@ import com.example.myapplication.network.RetrofitClient;
 import com.example.myapplication.budget.BudgetActivity;
 import com.example.myapplication.chat.ChatActivity;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,6 +60,9 @@ public class EventDetailActivity extends AppCompatActivity {
     private Button btnJoinEvent;
     private TextView textAlreadyJoined;
     private LinearLayout layoutParticipants;
+
+    private String budgetDeadline;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,6 +133,13 @@ public class EventDetailActivity extends AppCompatActivity {
             startActivity(i);
         });
 
+        btnOpenBudget.setOnClickListener(v -> {
+            Long eventId = getIntent().getLongExtra("eventId", -1);
+            Intent i = new Intent(EventDetailActivity.this, BudgetActivity.class);
+            i.putExtra("EVENT_ID", eventId);
+            i.putExtra("BUDGET_DEADLINE", budgetDeadline); 
+            startActivity(i);
+        });
 
         btnJoinEvent.setOnClickListener(v -> {
             showRegulaminDialog(() -> {
@@ -147,21 +159,12 @@ public class EventDetailActivity extends AppCompatActivity {
 
                         dateVotingEnd = event.getDatePollDeadline();
                         locationVotingEnd = event.getLocationPollDeadline();
+                        budgetDeadline = event.getBudgetDeadline();
 
                         isParticipant = event.isParticipant();
                         updateParticipantViews();
 
-                        if (!isParticipant) {
-                            btnOpenBudget.setVisibility(View.GONE);
-                        } else {
-                            btnOpenBudget.setVisibility(View.VISIBLE);
-                            btnOpenBudget.setOnClickListener(v -> {
-                                Intent i = new Intent(EventDetailActivity.this, BudgetActivity.class);
-                                i.putExtra("EVENT_ID", event.getId());
-                                i.putExtra("BUDGET_DEADLINE", event.getBudgetDeadline());
-                                startActivity(i);
-                            });
-                        }
+                        btnOpenBudget.setVisibility(isParticipant ? View.VISIBLE : View.GONE);
 
                         titleText.setText(event.getTitle());
                         dateText.setText(event.getDate());
@@ -489,6 +492,5 @@ public class EventDetailActivity extends AppCompatActivity {
         });
 
     }
-
 
 }
