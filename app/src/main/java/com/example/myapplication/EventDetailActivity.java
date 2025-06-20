@@ -278,6 +278,8 @@ public class EventDetailActivity extends AppCompatActivity {
             btnOpenTasks.setVisibility(View.VISIBLE);
             btnOpenGallery.setVisibility(View.VISIBLE);
 
+            setupVotingOptions();
+
             fetchAndShowParticipants();
         } else {
             btnJoinEvent.setVisibility(View.VISIBLE);
@@ -345,6 +347,16 @@ public class EventDetailActivity extends AppCompatActivity {
 
 
     private void setupVotingOptions() {
+
+        if (!isParticipant) {
+            dateVotingOptionsContainer.setVisibility(View.GONE);
+            btnVoteDate.setVisibility(View.GONE);
+            locationVotingOptionsContainer.setVisibility(View.GONE);
+            btnVoteLocation.setVisibility(View.GONE);
+            dateVotingEndInfo.setVisibility(View.GONE);
+            locationVotingEndInfo.setVisibility(View.GONE);
+            return;
+        }
 
         if (dateVotingEnd != null && !dateVotingEnd.isEmpty()) {
             dateVotingEndInfo.setVisibility(View.VISIBLE);
