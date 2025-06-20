@@ -1,5 +1,7 @@
 package com.example.myapplication.network;
 
+import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import android.content.Context;
@@ -8,12 +10,23 @@ import android.content.SharedPreferences;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.core.util.Consumer;
+
+import com.example.myapplication.data.UserDto;
+
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.Response;
+import retrofit2.Response;
 
 import java.io.IOException;
+
+import android.content.Context;
+import android.util.Log;
+
+import com.example.myapplication.network.ApiService;
+import com.example.myapplication.network.RetrofitClient;
+
 
 
 public class RetrofitClient {
@@ -31,12 +44,13 @@ public class RetrofitClient {
                 Request.Builder requestBuilder = original.newBuilder();
 
                 String token = tokenManager.getToken();
+                Log.d("AUTH_TOKEN", "Token = " + token);
                 if (token != null) {
                     requestBuilder.addHeader("Authorization", "Bearer " + token);
                 }
 
                 Request request = requestBuilder.build();
-                Response response = chain.proceed(request);
+                okhttp3.Response response = chain.proceed(request);
 
                 // Sprawdź czy odpowiedź to 401 lub 403 - Unauthorized
                 if (response.code() == 401 || response.code() == 403) {
@@ -56,12 +70,35 @@ public class RetrofitClient {
             });
 
             retrofit = new Retrofit.Builder()
-                    .baseUrl("http://10.0.2.2:8080/") // lokalny backend
+                    .baseUrl("http://10.0.2.2:8080/")
                     .client(clientBuilder.build())
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
         }
         return retrofit;
+    }
+
+    public static void getCurrentUserId(Context context, Consumer<Long> callback) {
+        ApiService apiService = RetrofitClient.getInstance(context).create(ApiService.class);
+
+        Log.d("USER_ID", "Wywołanie getCurrentUserId()");
+
+        apiService.getCurrentUser().enqueue(new Callback<UserDto>() {
+            @Override
+            public void onResponse(Call<UserDto> call, Response<UserDto> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Log.d("USER_ID", "Sukces! userId=" + response.body().getId());
+                    callback.accept(response.body().getId());
+                } else {
+                    Log.e("USER_ID", "Błąd serwera lub brak ciała: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UserDto> call, Throwable t) {
+                Log.e("USER_ID", "Błąd sieci: ", t);
+            }
+        });
     }
 }
 
