@@ -100,6 +100,21 @@ public class EventDetailActivity extends AppCompatActivity {
         btnOpenChat  = findViewById(R.id.btnOpenChat);
         dateVotingEndInfo = findViewById(R.id.dateVotingEndInfo);
         locationVotingEndInfo = findViewById(R.id.locationVotingEndInfo);
+        LinearLayout shareContainer = findViewById(R.id.shareContainer);
+        shareContainer.setOnClickListener(v -> shareEvent());
+
+        Intent dataIntent = getIntent();
+        if (Intent.ACTION_VIEW.equals(dataIntent.getAction())
+                && dataIntent.getData() != null) {
+
+            String last = dataIntent.getData().getLastPathSegment();
+            try {
+                long deepEventId = Long.parseLong(last);
+
+                dataIntent.putExtra("eventId", deepEventId);
+            } catch (NumberFormatException ignored) {}
+        }
+
 
         btnOpenChat.setOnClickListener(v -> {
             Intent i = new Intent(this, ChatActivity.class);
@@ -136,6 +151,18 @@ public class EventDetailActivity extends AppCompatActivity {
                         isParticipant = event.isParticipant();
                         updateParticipantViews();
 
+                        if (!isParticipant) {
+                            btnOpenBudget.setVisibility(View.GONE);
+                        } else {
+                            btnOpenBudget.setVisibility(View.VISIBLE);
+                            btnOpenBudget.setOnClickListener(v -> {
+                                Intent i = new Intent(EventDetailActivity.this, BudgetActivity.class);
+                                i.putExtra("EVENT_ID", event.getId());
+                                i.putExtra("BUDGET_DEADLINE", event.getBudgetDeadline());
+                                startActivity(i);
+                            });
+                        }
+
                         titleText.setText(event.getTitle());
                         dateText.setText(event.getDate());
                         descText.setText(event.getDescription());
@@ -157,8 +184,6 @@ public class EventDetailActivity extends AppCompatActivity {
                     }
                 }
 
-
-
                 @Override
                 public void onFailure(Call<com.example.myapplication.model.Event> call, Throwable t) {
                     Toast.makeText(EventDetailActivity.this, "Błąd ładowania wydarzenia", Toast.LENGTH_SHORT).show();
@@ -166,6 +191,23 @@ public class EventDetailActivity extends AppCompatActivity {
             });
         }
     }
+
+    private void shareEvent() {
+        long eventId = getIntent().getLongExtra("eventId", -1);
+        if (eventId == -1) { /* … */ return; }
+
+        String backendBase = "http://10.0.2.2:8080";
+        String link = backendBase + "/go/event/" + eventId;
+
+        String title = titleText.getText().toString();
+        Intent send = new Intent(Intent.ACTION_SEND);
+        send.putExtra(Intent.EXTRA_TEXT, "Zobacz wydarzenie: " + title + "\n" + link);
+        send.setType("text/plain");
+        startActivity(Intent.createChooser(send, "Udostępnij przez"));
+    }
+
+
+
 
     private void showRegulaminDialog(Runnable onAccept) {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_regulamin, null);
