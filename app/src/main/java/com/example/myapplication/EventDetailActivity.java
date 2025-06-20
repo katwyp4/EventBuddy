@@ -148,8 +148,14 @@ public class EventDetailActivity extends AppCompatActivity {
 
                         if (!isParticipant) {
                             btnOpenBudget.setVisibility(View.GONE);
+                            btnOpenTasks.setVisibility(View.GONE);
+                            btnOpenChat.setVisibility(View.GONE);
+                            btnOpenGallery.setVisibility(View.GONE);
                         } else {
-                            btnOpenBudget.setVisibility(View.VISIBLE); // just in case
+                            btnOpenBudget.setVisibility(View.VISIBLE);
+                            btnOpenTasks.setVisibility(View.VISIBLE);
+                            btnOpenChat.setVisibility(View.VISIBLE);
+                            btnOpenGallery.setVisibility(View.VISIBLE);
                             btnOpenBudget.setOnClickListener(v -> {
                                 Intent i = new Intent(EventDetailActivity.this, BudgetActivity.class);
                                 i.putExtra("EVENT_ID", event.getId());
