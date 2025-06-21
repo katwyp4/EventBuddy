@@ -32,7 +32,7 @@ public class ChatActivity extends AppCompatActivity {
     private Button     btnSend;
 
     private long   eventId;
-    private long   userId = 1;        // TODO: pobierz z auth
+    private long   userId = 1;
     private ChatAdapter  adapter;
     private ApiService   api;
 
