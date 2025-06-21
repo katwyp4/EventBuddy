@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import java.util.Objects;
 
 
-@Data // generuje gettery, settery, equals, hashCode, toString
+@Data
 @NoArgsConstructor
 @Entity
 @Table(name = "events_participants")

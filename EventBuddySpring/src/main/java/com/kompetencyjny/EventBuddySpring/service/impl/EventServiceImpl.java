@@ -59,10 +59,8 @@ public class EventServiceImpl implements EventService {
             }
         }
 
-        // 👥 Dodanie autora jako ADMIN
         event.addParticipant(loggedUserOpt.get(), EventRole.ADMIN);
 
-        // 💾 Zapisz
         return this.eventRepository.save(event);
     }
 
@@ -78,7 +76,7 @@ public class EventServiceImpl implements EventService {
 
         List<Expense> expenses = expenseRepository.findByEventId(eventId);
 
-        // 1. Oblicz ile wydał każdy użytkownik
+        // Oblicz ile wydał każdy użytkownik
         Map<User, BigDecimal> totalPaidByUser = new HashMap<>();
         for (Expense expense : expenses) {
             User payer = expense.getPayer();
@@ -86,7 +84,7 @@ public class EventServiceImpl implements EventService {
                     totalPaidByUser.getOrDefault(payer, BigDecimal.ZERO).add(expense.getAmount()));
         }
 
-        // 2. Oblicz całkowity koszt i średni koszt na osobę
+        // Oblicz całkowity koszt i średni koszt na osobę
         BigDecimal totalAmount = expenses.stream()
                 .map(Expense::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -96,13 +94,13 @@ public class EventServiceImpl implements EventService {
                 ? totalAmount.divide(BigDecimal.valueOf(numParticipants), 2, RoundingMode.HALF_UP)
                 : BigDecimal.ZERO;
 
-        // 3. Oblicz saldo każdego uczestnika
+        // Oblicz saldo każdego uczestnika
         Map<String, BigDecimal> balances = new HashMap<>();
         for (EventParticipant ep : participants) {
             User user = ep.getUser();
             BigDecimal paid = totalPaidByUser.getOrDefault(user, BigDecimal.ZERO);
             BigDecimal balance = paid.subtract(sharePerUser);
-            balances.put(user.getEmail(), balance); // możesz też użyć ID albo imienia
+            balances.put(user.getEmail(), balance);
         }
 
         return balances;

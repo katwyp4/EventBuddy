@@ -24,7 +24,7 @@ public class JsonEventStorageService {
         if (!Files.exists(uploadDir)) Files.createDirectories(uploadDir);
         if (!Files.exists(eventFile)) {
             Files.createDirectories(eventFile.getParent());
-            Files.write(eventFile, "[]".getBytes()); // pusty JSON array
+            Files.write(eventFile, "[]".getBytes());
         }
     }
 
@@ -42,7 +42,7 @@ public class JsonEventStorageService {
 
         // Ustaw ścieżkę do zdjęcia
         event.setImageUrl("/uploads/" + imageFileName);
-        //event.setId(System.currentTimeMillis()); // prosty ID
+        //event.setId(System.currentTimeMillis());
 
         events.add(event);
         objectMapper.writeValue(eventFile.toFile(), events);

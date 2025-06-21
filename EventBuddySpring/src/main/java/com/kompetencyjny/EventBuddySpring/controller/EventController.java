@@ -230,8 +230,8 @@ public class EventController {
             @AuthenticationPrincipal UserDetails userDetails) {
 
         try {
-            String imagePath = fileStorageService.saveImage(image); // tu zapisuje się zdjęcie do katalogu
-            eventRequest.setImageUrl(imagePath);                    // tylko ścieżka trafia do bazy
+            String imagePath = fileStorageService.saveImage(image);
+            eventRequest.setImageUrl(imagePath);
 
             Event event = eventMapper.toEntity(eventRequest);
             event.setBudgetDeadline(eventRequest.getBudgetDeadline());
