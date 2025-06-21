@@ -261,4 +261,11 @@ public class EventController {
         return ResponseEntity.ok(dtos);
     }
 
+    @GetMapping("/{id}/budget-deadline")
+    public ResponseEntity<String> getBudgetDeadline(@PathVariable Long id) {
+        return eventRepository.findById(id)
+                .map(event -> ResponseEntity.ok("\"" + event.getBudgetDeadline().toString() + "\""))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
 }

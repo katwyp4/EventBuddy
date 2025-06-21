@@ -123,4 +123,8 @@ public interface ApiService {
     @PUT("/api/events/{eventId}/participants/{userId}")
     Call<EventParticipantDto> joinEvent(@Path("eventId") Long eventId,
                                         @Path("userId") Long userId);
+
+    @GET("/api/events/{id}/budget-deadline")
+    Call<String> getBudgetDeadline(@Path("id") long eventId);
+
 }

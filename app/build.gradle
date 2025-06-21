@@ -57,6 +57,8 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.16.0'
     implementation 'com.google.firebase:firebase-analytics'
 
+    implementation "com.jakewharton.threetenabp:threetenabp:1.3.1"
+
     // TESTY
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
