@@ -49,11 +49,10 @@ public class GalleryActivity extends AppCompatActivity {
     private final List<String> photoUrls = new ArrayList<>();
     private PhotoPagerAdapter adapter;
 
-    private final ApiService api = RetrofitClient                    // Retrofit już masz w projekcie
+    private final ApiService api = RetrofitClient
             .getInstance(this)
             .create(ApiService.class);
 
-    /* ---------- Launcher wyboru zdjęcia z galerii ---------- */
     private final ActivityResultLauncher<String> pickImage =
             registerForActivityResult(
                     new ActivityResultContracts.GetContent(),
@@ -64,7 +63,6 @@ public class GalleryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gallery);
 
-        /* -------- inicjalizacja widoków -------- */
         viewPager   = findViewById(R.id.viewPager);
         counterText = findViewById(R.id.counterText);
         btnAddPhoto = findViewById(R.id.btnAddPhoto);
@@ -76,7 +74,6 @@ public class GalleryActivity extends AppCompatActivity {
             return;
         }
 
-        /* -------- ustaw adapter -------- */
         adapter = new PhotoPagerAdapter(photoUrls);
         viewPager.setAdapter(adapter);
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
@@ -86,16 +83,11 @@ public class GalleryActivity extends AppCompatActivity {
             }
         });
 
-        /* -------- pobierz zdjęcia z backendu -------- */
         loadPhotos();
 
-        /* -------- klik w „Dodaj zdjęcie” -------- */
         btnAddPhoto.setOnClickListener(v -> pickImage.launch("image/*"));
     }
 
-    /* :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
-    /* =======================  POBIERANIE  ZDJĘĆ  Z  BACKENDU  =========================== */
-    /* :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
 
     private void loadPhotos() {
         api.getEventPhotos(eventId).enqueue(new Callback<List<String>>() {
@@ -115,9 +107,6 @@ public class GalleryActivity extends AppCompatActivity {
         });
     }
 
-    /* :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
-    /* =======================  OBSŁUGA WYBORU  ZDJĘCIA Z  GALERII  ======================= */
-    /* :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
 
     private void handleImagePicked(Uri uri) {
         if (uri == null) return;
@@ -127,7 +116,6 @@ public class GalleryActivity extends AppCompatActivity {
             return;
         }
 
-        /* ---- przygotuj multipart ---- */
         RequestBody reqFile = RequestBody.create(tempFile,
                 MediaType.parse(getContentResolver().getType(uri)));
         MultipartBody.Part body =
@@ -137,7 +125,7 @@ public class GalleryActivity extends AppCompatActivity {
             @Override public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> resp) {
                 if (resp.isSuccessful()) {
                     showToast("Zdjęcie wysłane!");
-                    loadPhotos();                           // odśwież listę
+                    loadPhotos();
                 } else showToast("Błąd uploadu");
             }
 
@@ -147,9 +135,6 @@ public class GalleryActivity extends AppCompatActivity {
         });
     }
 
-    /* :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
-    /* =================================  POMOCNICZE  ==================================== */
-    /* :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
 
     private File copyUriToTempFile(Uri uri) {
         try (InputStream in = getContentResolver().openInputStream(uri)) {
@@ -172,9 +157,6 @@ public class GalleryActivity extends AppCompatActivity {
 
     private void showToast(String msg) { Toast.makeText(this, msg, Toast.LENGTH_SHORT).show(); }
 
-    /* :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
-    /* =======================  ADAPTER    DLA    ViewPager2   ============================ */
-    /* :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
 
     private static class PhotoPagerAdapter extends RecyclerView.Adapter<PhotoViewHolder> {
         private final List<String> data;
@@ -189,7 +171,7 @@ public class GalleryActivity extends AppCompatActivity {
 
         @Override public void onBindViewHolder(@NonNull PhotoViewHolder h, int pos) {
             Glide.with(h.image.getContext())
-                    .load("http://10.0.2.2:8080" + data.get(pos))   // dostosuj bazowy URL!
+                    .load("http://10.0.2.2:8080" + data.get(pos))
                     .into(h.image);
         }
 

@@ -15,14 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Adapter listy wydatków (opis + kwota + płatnik).
- */
+
 public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.VH> {
 
     private final List<ExpenseDto> items = new ArrayList<>();
 
-    /*────────────────────────  API publiczne  ──────────────────────────────*/
 
     public void setData(List<ExpenseDto> list) {
         items.clear();
@@ -35,7 +32,6 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.VH> {
         notifyItemInserted(items.size() - 1);
     }
 
-    /*────────────────────  Metody RecyclerView.Adapter  ────────────────────*/
 
     @NonNull
     @Override
@@ -56,7 +52,6 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.VH> {
     @Override
     public int getItemCount() { return items.size(); }
 
-    /*──────────────────────────  ViewHolder  ───────────────────────────────*/
 
     static class VH extends RecyclerView.ViewHolder {
         TextView desc, amount, payer;
@@ -65,7 +60,7 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.VH> {
             super(itemView);
             desc   = itemView.findViewById(R.id.tvExpenseDesc);
             amount = itemView.findViewById(R.id.tvExpenseAmount);
-            payer  = itemView.findViewById(R.id.tvExpensePayer);   // NEW
+            payer  = itemView.findViewById(R.id.tvExpensePayer);
         }
     }
 }

@@ -1,12 +1,10 @@
 package com.example.myapplication.data;
 
-/** Obiekt wysyłany w POST /api/expenses */
 public class CreateExpenseDto {
     private String description;
     private double amount;
     private Long eventId;
 
-    public CreateExpenseDto() {}  // dla Gson
 
     public CreateExpenseDto(String description, double amount,
                             Long eventId) {

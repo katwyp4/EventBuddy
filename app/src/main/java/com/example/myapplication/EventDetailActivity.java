@@ -2,7 +2,6 @@ package com.example.myapplication;
 
 import android.content.Intent;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
@@ -20,8 +19,6 @@ import com.example.myapplication.network.RetrofitClient;
 
 import com.example.myapplication.budget.BudgetActivity;
 import com.example.myapplication.chat.ChatActivity;
-
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
@@ -329,7 +326,7 @@ public class EventDetailActivity extends AppCompatActivity {
         }
         try {
             java.util.Date endDate;
-            if (endDateString.length() == 10) { // yyyy-MM-dd
+            if (endDateString.length() == 10) {
                 java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
                 endDate = sdf.parse(endDateString);
             } else {
@@ -415,8 +412,6 @@ public class EventDetailActivity extends AppCompatActivity {
         }
     }
 
-
-
     private void setupVoteButtons() {
         btnVoteDate.setOnClickListener(v -> {
             int selectedId = dateVotingRadioGroup.getCheckedRadioButtonId();
@@ -447,7 +442,7 @@ public class EventDetailActivity extends AppCompatActivity {
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
                     Toast.makeText(EventDetailActivity.this, "Głos oddany!", Toast.LENGTH_SHORT).show();
-                    fetchUpdatedPollOptions(isDateVote); // lub false, jeśli lokalizacja – zależnie od kontekstu
+                    fetchUpdatedPollOptions(isDateVote);
                 } else {
                     Toast.makeText(EventDetailActivity.this, "Błąd oddawania głosu", Toast.LENGTH_SHORT).show();
                 }

@@ -26,7 +26,7 @@ public class TaskActivity extends AppCompatActivity {
     private Button btnAddTask;
     private TaskAdapter adapter;
     private long eventId;
-    private ArrayList<String> participants;   // lista imion i nazwisk
+    private ArrayList<String> participants;
     private ApiService api;
 
     @Override
@@ -34,35 +34,27 @@ public class TaskActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task);
 
-        /* 1. Intent extras */
         eventId      = getIntent().getLongExtra("EVENT_ID", -1);
         participants = getIntent().getStringArrayListExtra("PARTICIPANTS");
         if (participants == null) participants = new ArrayList<>();
 
-        /* 2. Retrofit */
         api = RetrofitClient.getInstance(this).create(ApiService.class);
 
-        /* 3. RecyclerView + adapter */
         rvTasks = findViewById(R.id.rvTasks);
         rvTasks.setLayoutManager(new LinearLayoutManager(this));
 
-        adapter = new TaskAdapter();                         // <-- NEW
+        adapter = new TaskAdapter();
         rvTasks.setAdapter(adapter);
 
-        /* 4. Button „Dodaj zadanie” */
         btnAddTask = findViewById(R.id.btnAddTask);
         btnAddTask.setOnClickListener(v -> openAddTaskSheet());
 
-        /* 5. Załaduj istniejące zadania */
         loadTasks();
     }
-
-    /** Pobiera zadania z backendu */
     private void loadTasks() {
         adapter.setData(new ArrayList<>());
     }
 
-    /** BottomSheet do dodawania zadania */
     private void openAddTaskSheet() {
         BottomSheetDialog d = new BottomSheetDialog(this);
         View v = getLayoutInflater().inflate(R.layout.bottom_add_task, null);
@@ -71,22 +63,19 @@ public class TaskActivity extends AppCompatActivity {
         AutoCompleteTextView acAssignee = v.findViewById(R.id.acAssignee);
         Button              btnSave    = v.findViewById(R.id.btnSaveTask);
 
-        /* adapter z białą czcionką -------------------------------------- */
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
                 this,
-                R.layout.dropdown_item_white,          // twój layout z białą czcionką
+                R.layout.dropdown_item_white,
                 participants
         );
         acAssignee.setAdapter(spinnerAdapter);
-        acAssignee.setThreshold(1);          // filtruj po 1 znaku
+        acAssignee.setThreshold(1);
 
-        /* pokaż listę natychmiast po kliknięciu lub focusie -------------- */
         acAssignee.setOnClickListener(v1 -> acAssignee.showDropDown());
         acAssignee.setOnFocusChangeListener((v1, hasFocus) -> {
             if (hasFocus) acAssignee.showDropDown();
         });
 
-        /* -- Zapisz zadanie -- */
         btnSave.setOnClickListener(b -> {
             String title = etTitle.getText().toString().trim();
             String who   = acAssignee.getText().toString().trim();
@@ -98,7 +87,6 @@ public class TaskActivity extends AppCompatActivity {
                 return;
             }
 
-            /* MOCK lokalny – usuń gdy podłączysz backend */
             TaskDto t = new TaskDto();
             t.setTitle(title);
             t.setAssigneeFullName(who);
@@ -106,10 +94,6 @@ public class TaskActivity extends AppCompatActivity {
             adapter.add(t);
             d.dismiss();
 
-            /*  // prawdziwe wywołanie:
-            CreateTaskDto dto = new CreateTaskDto(title, who, eventId);
-            api.addTask(dto).enqueue(new Callback<TaskDto>() { ... });
-            */
         });
 
         d.setContentView(v);

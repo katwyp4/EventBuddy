@@ -25,7 +25,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.VH>{
         h.assignee.setText(t.getAssigneeFullName());
         h.done.setChecked(t.isDone());
 
-        // zmiana statusu
         h.done.setOnCheckedChangeListener((cb,checked)-> t.setDone(checked));
     }
     @Override public int getItemCount(){ return items.size(); }

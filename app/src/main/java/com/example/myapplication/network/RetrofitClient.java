@@ -52,7 +52,6 @@ public class RetrofitClient {
                 Request request = requestBuilder.build();
                 okhttp3.Response response = chain.proceed(request);
 
-                // Sprawdź czy odpowiedź to 401 lub 403 - Unauthorized
                 if (response.code() == 401 || response.code() == 403) {
                     Log.d("LOGOWANIE", "LOGOWANIE");
                     tokenManager.clearToken();

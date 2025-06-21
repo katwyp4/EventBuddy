@@ -10,7 +10,7 @@ public class ChatFirebaseMessagingService extends FirebaseMessagingService {
     public void onNewToken(String token) {
         super.onNewToken(token);
         Log.i("FCM", "Nowy token: " + token);
-        TokenRepository.register(token);          // zapisz + wyślij do backendu
+        TokenRepository.register(token);
     }
 
     @Override

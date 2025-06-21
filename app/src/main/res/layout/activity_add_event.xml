@@ -52,7 +52,6 @@
             android:inputType="date"
             android:layout_marginTop="4dp"/>
 
-        <!-- Checkbox PRZENIESIONY tutaj -->
         <CheckBox
             android:id="@+id/checkboxDateVoting"
             android:layout_width="wrap_content"
@@ -130,7 +129,6 @@
                 android:layout_marginTop="8dp" />
         </LinearLayout>
 
-        <!-- POLE: TERMIN DODAWANIA WYDATKÓW -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -148,7 +146,6 @@
             android:inputType="date"
             android:layout_marginTop="4dp"/>
 
-        <!-- LOKALIZACJA i głosowanie -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

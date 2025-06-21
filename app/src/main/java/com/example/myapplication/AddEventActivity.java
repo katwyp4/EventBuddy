@@ -382,15 +382,8 @@ public class AddEventActivity extends AppCompatActivity {
             event.setEventPrivacy("PUBLIC_CLOSED");
             event.setEnableDateVoting(dateVoting);
             event.setEnableLocationVoting(locationVoting);
-
-            // 1. odczytaj termin z pola
             String budgetDeadline = editBudgetDeadline.getText().toString().trim();
-            // 2. ustaw w obiekcie Event
             event.setBudgetDeadline(budgetDeadline);
-
-
-            Log.d("EVENT", "enableDateVoting = " + event.getEnableDateVoting());
-
 
             pollsList.clear();
 

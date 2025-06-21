@@ -35,8 +35,8 @@ public final class NotificationHelper {
         }
     }
 
-    /** Wywołuj z FirebaseMessagingService. */
     public static void showChatNotification(Context ctx, String title, String body, long eventId) {
+
         ensureChannel(ctx);
 
         Intent intent = new Intent(ctx, ChatActivity.class);
