@@ -51,17 +51,19 @@ public class BudgetActivity extends AppCompatActivity {
         /* --- odbiór danych z Intentu --- */
         eventId = getIntent().getLongExtra("EVENT_ID", -1);
 
+        // Fallback deadline z Intentu (na wszelki wypadek)
         String deadlineStr = getIntent().getStringExtra("BUDGET_DEADLINE");
-        Log.d("DEBUG_BUDGET", "Odebrany deadline: " + deadlineStr);
         if (deadlineStr != null && !deadlineStr.isEmpty()) {
-            deadline = LocalDate.parse(deadlineStr);  // tylko jeśli format "yyyy-MM-dd"
+            try {
+                deadline = LocalDate.parse(deadlineStr);
+            } catch (Exception e) {
+                deadline = LocalDate.MAX;
+            }
         } else {
-            deadline = LocalDate.MAX; // fallback: pozwala dodawać zawsze
+            deadline = LocalDate.MAX;
         }
 
-        Log.d("DEBUG_BUDGET2", "Odebrany deadline: " + deadline);
-
-
+        Log.d("DEBUG_BUDGET", "Fallback deadline z Intentu: " + deadline);
 
         /* --- RecyclerView & adapter --- */
         RecyclerView rv = findViewById(R.id.rvExpenses);
@@ -70,33 +72,55 @@ public class BudgetActivity extends AppCompatActivity {
         rv.setAdapter(adapter);
 
         /* --- przyciski --- */
-        btnAddExpense     = findViewById(R.id.btnAddExpense);
+        btnAddExpense = findViewById(R.id.btnAddExpense);
         btnShowSettlement = findViewById(R.id.btnShowSettlement);
 
         btnAddExpense.setOnClickListener(v -> openAddExpenseSheet());
         btnShowSettlement.setOnClickListener(v -> showSettlementDialog());
 
-        Log.d("DEBUG", "apiService: " + apiService); // powinno dać null lub instancję
-        Log.d("BUDGET", "Event ID: " + eventId);
+        // Pobierz aktualny deadline z serwera
+        if (eventId != -1) {
+            apiService.getBudgetDeadline(eventId).enqueue(new Callback<String>() {
+                @Override
+                public void onResponse(Call<String> call, Response<String> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        try {
+                            deadline = LocalDate.parse(response.body());
+                            Log.d("BUDGET", "Zaktualizowany deadline z serwera: " + deadline);
+                            toggleButtons(); // odśwież po aktualnym deadline
+                        } catch (Exception e) {
+                            Log.e("BUDGET", "Błąd parsowania daty", e);
+                        }
+                    } else {
+                        Log.w("BUDGET", "Nie udało się pobrać deadline'u z serwera");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<String> call, Throwable t) {
+                    Log.e("BUDGET", "Błąd sieci przy pobieraniu deadline'u: " + t.getMessage());
+                }
+            });
+        }
+
+        // Pobierz wydatki
         apiService.getExpensesForEvent(eventId).enqueue(new Callback<List<ExpenseDto>>() {
             @Override
             public void onResponse(Call<List<ExpenseDto>> call, Response<List<ExpenseDto>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     adapter.setData(response.body());
                 } else {
-                    Log.d("DEBUG2", "BudgetActivity: " + BudgetActivity.this);
                     Toast.makeText(BudgetActivity.this, "Brak danych lub błąd serwera", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<List<ExpenseDto>> call, Throwable t) {
-                Log.d("DEBUG3", "BudgetActivity: " + BudgetActivity.this + "Błąd sieci: " + t.getMessage());
                 Toast.makeText(BudgetActivity.this, "Błąd sieci: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
 
-
+        // Wywołaj początkowo toggleButtons na wypadek, gdyby deadline z serwera się nie udał
         toggleButtons();
     }
 
