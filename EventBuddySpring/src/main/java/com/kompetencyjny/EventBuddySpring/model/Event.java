@@ -25,9 +25,6 @@ public class Event {
     private LocalDate date;
     private String location;
 
-    private Double latitude;
-    private Double longitude;
-    private String shareLink;
     private EventPrivacy eventPrivacy;
     @JsonIgnore private Boolean active=true;
     @JsonIgnore private LocalDate deactivationDate=null;

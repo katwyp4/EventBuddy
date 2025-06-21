@@ -22,8 +22,6 @@ public class EventRequest {
     private LocalDate date;
     private String location;
 
-    private Double latitude;
-    private Double longitude;
     @Pattern(regexp = "(PRIVATE|PUBLIC_OPEN|PUBLIC_CLOSED)")
     private String eventPrivacy;
     private String imageUrl;
