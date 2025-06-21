@@ -5,6 +5,7 @@ public class CreateMessageDto {
     private Long   eventId;
     private String content;
 
+
     public CreateMessageDto() { }
 
 

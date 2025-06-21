@@ -24,7 +24,16 @@ public class ChatFirebaseMessagingService extends FirebaseMessagingService {
 
             Log.d("FCM", "ODEBRANO wiadomość typu DATA: " + title + " / " + body);
 
-            NotificationHelper.showChatNotification(this, title, body);
+            String eventIdStr = msg.getData().get("eventId");
+            Log.d("FCM2", eventIdStr);
+            if (title != null && body != null && eventIdStr != null) {
+                try {
+                    long eventId = Long.parseLong(eventIdStr);
+                    NotificationHelper.showChatNotification(this, title, body, eventId);
+                } catch (NumberFormatException e) {
+                    Log.e("FCM", "Nieprawidłowy eventId: " + eventIdStr);
+                }
+            }
         }
     }
 }
