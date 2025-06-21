@@ -75,12 +75,18 @@
             android:text="Zaloguj się" />
 
         <TextView
+            android:id="@+id/textRegister"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Zapomniałeś hasła?"
-            android:textColor="@color/text_white"
+            android:text="Nie masz jeszcze konta? Dołącz do nas!"
+            android:textColor="@color/button_blue"
+            android:textStyle="bold"
             android:textSize="14sp"
-            android:layout_marginTop="16dp"/>
+            android:layout_marginTop="8dp"
+            android:layout_gravity="center_horizontal"
+            android:clickable="true"
+            android:focusable="true"/>
+
 
     </LinearLayout>
 
