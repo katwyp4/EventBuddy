@@ -9,7 +9,5 @@
     <color name="white">#FFFFFF</color>
     <color name="purple_700">#6200EE</color>
 
-
-
-    <color name="blue">#4947A6</color> //dodalem bo mi nie startowalo
+    <color name="blue">#4947A6</color>
 </resources>

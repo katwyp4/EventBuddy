@@ -34,7 +34,6 @@ public final class NotificationHelper {
         }
     }
 
-    /** Wywołuj z FirebaseMessagingService. */
     public static void showChatNotification(Context ctx, String title, String body) {
         ensureChannel(ctx);
 

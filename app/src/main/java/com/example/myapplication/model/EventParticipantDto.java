@@ -7,7 +7,6 @@ public class EventParticipantDto {
     private String eventRole;
     private UserDto user;
 
-    // Gettery i settery
     public Long getEventId() {
         return eventId;
     }

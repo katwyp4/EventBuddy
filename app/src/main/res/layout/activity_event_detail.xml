@@ -6,7 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Pasek nawigacji -->
     <include
         layout="@layout/custom_navbar"
         android:id="@+id/detailToolbar"
@@ -74,7 +73,6 @@
                 android:textSize="14sp"
                 android:textAlignment="center" />
 
-            <!-- Kontener i RadioGroup do głosowania na datę -->
             <LinearLayout
                 android:id="@+id/dateVotingOptionsContainer"
                 android:layout_width="match_parent"
@@ -209,7 +207,7 @@
                 android:rowCount="2"
                 android:useDefaultMargins="true">
 
-                <!-- Budżet -->
+
                 <Button
                     android:id="@+id/btnOpenBudget"
                     android:layout_width="0dp"
@@ -221,7 +219,6 @@
                     android:text="Budżet"
                     android:textColor="#FFFFFF" />
 
-                <!-- Taski -->
                 <ImageButton
                     android:id="@+id/btnOpenTasks"
                     android:layout_width="0dp"
@@ -234,7 +231,6 @@
                     android:src="@drawable/ic_tasks"
                     app:tint="#FFFFFF" />
 
-                <!-- Czat -->
                 <ImageButton
                     android:id="@+id/btnOpenChat"
                     android:layout_width="0dp"
@@ -246,8 +242,6 @@
                     android:contentDescription="Czat"
                     android:src="@drawable/ic_chat"
                     app:tint="#FFFFFF" />
-
-                <!-- Galeria -->
                 <ImageButton
                     android:id="@+id/btnOpenGallery"
                     android:layout_width="0dp"

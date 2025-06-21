@@ -1,6 +1,5 @@
 package com.example.myapplication.data;
 
-/** Model pojedynczego zadania (backend DTO). */
 public class TaskDto {
 
     private Long id;
@@ -8,8 +7,7 @@ public class TaskDto {
     private String assigneeFullName;
     private boolean done;
 
-    /* ───  Konstruktory  ─── */
-    public TaskDto() {}                                   // wymagany przez GSON
+    public TaskDto() {}
 
     public TaskDto(Long id, String title,
                    String assigneeFullName, boolean done) {
@@ -18,8 +16,6 @@ public class TaskDto {
         this.assigneeFullName = assigneeFullName;
         this.done = done;
     }
-
-    /* ───  get  ─── */
     public Long    getId()               { return id; }
     public String  getTitle()            { return title; }
     public String  getAssigneeFullName() { return assigneeFullName; }

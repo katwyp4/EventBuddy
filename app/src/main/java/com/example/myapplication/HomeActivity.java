@@ -31,12 +31,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-
-
-
-
 public class HomeActivity extends AppCompatActivity {
-
     private RecyclerView recyclerView;
     private EventAdapter adapter;
     private List<Event> eventList;
@@ -45,30 +40,21 @@ public class HomeActivity extends AppCompatActivity {
 
     private ActivityResultLauncher<Intent> addEventLauncher;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-
         recyclerView = findViewById(R.id.eventsRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         ImageButton moreButton = findViewById(R.id.moreButton);
         moreButton.setOnClickListener(v -> showPopupMenu(v));
-
         TextView addButton = findViewById(R.id.addEventButton);
         addButton.setOnClickListener(v -> {
             Intent intent = new Intent(HomeActivity.this, AddEventActivity.class);
             addEventLauncher.launch(intent);
         });
 
-
         eventList = new ArrayList<>();
-//        eventList.add(new Event("15.05–16.05.2025", "Juwenalia", "Święto studentów pełne atrakcji", R.drawable.juwenalia));
-//        eventList.add(new Event("19.07–25.07.2025", "Adapciak", "Obóz zerowy dla studentów", R.drawable.adapciak));
-//        eventList.add(new Event("19.07–25.07.2025", "koncerty", "Obóz zerowy dla studentów", R.drawable.koncert));
-
         apiService = RetrofitClient.getInstance(getApplicationContext()).create(ApiService.class);
         eventList = new ArrayList<>();
         adapter = new EventAdapter(eventList);
@@ -77,7 +63,7 @@ public class HomeActivity extends AppCompatActivity {
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == RESULT_OK) {
-                        loadEvents(0, 40); // refresh list
+                        loadEvents(0, 40);
                     }
                 }
         );
@@ -106,25 +92,13 @@ public class HomeActivity extends AppCompatActivity {
     private void showPopupMenu(View anchor) {
         PopupMenu popup = new PopupMenu(this, anchor);
         popup.getMenuInflater().inflate(R.menu.menu, popup.getMenu());
-
         popup.setOnMenuItemClickListener(item -> {
             int id = item.getItemId();
-            if (id == R.id.menu_home) {
-                Toast.makeText(this, "Strona główna", Toast.LENGTH_SHORT).show();
-                return true;
-            } else if (id == R.id.menu_profile) {
-                Toast.makeText(this, "Profil", Toast.LENGTH_SHORT).show();
-                return true;
-            } else if (id == R.id.menu_chat) {
-                Toast.makeText(this, "Czat", Toast.LENGTH_SHORT).show();
-                return true;
-            }
-            else if (id == R.id.menu_logout) {
+             if (id == R.id.menu_logout) {
                 logoutUser();
                 return true;
             }
             return false;
-
         });
 
         popup.show();

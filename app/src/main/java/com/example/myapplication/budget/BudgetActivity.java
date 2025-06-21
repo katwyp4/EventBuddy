@@ -30,7 +30,6 @@ import retrofit2.Response;
 
 public class BudgetActivity extends AppCompatActivity {
 
-    /*────────────────────────────  POLA  ────────────────────────────*/
     private ExpenseAdapter adapter;
 
     private long eventId = -1;
@@ -40,7 +39,6 @@ public class BudgetActivity extends AppCompatActivity {
     private View btnShowSettlement;
     private ApiService apiService;
 
-    /*────────────────────────────  LIFE-CYCLE  ──────────────────────*/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,10 +46,8 @@ public class BudgetActivity extends AppCompatActivity {
 
         apiService = RetrofitClient.getInstance(getApplicationContext()).create(ApiService.class);
 
-        /* --- odbiór danych z Intentu --- */
         eventId = getIntent().getLongExtra("EVENT_ID", -1);
 
-        // Fallback deadline z Intentu (na wszelki wypadek)
         String deadlineStr = getIntent().getStringExtra("BUDGET_DEADLINE");
         if (deadlineStr != null && !deadlineStr.isEmpty()) {
             try {
@@ -65,20 +61,17 @@ public class BudgetActivity extends AppCompatActivity {
 
         Log.d("DEBUG_BUDGET", "Fallback deadline z Intentu: " + deadline);
 
-        /* --- RecyclerView & adapter --- */
         RecyclerView rv = findViewById(R.id.rvExpenses);
         rv.setLayoutManager(new LinearLayoutManager(this));
         adapter = new ExpenseAdapter();
         rv.setAdapter(adapter);
 
-        /* --- przyciski --- */
         btnAddExpense = findViewById(R.id.btnAddExpense);
         btnShowSettlement = findViewById(R.id.btnShowSettlement);
 
         btnAddExpense.setOnClickListener(v -> openAddExpenseSheet());
         btnShowSettlement.setOnClickListener(v -> showSettlementDialog());
 
-        // Pobierz aktualny deadline z serwera
         if (eventId != -1) {
             apiService.getBudgetDeadline(eventId).enqueue(new Callback<String>() {
                 @Override
@@ -87,7 +80,7 @@ public class BudgetActivity extends AppCompatActivity {
                         try {
                             deadline = LocalDate.parse(response.body());
                             Log.d("BUDGET", "Zaktualizowany deadline z serwera: " + deadline);
-                            toggleButtons(); // odśwież po aktualnym deadline
+                            toggleButtons();
                         } catch (Exception e) {
                             Log.e("BUDGET", "Błąd parsowania daty", e);
                         }
@@ -120,18 +113,15 @@ public class BudgetActivity extends AppCompatActivity {
             }
         });
 
-        // Wywołaj początkowo toggleButtons na wypadek, gdyby deadline z serwera się nie udał
         toggleButtons();
     }
 
-    /*────────────────────  UI: przyciski vs deadline  ───────────────*/
     private void toggleButtons() {
         boolean afterDeadline = LocalDate.now().isAfter(deadline);
         btnAddExpense.setVisibility(afterDeadline ? View.GONE  : View.VISIBLE);
         btnShowSettlement.setVisibility(afterDeadline ? View.VISIBLE : View.GONE);
     }
 
-    /*────────────────────  Bottom-sheet: nowy wydatek  ──────────────*/
     private void openAddExpenseSheet() {
         BottomSheetDialog sheet = new BottomSheetDialog(this);
         View v = getLayoutInflater().inflate(R.layout.bottom_add_expense, null);
@@ -154,8 +144,8 @@ public class BudgetActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(Call<ExpenseDto> call, Response<ExpenseDto> response) {
                     if (response.isSuccessful() && response.body() != null) {
-                        adapter.add(response.body());  // dodaj do listy
-                        sheet.dismiss();               // zamknij bottom sheet
+                        adapter.add(response.body());
+                        sheet.dismiss();
                     } else {
                         Toast.makeText(BudgetActivity.this, "Błąd dodawania wydatku", Toast.LENGTH_SHORT).show();
                     }
@@ -173,7 +163,6 @@ public class BudgetActivity extends AppCompatActivity {
         sheet.show();
     }
 
-    /*────────────────────  Dialog rozliczenia  ─────────────────────*/
     private void showSettlementDialog() {
         if (eventId == -1) {
             Toast.makeText(this, "Brak ID wydarzenia", Toast.LENGTH_SHORT).show();

@@ -46,14 +46,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.VH> {
         return items.size();
     }
 
-    /** Zastępuje całą listę (np. przy ładowaniu z backendu). */
     public void addAll(List<MessageDto> list) {
         int start = items.size();
         items.addAll(list);
         notifyItemRangeInserted(start, list.size());
     }
 
-    /** Dokłada jedną wiadomość (po wysłaniu). */
     public void add(MessageDto m) {
         items.add(m);
         notifyItemInserted(items.size() - 1);

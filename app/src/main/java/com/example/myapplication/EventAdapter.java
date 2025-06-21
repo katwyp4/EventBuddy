@@ -63,7 +63,6 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
                 .load("http://10.0.2.2:8080" + event.getImageUrl())
                 .into(holder.eventImage);
 
-        // Pokaz informację, czy jest głosowanie na datę
         if (event.getDatePoll() != null && event.getDatePoll() != null) {
             holder.dateVotingInfo.setText("Głosowanie na datę: TAK");
             holder.dateVotingInfo.setVisibility(View.VISIBLE);
@@ -89,7 +88,6 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             intent.putExtra("IS_PARTICIPANT", event.isParticipant());
             intent.putExtra("dateVotingEnd", event.getDateVotingEnd());
             intent.putExtra("locationVotingEnd", event.getLocationVotingEnd());
-
 
             holder.itemView.getContext().startActivity(intent);
         });
