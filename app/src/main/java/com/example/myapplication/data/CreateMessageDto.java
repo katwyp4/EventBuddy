@@ -5,7 +5,7 @@ public class CreateMessageDto {
     private Long   eventId;
     private String content;
 
-    /* ❶  bez-arg constructor – konieczny przy użyciu setEventId()/setContent() */
+    /* bez-arg constructor – konieczny przy użyciu setEventId()/setContent() */
     public CreateMessageDto() { }
 
 

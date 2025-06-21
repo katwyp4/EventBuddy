@@ -155,7 +155,7 @@ public class AddEventActivity extends AppCompatActivity {
                 return;
             }
 
-            if (option.length() > 80 || !option.matches("^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźżA-ZĄĆĘŁŃÓŚŹŻ\\s\\-]*$")) {
+            if (option.length() > 140 || !option.matches("^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźżA-ZĄĆĘŁŃÓŚŹŻ0-9\\s\\-.]*$")) {
                 editNewLocationPollOption.setError("Nieprawidłowa lokalizacja");
                 return;
             }
@@ -238,10 +238,10 @@ public class AddEventActivity extends AppCompatActivity {
         editLocation.addTextChangedListener(new TextWatcher() {
             public void afterTextChanged(Editable s) {
                 String input = s.toString().trim();
-                if (input.length() > 80) {
-                    editLocation.setError("Maks. 80 znaków");
-                } else if (!input.matches("^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźżA-ZĄĆĘŁŃÓŚŹŻ\\s\\-]*$")) {
-                    editLocation.setError("Dozwolone: litery, spacje, myślniki; Musi zaczynać się z dużej litery");
+                if (input.length() > 140) {
+                    editLocation.setError("Maks. 140 znaków");
+                } else if (!input.matches("^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźżA-ZĄĆĘŁŃÓŚŹŻ0-9\\s\\-.]*$")) {
+                    editLocation.setError("Dozwolone: litery, spacje, myślniki i kropki; Musi zaczynać się z dużej litery");
                 } else {
                     editLocation.setError(null);
                 }
@@ -270,10 +270,10 @@ public class AddEventActivity extends AppCompatActivity {
                 String input = s.toString().trim();
                 if (input.isEmpty()) {
                     editNewLocationPollOption.setError(null);
-                } else if (input.length() > 80) {
-                    editNewLocationPollOption.setError("Maks. 80 znaków");
-                } else if (!input.matches("^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźżA-ZĄĆĘŁŃÓŚŹŻ\\s\\-]*$")) {
-                    editNewLocationPollOption.setError("Dozwolone: litery, spacje, myślniki; Musi zaczynać się z dużej litery");
+                } else if (input.length() > 140) {
+                    editNewLocationPollOption.setError("Maks. 140 znaków");
+                } else if (!input.matches("^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźżA-ZĄĆĘŁŃÓŚŹŻ0-9\\s\\-.]*$")) {
+                    editNewLocationPollOption.setError("Dozwolone: litery, spacje, myślniki i kropki; Musi zaczynać się z dużej litery");
                 } else {
                     editNewLocationPollOption.setError(null);
                 }
