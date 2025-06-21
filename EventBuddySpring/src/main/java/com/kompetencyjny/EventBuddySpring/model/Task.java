@@ -18,7 +18,7 @@ public class Task {
     private Long id;
 
     private String name;
-    private String status; // np. TO_DO, IN_PROGRESS, DONE
+    private String status;
 
     @ManyToOne
     @JoinColumn(name = "event_id")
