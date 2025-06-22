@@ -30,7 +30,6 @@ import retrofit2.Response;
 
 public class BudgetActivity extends AppCompatActivity {
 
-    /*────────────────────────────  POLA  ────────────────────────────*/
     private ExpenseAdapter adapter;
 
     private long eventId = -1;
@@ -40,7 +39,6 @@ public class BudgetActivity extends AppCompatActivity {
     private View btnShowSettlement;
     private ApiService apiService;
 
-    /*────────────────────────────  LIFE-CYCLE  ──────────────────────*/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,66 +46,82 @@ public class BudgetActivity extends AppCompatActivity {
 
         apiService = RetrofitClient.getInstance(getApplicationContext()).create(ApiService.class);
 
-        /* --- odbiór danych z Intentu --- */
         eventId = getIntent().getLongExtra("EVENT_ID", -1);
 
         String deadlineStr = getIntent().getStringExtra("BUDGET_DEADLINE");
-        Log.d("DEBUG_BUDGET", "Odebrany deadline: " + deadlineStr);
         if (deadlineStr != null && !deadlineStr.isEmpty()) {
-            deadline = LocalDate.parse(deadlineStr);  // tylko jeśli format "yyyy-MM-dd"
+            try {
+                deadline = LocalDate.parse(deadlineStr);
+            } catch (Exception e) {
+                deadline = LocalDate.MAX;
+            }
         } else {
-            deadline = LocalDate.MAX; // fallback: pozwala dodawać zawsze
+            deadline = LocalDate.MAX;
         }
 
-        Log.d("DEBUG_BUDGET2", "Odebrany deadline: " + deadline);
+        Log.d("DEBUG_BUDGET", "Fallback deadline z Intentu: " + deadline);
 
-
-
-        /* --- RecyclerView & adapter --- */
         RecyclerView rv = findViewById(R.id.rvExpenses);
         rv.setLayoutManager(new LinearLayoutManager(this));
         adapter = new ExpenseAdapter();
         rv.setAdapter(adapter);
 
-        /* --- przyciski --- */
-        btnAddExpense     = findViewById(R.id.btnAddExpense);
+        btnAddExpense = findViewById(R.id.btnAddExpense);
         btnShowSettlement = findViewById(R.id.btnShowSettlement);
 
         btnAddExpense.setOnClickListener(v -> openAddExpenseSheet());
         btnShowSettlement.setOnClickListener(v -> showSettlementDialog());
 
-        Log.d("DEBUG", "apiService: " + apiService); // powinno dać null lub instancję
-        Log.d("BUDGET", "Event ID: " + eventId);
+        if (eventId != -1) {
+            apiService.getBudgetDeadline(eventId).enqueue(new Callback<String>() {
+                @Override
+                public void onResponse(Call<String> call, Response<String> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        try {
+                            deadline = LocalDate.parse(response.body());
+                            Log.d("BUDGET", "Zaktualizowany deadline z serwera: " + deadline);
+                            toggleButtons();
+                        } catch (Exception e) {
+                            Log.e("BUDGET", "Błąd parsowania daty", e);
+                        }
+                    } else {
+                        Log.w("BUDGET", "Nie udało się pobrać deadline'u z serwera");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<String> call, Throwable t) {
+                    Log.e("BUDGET", "Błąd sieci przy pobieraniu deadline'u: " + t.getMessage());
+                }
+            });
+        }
+
+        // Pobierz wydatki
         apiService.getExpensesForEvent(eventId).enqueue(new Callback<List<ExpenseDto>>() {
             @Override
             public void onResponse(Call<List<ExpenseDto>> call, Response<List<ExpenseDto>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     adapter.setData(response.body());
                 } else {
-                    Log.d("DEBUG2", "BudgetActivity: " + BudgetActivity.this);
                     Toast.makeText(BudgetActivity.this, "Brak danych lub błąd serwera", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<List<ExpenseDto>> call, Throwable t) {
-                Log.d("DEBUG3", "BudgetActivity: " + BudgetActivity.this + "Błąd sieci: " + t.getMessage());
                 Toast.makeText(BudgetActivity.this, "Błąd sieci: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
 
-
         toggleButtons();
     }
 
-    /*────────────────────  UI: przyciski vs deadline  ───────────────*/
     private void toggleButtons() {
         boolean afterDeadline = LocalDate.now().isAfter(deadline);
         btnAddExpense.setVisibility(afterDeadline ? View.GONE  : View.VISIBLE);
         btnShowSettlement.setVisibility(afterDeadline ? View.VISIBLE : View.GONE);
     }
 
-    /*────────────────────  Bottom-sheet: nowy wydatek  ──────────────*/
     private void openAddExpenseSheet() {
         BottomSheetDialog sheet = new BottomSheetDialog(this);
         View v = getLayoutInflater().inflate(R.layout.bottom_add_expense, null);
@@ -130,8 +144,8 @@ public class BudgetActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(Call<ExpenseDto> call, Response<ExpenseDto> response) {
                     if (response.isSuccessful() && response.body() != null) {
-                        adapter.add(response.body());  // dodaj do listy
-                        sheet.dismiss();               // zamknij bottom sheet
+                        adapter.add(response.body());
+                        sheet.dismiss();
                     } else {
                         Toast.makeText(BudgetActivity.this, "Błąd dodawania wydatku", Toast.LENGTH_SHORT).show();
                     }
@@ -149,7 +163,6 @@ public class BudgetActivity extends AppCompatActivity {
         sheet.show();
     }
 
-    /*────────────────────  Dialog rozliczenia  ─────────────────────*/
     private void showSettlementDialog() {
         if (eventId == -1) {
             Toast.makeText(this, "Brak ID wydarzenia", Toast.LENGTH_SHORT).show();

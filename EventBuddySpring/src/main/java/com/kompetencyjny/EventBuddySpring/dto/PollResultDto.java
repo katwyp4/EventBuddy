@@ -11,7 +11,6 @@ public class PollResultDto {
         this.voteCount = voteCount;
     }
 
-    // Gettery i settery
     public Long getOptionId() { return optionId; }
     public String getValue() { return value; }
     public int getVoteCount() { return voteCount; }

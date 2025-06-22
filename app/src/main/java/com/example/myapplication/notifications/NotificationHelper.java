@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -49,16 +50,21 @@ public final class NotificationHelper {
         }
     }
 
-    /** Wywołuj z FirebaseMessagingService. */
-    public static void showChatNotification(Context ctx, String title, String body) {
+    public static void showChatNotification(Context ctx, String title, String body, long eventId) {
+
         ensureChannel(ctx);
 
+        Intent intent = new Intent(ctx, ChatActivity.class);
+        intent.putExtra("EVENT_ID", eventId);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        Log.d("EVENTUR", "TUTAJ1");
         PendingIntent tap = PendingIntent.getActivity(
-                ctx, 0,
-                new Intent(ctx, ChatActivity.class)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK),
+                ctx,
+                (int) eventId,
+                intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
+        Log.d("EVENTUR", "TUTAJ2");
 
         NotificationCompat.Builder nb = new NotificationCompat.Builder(ctx, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_chat_notification)
@@ -67,7 +73,7 @@ public final class NotificationHelper {
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(body))
                 .setAutoCancel(true)
                 .setContentIntent(tap);
-
+        Log.d("EVENTUR", "TUTAJ3");
         NotificationManagerCompat.from(ctx)
                 .notify((int) System.currentTimeMillis(), nb.build());
     }
@@ -82,6 +88,7 @@ public final class NotificationHelper {
         NotificationManagerCompat.from(ctx)
                 .notify((int) System.currentTimeMillis(), nb.build());
     }
+
 
 
 }

@@ -21,21 +21,12 @@
         android:usesCleartextTraffic="true"
         android:name=".MyApp"
         >
-
-
-
-        <!-- Ikona dla wszystkich powiadomień (24×24 dp, kolor #FFFFFF) -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_chat_notification" />
-
-        <!-- Kanał domyślny, gdybyś używał tylko jednego -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="chat_messages" />
-
-
-
 
         <activity
             android:name=".RegisterActivity"
@@ -53,7 +44,20 @@
             </intent-filter>
         </activity>
         <activity android:name=".HomeActivity" />
-        <activity android:name=".EventDetailActivity" />
+        <activity
+            android:name=".EventDetailActivity"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <data android:scheme="myapp"
+                    android:host="event"
+                    android:pathPattern="/.*"/>
+            </intent-filter>
+        </activity>
         <activity android:name=".AddEventActivity" />
 
 
@@ -66,7 +70,6 @@
             android:label="@string/tasks" />
 
         <activity android:name=".gallery.GalleryActivity" />
-
 
         <activity
             android:name=".chat.ChatActivity"
@@ -87,9 +90,5 @@
     </application>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-
-
-
-
 
 </manifest>

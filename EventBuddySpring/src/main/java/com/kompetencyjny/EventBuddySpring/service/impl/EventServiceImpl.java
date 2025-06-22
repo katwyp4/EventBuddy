@@ -78,7 +78,7 @@ public class EventServiceImpl implements EventService {
 
         List<Expense> expenses = expenseRepository.findByEventId(eventId);
 
-        // 1. Oblicz ile wydał każdy użytkownik
+        // Oblicz ile wydał każdy użytkownik
         Map<User, BigDecimal> totalPaidByUser = new HashMap<>();
         for (Expense expense : expenses) {
             User payer = expense.getPayer();
@@ -86,7 +86,7 @@ public class EventServiceImpl implements EventService {
                     totalPaidByUser.getOrDefault(payer, BigDecimal.ZERO).add(expense.getAmount()));
         }
 
-        // 2. Oblicz całkowity koszt i średni koszt na osobę
+        // Oblicz całkowity koszt i średni koszt na osobę
         BigDecimal totalAmount = expenses.stream()
                 .map(Expense::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -96,13 +96,13 @@ public class EventServiceImpl implements EventService {
                 ? totalAmount.divide(BigDecimal.valueOf(numParticipants), 2, RoundingMode.HALF_UP)
                 : BigDecimal.ZERO;
 
-        // 3. Oblicz saldo każdego uczestnika
+        // Oblicz saldo każdego uczestnika
         Map<String, BigDecimal> balances = new HashMap<>();
         for (EventParticipant ep : participants) {
             User user = ep.getUser();
             BigDecimal paid = totalPaidByUser.getOrDefault(user, BigDecimal.ZERO);
             BigDecimal balance = paid.subtract(sharePerUser);
-            balances.put(user.getEmail(), balance); // możesz też użyć ID albo imienia
+            balances.put(user.getEmail(), balance);
         }
 
         return balances;
@@ -234,9 +234,6 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public boolean isUserAParticipantOf(Long eventId, Long userId) {
-        Optional<Event> eventOpt = this.findByIdInternal(eventId);
-        Optional<User> userOpt = this.userService.findById(userId);
-        if (userOpt.isEmpty() || eventOpt.isEmpty()) throw new NotFoundException("User or Event does not exists!");
         return eventParticipantRepository.existsById(new UserEventId(userId, eventId));
     }
 
@@ -293,6 +290,32 @@ public class EventServiceImpl implements EventService {
     public Page<EventParticipant> findAllEventParticipants(Pageable pageable, Long eventId, String loggedUserName) {
         if (!isEventVisibleToUser(eventId, loggedUserName)) throw new NotFoundException("Event does not exists!");
         return eventParticipantRepository.findAllById_EventId(eventId, pageable);
+    }
+
+
+    @Override
+    public Page<EventParticipant> findAllEventParticipantsWithRole(Pageable pageable, Long eventId, EventRole role, String loggedUserName){
+        if (!isEventVisibleToUser(eventId, loggedUserName)) throw new NotFoundException("Event does not exists!");
+        return eventParticipantRepository.findAllById_EventIdAndEventRole(eventId, role, pageable);
+    }
+
+    public EventParticipant joinEvent(Long eventId, String loggedEmail) {
+        User user = userService.findByEmail(loggedEmail)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        Event event = findByIdInternal(eventId)
+                .orElseThrow(() -> new NotFoundException("Event not found"));
+
+        Optional<EventParticipant> existing = eventParticipantRepository.findById(new UserEventId(user.getId(), eventId));
+        if (existing.isPresent()) return existing.get();
+
+        if (event.getEventPrivacy() == EventPrivacy.PRIVATE) {
+            throw new ForbiddenException("Nie można dołączyć do prywatnego wydarzenia.");
+        }
+
+        EventParticipant participant = event.addParticipant(user, EventRole.PASSIVE);
+        eventRepository.save(event);
+        return participant;
     }
 
     @Override

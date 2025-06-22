@@ -23,8 +23,8 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getEmail())
-                .password(user.getPassword()) // hasło musi być zahashowane
-                .authorities("ROLE_" + user.getRole().name()) // dodanie roli użytkownika
+                .password(user.getPassword())
+                .authorities("ROLE_" + user.getRole().name())
                 .build();
     }
 }

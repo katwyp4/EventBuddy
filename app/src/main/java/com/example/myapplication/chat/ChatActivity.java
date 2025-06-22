@@ -32,7 +32,7 @@ public class ChatActivity extends AppCompatActivity {
     private Button     btnSend;
 
     private long   eventId;
-    private long   userId = 1;        // TODO: pobierz z auth
+    private long   userId = 1;
     private ChatAdapter  adapter;
     private ApiService   api;
 
@@ -52,28 +52,20 @@ public class ChatActivity extends AppCompatActivity {
                     TokenRepository.register(token);
                 });
 
-
-        // 1. Intent extras
         eventId = getIntent().getLongExtra("EVENT_ID", -1);
         userId  = getIntent().getLongExtra("USER_ID", 1);
 
-        // 2. Retrofit
         api = RetrofitClient.getInstance(this).create(ApiService.class);
 
-        // 3. View binding
         rvMessages = findViewById(R.id.rvMessages);
         etMessage  = findViewById(R.id.etMessage);
         btnSend    = findViewById(R.id.btnSend);
 
-        // 4. RecyclerView + adapter
         rvMessages.setLayoutManager(new LinearLayoutManager(this));
         adapter = new ChatAdapter(new ArrayList<>());
         rvMessages.setAdapter(adapter);
 
-        // 5. Load existing messages
-        loadMessages();
 
-        // 6. Send button
         btnSend.setOnClickListener(v -> {
             String content = etMessage.getText().toString().trim();
             if (content.isEmpty()) return;
@@ -89,7 +81,7 @@ public class ChatActivity extends AppCompatActivity {
                         etMessage.setText("");
                     }
                 }
-                @Override public void onFailure(Call<MessageDto> c, Throwable t) { /* TODO: obsługa błędów */ }
+                @Override public void onFailure(Call<MessageDto> c, Throwable t) { }
             });
         });
     }
@@ -102,7 +94,7 @@ public class ChatActivity extends AppCompatActivity {
                     rvMessages.scrollToPosition(adapter.getItemCount() - 1);
                 }
             }
-            @Override public void onFailure(Call<List<MessageDto>> c, Throwable t) { /* TODO */ }
+            @Override public void onFailure(Call<List<MessageDto>> c, Throwable t) { }
         });
     }
 }

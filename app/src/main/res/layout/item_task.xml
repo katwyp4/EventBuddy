@@ -6,7 +6,6 @@
     android:padding="12dp"
     android:background="#1E1E1E">
 
-    <!-- check-box „zrobione” -->
     <CheckBox
         android:id="@+id/checkDone"
         android:layout_width="wrap_content"
@@ -15,7 +14,6 @@
         android:focusable="false"
         android:focusableInTouchMode="false"/>
 
-    <!-- kolumna tekstów -->
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="0dp"

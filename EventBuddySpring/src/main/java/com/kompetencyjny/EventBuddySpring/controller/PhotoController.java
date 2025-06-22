@@ -29,7 +29,7 @@ public class PhotoController {
         this.storage   = storage;
     }
 
-    /* ================== 1. pobierz listę zdjęć danego wydarzenia ================== */
+    //pobierz listę zdjęć danego wydarzenia
     @GetMapping
     public ResponseEntity<List<String>> listPhotos(@PathVariable Long eventId) {
         List<String> urls = photoRepo.findByEvent_Id(eventId)
@@ -39,7 +39,7 @@ public class PhotoController {
         return ResponseEntity.ok(urls);
     }
 
-    /* ================== 2. wyślij nowe zdjęcie (multipart/form-data) =============== */
+    // wyślij nowe zdjęcie (multipart/form-data)
     @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<Void> upload(@PathVariable Long eventId,
                                        @RequestPart("file") MultipartFile file) {

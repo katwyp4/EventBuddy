@@ -12,7 +12,6 @@ import com.kompetencyjny.EventBuddySpring.repo.UserRepository;
 import com.kompetencyjny.EventBuddySpring.service.EventService;
 import com.kompetencyjny.EventBuddySpring.service.FileStorageService;
 import com.kompetencyjny.EventBuddySpring.service.PollService;
-import com.kompetencyjny.EventBuddySpring.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,10 +23,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -60,14 +59,14 @@ public class EventController {
             if (event.getDate() == null && event.getDatePoll() != null && eventService.hasDateVotingEnded(event)) {
                 PollOption winner = pollService.getWinner(event.getDatePoll());
                 if (winner != null) {
-                    event.setDate(LocalDate.parse(winner.getValue()));
+                    event.setDate(LocalDate.parse(winner.getValue_()));
                     eventRepository.save(event);
                 }
             }
             if (event.getLocation() == null && event.getLocationPoll() != null && eventService.hasLocationVotingEnded(event)) {
                 PollOption locationWinner = pollService.getWinner(event.getLocationPoll());
                 if (locationWinner != null) {
-                    event.setLocation(locationWinner.getValue());
+                    event.setLocation(locationWinner.getValue_());
                     eventRepository.save(event);
                 }
             }
@@ -135,7 +134,7 @@ public class EventController {
             event.setLocationPoll(locationPoll);
         }
 
-        event = eventRepository.save(event);
+        event = eventService.create(event, userDetails.getUsername());
 
         return new ResponseEntity<>(eventMapper.toDto(event), HttpStatus.CREATED);
     }
@@ -177,7 +176,7 @@ public class EventController {
         if (role==null) eventRole = EventRole.PASSIVE;
         else eventRole = role.toEventRoleEnum();
 
-        EventParticipant eventParticipant = eventService.updateEventParticipantRole(eventId, userId, eventRole, userDetails.getUsername());
+        EventParticipant eventParticipant = eventService.joinEvent(eventId, userDetails.getUsername());
         return ResponseEntity.ok(eventParticipantMapper.toDto(eventParticipant));
     }
     // Informacje o uczestniku (userId) z wydarzenia (eventId)
@@ -198,10 +197,23 @@ public class EventController {
     @GetMapping("/{eventId}/participants")
     public ResponseEntity<Page<EventParticipantDto>> getParticipants(Pageable pageable,
                                                                     @PathVariable Long eventId,
+                                                                    @RequestParam(required = false) String role,
                                                                     @AuthenticationPrincipal UserDetails userDetails
     ){
-        return ResponseEntity.ok(eventService.findAllEventParticipants(pageable, eventId, userDetails.getUsername()).map(eventParticipantMapper::toDto));
+        if (role == null) {
+            return ResponseEntity.ok(eventService.findAllEventParticipants(pageable, eventId, userDetails.getUsername()).map(eventParticipantMapper::toDto));
+        }
+        else{
+            EventRole eventRole;
+            try {
+                eventRole = EventRole.valueOf(role.toUpperCase()); // optional: normalize case
+            } catch (IllegalArgumentException | NullPointerException e) {
+                return ResponseEntity.badRequest().build();
+            }
+            return ResponseEntity.ok(eventService.findAllEventParticipantsWithRole(pageable, eventId, eventRole, userDetails.getUsername()).map(eventParticipantMapper::toDto));
+        }
     }
+
 
     // Usuwanie uczestnika (userId) z wydarzenia (eventId)
     // [DELETE] /api/events/{eventId}/participants/{userId}
@@ -230,8 +242,8 @@ public class EventController {
             @AuthenticationPrincipal UserDetails userDetails) {
 
         try {
-            String imagePath = fileStorageService.saveImage(image); // tu zapisuje się zdjęcie do katalogu
-            eventRequest.setImageUrl(imagePath);                    // tylko ścieżka trafia do bazy
+            String imagePath = fileStorageService.saveImage(image);
+            eventRequest.setImageUrl(imagePath);
 
             Event event = eventMapper.toEntity(eventRequest);
             event.setBudgetDeadline(eventRequest.getBudgetDeadline());
@@ -247,7 +259,7 @@ public class EventController {
     public ResponseEntity<List<PollOptionDto>> getDatePollOptions(@PathVariable Long eventId) {
         List<PollOption> options = pollOptionRepository.findDatePollOptionsByEventId(eventId);
         List<PollOptionDto> dtos = options.stream()
-                .map(o -> new PollOptionDto(o.getId(), o.getValue(), o.getVoteCount(), o.getPoll().getId()))
+                .map(o -> new PollOptionDto(o.getId(), o.getValue_(), o.getVoteCount(), o.getPoll().getId()))
                 .toList();
         return ResponseEntity.ok(dtos);
     }
@@ -256,9 +268,16 @@ public class EventController {
     public ResponseEntity<List<PollOptionDto>> getLocationPollOptions(@PathVariable Long eventId) {
         List<PollOption> options = pollOptionRepository.findLocationPollOptionsByEventId(eventId);
         List<PollOptionDto> dtos = options.stream()
-                .map(o -> new PollOptionDto(o.getId(), o.getValue(), o.getVoteCount(), o.getPoll().getId()))
+                .map(o -> new PollOptionDto(o.getId(), o.getValue_(), o.getVoteCount(), o.getPoll().getId()))
                 .toList();
         return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping("/{id}/budget-deadline")
+    public ResponseEntity<String> getBudgetDeadline(@PathVariable Long id) {
+        return eventRepository.findById(id)
+                .map(event -> ResponseEntity.ok("\"" + event.getBudgetDeadline().toString() + "\""))
+                .orElse(ResponseEntity.notFound().build());
     }
 
 }

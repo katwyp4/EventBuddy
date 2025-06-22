@@ -10,7 +10,6 @@ import com.kompetencyjny.EventBuddySpring.repo.PollOptionRepository;
 import com.kompetencyjny.EventBuddySpring.repo.PollRepository;
 import com.kompetencyjny.EventBuddySpring.repo.UserRepository;
 import com.kompetencyjny.EventBuddySpring.repo.VoteRepository;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -58,12 +57,12 @@ public class PollController {
 
         Poll poll = pollOpt.get();
         PollOption option = new PollOption();
-        option.setValue(dto.getValue());
+        option.setValue_(dto.getValue());
         option.setVoteCount(0);
         option.setPoll(poll);
         pollOptionRepository.save(option);
 
-        PollOptionDto response = new PollOptionDto(option.getId(), option.getValue(), option.getVoteCount(), poll.getId());
+        PollOptionDto response = new PollOptionDto(option.getId(), option.getValue_(), option.getVoteCount(), poll.getId());
         return ResponseEntity.ok(response);
     }
 
@@ -110,7 +109,7 @@ public class PollController {
             voteRepository.save(vote);
         }
 
-        PollOptionDto response = new PollOptionDto(newOption.getId(), newOption.getValue(), newOption.getVoteCount(), pollId);
+        PollOptionDto response = new PollOptionDto(newOption.getId(), newOption.getValue_(), newOption.getVoteCount(), pollId);
         return ResponseEntity.ok(response);
     }
 
@@ -122,7 +121,7 @@ public class PollController {
         if (pollOpt.isEmpty()) return ResponseEntity.notFound().build();
 
         List<PollOptionDto> results = pollOpt.get().getOptions().stream()
-                .map(opt -> new PollOptionDto(opt.getId(), opt.getValue(), opt.getVoteCount(), opt.getPoll().getId()))
+                .map(opt -> new PollOptionDto(opt.getId(), opt.getValue_(), opt.getVoteCount(), opt.getPoll().getId()))
                 .toList();
 
         return ResponseEntity.ok(results);
@@ -136,7 +135,7 @@ public class PollController {
 
         Poll poll = pollOpt.get();
         List<PollOptionDto> options = poll.getOptions().stream()
-                .map(opt -> new PollOptionDto(opt.getId(), opt.getValue(), opt.getVoteCount(), opt.getPoll().getId()))
+                .map(opt -> new PollOptionDto(opt.getId(), opt.getValue_(), opt.getVoteCount(), opt.getPoll().getId()))
                 .toList();
 
         PollDto dto = new PollDto(poll.getId(), poll.getQuestion(), options);
