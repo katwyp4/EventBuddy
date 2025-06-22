@@ -20,9 +20,6 @@ public class EventDto {
     private String description;
     private LocalDate date;
     private String location;
-    private Double longitude;
-    private Double latitude;
-    private String shareLink;
     private String eventPrivacy;
     private String imageUrl;
     private PollDto datePoll;

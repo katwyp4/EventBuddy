@@ -65,7 +65,7 @@ public class ChatActivity extends AppCompatActivity {
         adapter = new ChatAdapter(new ArrayList<>());
         rvMessages.setAdapter(adapter);
 
-
+        loadMessages();
         btnSend.setOnClickListener(v -> {
             String content = etMessage.getText().toString().trim();
             if (content.isEmpty()) return;
