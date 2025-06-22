@@ -111,12 +111,8 @@ public interface ApiService {
                                 @Part MultipartBody.Part file);
 
 
-
     @POST("/api/reminders")
     Call<Void> registerReminder(@Body ReminderRequest request);
-
-
-
 
     @POST("/api/notifications/token")
     Call<Void> sendFcmToken(@Query("token") String token);

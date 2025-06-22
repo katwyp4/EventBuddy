@@ -67,7 +67,7 @@ public class MessageController {
                 .filter(t -> t != null && !t.isBlank())
                 .forEach(token -> {
                     System.out.println("[FCM] Wysyłam powiadomienie do tokena: " + token);
-                    pushNotificationService.sendPushNotification(token, title, body, event.getId());
+                    pushNotificationService.sendPushNotification(token, title, body, "message", event.getId());
                 });
 
         return ResponseEntity.ok(mapToDto(saved));

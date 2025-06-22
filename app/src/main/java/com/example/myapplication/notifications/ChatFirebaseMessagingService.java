@@ -33,7 +33,7 @@ public class ChatFirebaseMessagingService extends FirebaseMessagingService {
                             NotificationHelper.showEventNotification(this, title, body);
                         }
                         else {
-                            NotificationHelper.showChatNotification(this, title, body);
+                            NotificationHelper.showChatNotification(this, title, body, eventId);
                         }
                     } catch (NumberFormatException e) {
                     Log.e("FCM", "Nieprawidłowy eventId: " + eventIdStr);
