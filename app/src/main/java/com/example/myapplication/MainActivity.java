@@ -1,5 +1,7 @@
 package com.example.myapplication;
 
+import static android.content.Context.MODE_PRIVATE;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -10,6 +12,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import com.example.myapplication.network.ApiService;
+import com.example.myapplication.network.RetrofitClient;
+import com.google.firebase.messaging.FirebaseMessaging;
+import android.content.SharedPreferences;
+import android.util.Log;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -46,4 +55,5 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
     }
+
 }

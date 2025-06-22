@@ -3,7 +3,6 @@ package com.kompetencyjny.EventBuddySpring.controller;
 import com.kompetencyjny.EventBuddySpring.model.User;
 import com.kompetencyjny.EventBuddySpring.repo.UserRepository;
 import com.kompetencyjny.EventBuddySpring.service.PushNotificationService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,8 +25,9 @@ public class NotificationController {
     public void sendNotification(@RequestParam String token,
                                  @RequestParam String title,
                                  @RequestParam String body,
+                                 @RequestParam String type,
                                  @RequestParam Long eventId) {
-        pushNotificationService.sendPushNotification(token, title, body, eventId);
+        pushNotificationService.sendPushNotification(token, title, type, body, eventId);
     }
 
 
