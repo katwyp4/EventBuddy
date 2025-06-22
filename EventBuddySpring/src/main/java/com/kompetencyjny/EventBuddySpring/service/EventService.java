@@ -55,4 +55,6 @@ public interface EventService {
     public boolean hasDateVotingEnded(Event event);
 
     public boolean hasLocationVotingEnded(Event event);
+
+    public EventParticipant joinEvent(Long eventId, String loggedEmail);
 }

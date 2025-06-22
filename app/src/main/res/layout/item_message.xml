@@ -5,7 +5,6 @@
     android:layout_height="wrap_content"
     android:padding="8dp">
 
-    <!-- Imię i nazwisko -->
     <TextView
         android:id="@+id/tvMessageSender"
         android:layout_width="0dp"
@@ -18,7 +17,6 @@
         app:layout_constraintEnd_toStartOf="@id/tvMessageTime"
         app:layout_constraintHorizontal_bias="0"/>
 
-    <!-- Data + godzina -->
     <TextView
         android:id="@+id/tvMessageTime"
         android:layout_width="wrap_content"
@@ -28,7 +26,6 @@
         app:layout_constraintBaseline_toBaselineOf="@id/tvMessageSender"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Treść wiadomości -->
     <TextView
         android:id="@+id/tvMessageContent"
         android:layout_width="0dp"

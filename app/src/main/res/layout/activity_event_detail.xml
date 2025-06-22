@@ -6,7 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Pasek nawigacji -->
     <include
         layout="@layout/custom_navbar"
         android:id="@+id/detailToolbar"
@@ -74,7 +73,6 @@
                 android:textSize="14sp"
                 android:textAlignment="center" />
 
-            <!-- Kontener i RadioGroup do głosowania na datę -->
             <LinearLayout
                 android:id="@+id/dateVotingOptionsContainer"
                 android:layout_width="match_parent"
@@ -167,18 +165,33 @@
                 android:visibility="gone" />
 
             <Button
-                android:id="@+id/btnJoin"
+                android:id="@+id/btnJoinEvent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/join_button"
+                android:text="Dołącz do wydarzenia"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="16dp"
                 android:backgroundTint="#3F51B5"
                 android:textColor="#FFFFFF" />
 
+            <TextView
+                android:id="@+id/textAlreadyJoined"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Jesteś zapisany do wydarzenia!"
+                android:textColor="#37CC4E"
+                android:gravity="center"
+                android:visibility="gone"
+                android:textSize="18sp"
+                android:padding="10dp" />
 
-
-
+            <LinearLayout
+                android:id="@+id/layoutParticipants"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:paddingTop="8dp"/>
 
 
             <GridLayout
@@ -194,7 +207,7 @@
                 android:rowCount="2"
                 android:useDefaultMargins="true">
 
-                <!-- Budżet -->
+
                 <Button
                     android:id="@+id/btnOpenBudget"
                     android:layout_width="0dp"
@@ -206,7 +219,6 @@
                     android:text="Budżet"
                     android:textColor="#FFFFFF" />
 
-                <!-- Taski -->
                 <ImageButton
                     android:id="@+id/btnOpenTasks"
                     android:layout_width="0dp"
@@ -219,7 +231,6 @@
                     android:src="@drawable/ic_tasks"
                     app:tint="#FFFFFF" />
 
-                <!-- Czat -->
                 <ImageButton
                     android:id="@+id/btnOpenChat"
                     android:layout_width="0dp"
@@ -231,8 +242,6 @@
                     android:contentDescription="Czat"
                     android:src="@drawable/ic_chat"
                     app:tint="#FFFFFF" />
-
-                <!-- Galeria -->
                 <ImageButton
                     android:id="@+id/btnOpenGallery"
                     android:layout_width="0dp"
@@ -288,6 +297,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/shareContainer"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"

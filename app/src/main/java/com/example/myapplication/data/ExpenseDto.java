@@ -1,19 +1,16 @@
 package com.example.myapplication.data;
 
-/** Dane pojedynczego wydatku otrzymywane z backendu. */
 public class ExpenseDto {
     private Long id;
-    private String description;  // opis wydatku
+    private String description;
 
     private String payerFullName;
-    private double amount;       // kwota
+    private double amount;
     private Long payerId;
     private Long eventId;
 
-    /* Konstruktor bezargumentowy – wymagany przez Gson/Retrofit */
     public ExpenseDto() {}
 
-    /*────────── GETTERY I SETTERY ─────────*/
 
     public Long getId()          { return id; }
     public void setId(Long id)   { this.id = id; }

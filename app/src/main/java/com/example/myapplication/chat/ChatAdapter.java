@@ -22,14 +22,12 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.VH> {
         items.addAll(initial);
     }
 
-    /** Podmień całą listę wiadomości. */
     public void setData(List<MessageDto> list) {
         items.clear();
         items.addAll(list);
         notifyDataSetChanged();
     }
 
-    /** Dodaj pojedynczą wiadomość. */
     public void add(MessageDto msg) {
         items.add(msg);
         notifyItemInserted(items.size() - 1);

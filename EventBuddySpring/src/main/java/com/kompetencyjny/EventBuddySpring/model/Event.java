@@ -7,7 +7,7 @@ import lombok.*;
 import java.time.LocalDate;
 import java.util.*;
 
-@Data // generuje gettery, settery, equals, hashCode, toString
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity

@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 public class MessageDto {
     private Long id;
     private String content;
-    private String sentAt;          // "2025-05-17T13:55:00"
+    private String sentAt;
 
     @SerializedName("senderFullName")
     private String senderFullName;

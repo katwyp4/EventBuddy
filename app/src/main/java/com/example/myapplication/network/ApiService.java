@@ -36,9 +36,6 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 
-
-
-
 public interface ApiService {
 
     @FormUrlEncoded
@@ -113,7 +110,6 @@ public interface ApiService {
                                 @Part MultipartBody.Part file);
 
 
-
     @POST("/api/notifications/token")
     Call<Void> sendFcmToken(@Query("token") String token);
 
@@ -143,6 +139,15 @@ public interface ApiService {
 
     @DELETE("/api/tasks/{taskId}")
     Call<Void> deleteTask(@Path("taskId") Long taskId);
+    @GET("/api/events/{eventId}/participants")
+    Call<List<String>> getEventParticipants(@Path("eventId") long eventId);
+
+    @PUT("/api/events/{eventId}/participants/{userId}")
+    Call<EventParticipantDto> joinEvent(@Path("eventId") Long eventId,
+                                        @Path("userId") Long userId);
+
+    @GET("/api/events/{id}/budget-deadline")
+    Call<String> getBudgetDeadline(@Path("id") long eventId);
 
     @GET("/api/events/{eventId}/participants")
     Call<PaginatedResponse<EventParticipantDto>> getEventParticipants(@Path("eventId") Long eventId, @Query("page") int page, @Query("size") int size,  @Query("eventRole") String eventRole );

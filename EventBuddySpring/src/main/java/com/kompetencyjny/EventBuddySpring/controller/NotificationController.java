@@ -25,8 +25,9 @@ public class NotificationController {
     @PostMapping("/send")
     public void sendNotification(@RequestParam String token,
                                  @RequestParam String title,
-                                 @RequestParam String body) {
-        pushNotificationService.sendPushNotification(token, title, body);
+                                 @RequestParam String body,
+                                 @RequestParam Long eventId) {
+        pushNotificationService.sendPushNotification(token, title, body, eventId);
     }
 
 

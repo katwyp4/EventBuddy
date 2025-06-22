@@ -176,7 +176,7 @@ public class EventController {
         if (role==null) eventRole = EventRole.PASSIVE;
         else eventRole = role.toEventRoleEnum();
 
-        EventParticipant eventParticipant = eventService.updateEventParticipantRole(eventId, userId, eventRole, userDetails.getUsername());
+        EventParticipant eventParticipant = eventService.joinEvent(eventId, userDetails.getUsername());
         return ResponseEntity.ok(eventParticipantMapper.toDto(eventParticipant));
     }
     // Informacje o uczestniku (userId) z wydarzenia (eventId)
@@ -242,8 +242,8 @@ public class EventController {
             @AuthenticationPrincipal UserDetails userDetails) {
 
         try {
-            String imagePath = fileStorageService.saveImage(image); // tu zapisuje się zdjęcie do katalogu
-            eventRequest.setImageUrl(imagePath);                    // tylko ścieżka trafia do bazy
+            String imagePath = fileStorageService.saveImage(image);
+            eventRequest.setImageUrl(imagePath);
 
             Event event = eventMapper.toEntity(eventRequest);
             event.setBudgetDeadline(eventRequest.getBudgetDeadline());
@@ -271,6 +271,13 @@ public class EventController {
                 .map(o -> new PollOptionDto(o.getId(), o.getValue_(), o.getVoteCount(), o.getPoll().getId()))
                 .toList();
         return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping("/{id}/budget-deadline")
+    public ResponseEntity<String> getBudgetDeadline(@PathVariable Long id) {
+        return eventRepository.findById(id)
+                .map(event -> ResponseEntity.ok("\"" + event.getBudgetDeadline().toString() + "\""))
+                .orElse(ResponseEntity.notFound().build());
     }
 
 }

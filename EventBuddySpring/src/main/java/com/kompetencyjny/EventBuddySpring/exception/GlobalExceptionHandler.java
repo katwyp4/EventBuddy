@@ -8,14 +8,12 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Handle NotFoundException
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Object> handleNotFoundException(NotFoundException ex) {
         // Return a 404 with the exception message
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-    // Handle ForbiddenException
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<Object> handleUnauthorizedException(ForbiddenException ex) {
         // Return a 403 with the exception message

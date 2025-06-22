@@ -8,21 +8,17 @@ import android.util.Pair;
 import android.view.View;
 import android.widget.*;
 
-
-
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-
 import com.bumptech.glide.Glide;
-
+import com.example.myapplication.model.EventParticipantDto;
 import com.example.myapplication.model.PollOption;
 import com.example.myapplication.network.ApiService;
 import com.example.myapplication.network.RetrofitClient;
 
 import com.example.myapplication.budget.BudgetActivity;
 import com.example.myapplication.chat.ChatActivity;
-
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,16 +43,11 @@ public class EventDetailActivity extends AppCompatActivity {
     List<PollOption> locationPollOptions = new ArrayList<>();
 
     private Button btnOpenBudget;
-
     private ImageButton btnOpenChat;
-
     private ImageButton btnOpenTasks;
-
     private ImageButton btnOpenGallery;
 
-
-
-    private boolean isParticipant = true;
+    private boolean isParticipant = false;
 
     private String dateVotingEnd;
     private String locationVotingEnd;
@@ -64,8 +55,11 @@ public class EventDetailActivity extends AppCompatActivity {
     private TextView dateVotingEndInfo;
     private TextView locationVotingEndInfo;
 
+    private Button btnJoinEvent;
+    private TextView textAlreadyJoined;
+    private LinearLayout layoutParticipants;
 
-
+    private String budgetDeadline;
 
 
     @Override
@@ -90,27 +84,38 @@ public class EventDetailActivity extends AppCompatActivity {
         btnOpenTasks = findViewById(R.id.btnOpenTasks);
         btnOpenGallery = findViewById(R.id.btnOpenGallery);
 
-
+        btnJoinEvent = findViewById(R.id.btnJoinEvent);
+        textAlreadyJoined = findViewById(R.id.textAlreadyJoined);
+        layoutParticipants = findViewById(R.id.layoutParticipants);
 
 
 
         btnOpenTasks.setOnClickListener(v -> {
             Intent i = new Intent(EventDetailActivity.this,
                     com.example.myapplication.task.TaskActivity.class);
-
             i.putExtra("EVENT_ID",
-                    getIntent().getLongExtra("eventId", -1));     // id eventu
+                    getIntent().getLongExtra("eventId", -1));
 
             startActivity(i);
         });
 
-
-
         btnOpenChat  = findViewById(R.id.btnOpenChat);
         dateVotingEndInfo = findViewById(R.id.dateVotingEndInfo);
         locationVotingEndInfo = findViewById(R.id.locationVotingEndInfo);
+        LinearLayout shareContainer = findViewById(R.id.shareContainer);
+        shareContainer.setOnClickListener(v -> shareEvent());
 
+        Intent dataIntent = getIntent();
+        if (Intent.ACTION_VIEW.equals(dataIntent.getAction())
+                && dataIntent.getData() != null) {
 
+            String last = dataIntent.getData().getLastPathSegment();
+            try {
+                long deepEventId = Long.parseLong(last);
+
+                dataIntent.putExtra("eventId", deepEventId);
+            } catch (NumberFormatException ignored) {}
+        }
 
 
         btnOpenChat.setOnClickListener(v -> {
@@ -125,7 +130,47 @@ public class EventDetailActivity extends AppCompatActivity {
             startActivity(i);
         });
 
+        btnOpenBudget.setOnClickListener(v -> {
+            Long eventId = getIntent().getLongExtra("eventId", -1);
+            Intent i = new Intent(EventDetailActivity.this, BudgetActivity.class);
+            i.putExtra("EVENT_ID", eventId);
+            i.putExtra("BUDGET_DEADLINE", budgetDeadline);
+            startActivity(i);
+        });
 
+        btnJoinEvent.setOnClickListener(v -> {
+            showRegulaminDialog(() -> {
+                Log.d("EVENT_JOIN", "Zaakceptowano regulamin");
+                Long eventId = getIntent().getLongExtra("eventId", -1);
+                if (eventId == -1){
+                    Log.d("EVENT_JOIN", "Brakuje eventId lub userId");
+                    return;
+                }
+
+                RetrofitClient.getCurrentUserId(this, userId -> {
+                    apiService.joinEvent(eventId, userId).enqueue(new Callback<EventParticipantDto>() {
+                        @Override
+                        public void onResponse(Call<EventParticipantDto> call, Response<EventParticipantDto> response) {
+                            if (response.isSuccessful()) {
+                                Log.d("EVENT_JOIN", "Dołączono do wydarzenia: " + response.body());
+                                Toast.makeText(EventDetailActivity.this, "Dołączono do wydarzenia!", Toast.LENGTH_SHORT).show();
+                                isParticipant = true;
+                                updateParticipantViews();
+                            } else {
+                                Log.e("EVENT_JOIN", "Błąd serwera: " + response.code());
+                                Toast.makeText(EventDetailActivity.this, "Nie udało się dołączyć do wydarzenia", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<EventParticipantDto> call, Throwable t) {
+                            Log.e("EVENT_JOIN", "Błąd sieci", t);
+                            Toast.makeText(EventDetailActivity.this, "Błąd sieci: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                });
+            });
+        });
 
         Long eventId = getIntent().getLongExtra("eventId", -1);
 
@@ -138,22 +183,13 @@ public class EventDetailActivity extends AppCompatActivity {
 
                         dateVotingEnd = event.getDatePollDeadline();
                         locationVotingEnd = event.getLocationPollDeadline();
+                        budgetDeadline = event.getBudgetDeadline();
 
                         isParticipant = event.isParticipant();
+                        updateParticipantViews();
 
-                        if (!isParticipant) {
-                            btnOpenBudget.setVisibility(View.GONE);
-                        } else {
-                            btnOpenBudget.setVisibility(View.VISIBLE); // just in case
-                            btnOpenBudget.setOnClickListener(v -> {
-                                Intent i = new Intent(EventDetailActivity.this, BudgetActivity.class);
-                                i.putExtra("EVENT_ID", event.getId());
-                                i.putExtra("BUDGET_DEADLINE", event.getBudgetDeadline());
-                                startActivity(i);
-                            });
-                        }
+                        btnOpenBudget.setVisibility(isParticipant ? View.VISIBLE : View.GONE);
 
-                        // Ustaw dane na ekranie
                         titleText.setText(event.getTitle());
                         dateText.setText(event.getDate());
                         descText.setText(event.getDescription());
@@ -163,12 +199,15 @@ public class EventDetailActivity extends AppCompatActivity {
                                 .load("http://10.0.2.2:8080" + event.getImageUrl())
                                 .into(eventImage);
 
-                        // POBIERZ POLLE
                         fetchUpdatedPollOptions(true);
                         fetchUpdatedPollOptions(false);
 
                         setupVotingOptions();
                         setupVoteButtons();
+
+                        if (isParticipant) {
+                            fetchAndShowParticipants();
+                        }
                     }
                 }
 
@@ -178,8 +217,107 @@ public class EventDetailActivity extends AppCompatActivity {
                 }
             });
         }
-
     }
+
+    private void shareEvent() {
+        long eventId = getIntent().getLongExtra("eventId", -1);
+        if (eventId == -1) { /* … */ return; }
+
+        String backendBase = "http://10.0.2.2:8080";
+        String link = backendBase + "/go/event/" + eventId;
+
+        String title = titleText.getText().toString();
+        Intent send = new Intent(Intent.ACTION_SEND);
+        send.putExtra(Intent.EXTRA_TEXT, "Zobacz wydarzenie: " + title + "\n" + link);
+        send.setType("text/plain");
+        startActivity(Intent.createChooser(send, "Udostępnij przez"));
+    }
+
+
+
+
+    private void showRegulaminDialog(Runnable onAccept) {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_regulamin, null);
+        CheckBox checkbox = dialogView.findViewById(R.id.checkboxAkceptuje);
+        TextView tvRegulamin = dialogView.findViewById(R.id.tvRegulamin);
+        tvRegulamin.setText("Przystępując do wydarzenia, zobowiązujesz się do przestrzegania zasad ustalonych przez organizatora.\n" +
+                "Nie możesz się później wypisać z wydarzenia. Organizator może kontaktować się z Tobą w sprawie wydarzenia.");
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Regulamin wydarzenia")
+                .setView(dialogView)
+                .setPositiveButton("Potwierdź", null)
+                .setNegativeButton("Anuluj", (d, w) -> d.dismiss())
+                .create();
+
+        dialog.setOnShowListener(d -> {
+            Button pozytywny = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            pozytywny.setEnabled(false);
+            checkbox.setOnCheckedChangeListener((btn, checked) -> pozytywny.setEnabled(checked));
+            pozytywny.setOnClickListener(v -> {
+                dialog.dismiss();
+                onAccept.run();
+            });
+        });
+
+        dialog.show();
+    }
+
+    private void updateParticipantViews() {
+        if (isParticipant) {
+            btnJoinEvent.setVisibility(View.GONE);
+            textAlreadyJoined.setVisibility(View.VISIBLE);
+            layoutParticipants.setVisibility(View.VISIBLE);
+
+            btnOpenBudget.setVisibility(View.VISIBLE);
+            btnOpenChat.setVisibility(View.VISIBLE);
+            btnOpenTasks.setVisibility(View.VISIBLE);
+            btnOpenGallery.setVisibility(View.VISIBLE);
+
+            setupVotingOptions();
+
+            fetchAndShowParticipants();
+        } else {
+            btnJoinEvent.setVisibility(View.VISIBLE);
+            textAlreadyJoined.setVisibility(View.GONE);
+            layoutParticipants.setVisibility(View.GONE);
+
+            btnOpenBudget.setVisibility(View.GONE);
+            btnOpenChat.setVisibility(View.GONE);
+            btnOpenTasks.setVisibility(View.GONE);
+            btnOpenGallery.setVisibility(View.GONE);
+        }
+    }
+
+    private void fetchAndShowParticipants() {
+        Long eventId = getIntent().getLongExtra("eventId", -1);
+        if (eventId == -1) return;
+        apiService.getEventParticipants(eventId).enqueue(new Callback<List<String>>() {
+            @Override
+            public void onResponse(Call<List<String>> call, Response<List<String>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<String> participants = response.body();
+                    layoutParticipants.removeAllViews();
+                    TextView header = new TextView(EventDetailActivity.this);
+                    header.setText("Uczestnicy wydarzenia (" + participants.size() + "):");
+                    header.setTextColor(Color.WHITE);
+                    header.setTextSize(16);
+                    layoutParticipants.addView(header);
+
+                    for (String name : participants) {
+                        TextView tv = new TextView(EventDetailActivity.this);
+                        tv.setText(name);
+                        tv.setTextColor(Color.WHITE);
+                        layoutParticipants.addView(tv);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<String>> call, Throwable t) {}
+        });
+    }
+
 
     private boolean isVotingActive(String endDateString) {
         if (endDateString == null || endDateString.isEmpty()) {
@@ -187,10 +325,10 @@ public class EventDetailActivity extends AppCompatActivity {
         }
         try {
             java.util.Date endDate;
-            if (endDateString.length() == 10) { // yyyy-MM-dd
+            if (endDateString.length() == 10) {
                 java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
                 endDate = sdf.parse(endDateString);
-            } else { // yyyy-MM-dd HH:mm
+            } else {
                 java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.getDefault());
                 endDate = sdf.parse(endDateString);
             }
@@ -198,13 +336,23 @@ public class EventDetailActivity extends AppCompatActivity {
             java.util.Date now = new java.util.Date();
             return now.before(endDate);
         } catch (Exception e) {
-            return true; // Jeśli błąd – domyślnie aktywne
+            return true;
         }
     }
 
 
 
     private void setupVotingOptions() {
+
+        if (!isParticipant) {
+            dateVotingOptionsContainer.setVisibility(View.GONE);
+            btnVoteDate.setVisibility(View.GONE);
+            locationVotingOptionsContainer.setVisibility(View.GONE);
+            btnVoteLocation.setVisibility(View.GONE);
+            dateVotingEndInfo.setVisibility(View.GONE);
+            locationVotingEndInfo.setVisibility(View.GONE);
+            return;
+        }
 
         if (dateVotingEnd != null && !dateVotingEnd.isEmpty()) {
             dateVotingEndInfo.setVisibility(View.VISIBLE);
@@ -263,8 +411,6 @@ public class EventDetailActivity extends AppCompatActivity {
         }
     }
 
-
-
     private void setupVoteButtons() {
         btnVoteDate.setOnClickListener(v -> {
             int selectedId = dateVotingRadioGroup.getCheckedRadioButtonId();
@@ -295,7 +441,7 @@ public class EventDetailActivity extends AppCompatActivity {
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
                     Toast.makeText(EventDetailActivity.this, "Głos oddany!", Toast.LENGTH_SHORT).show();
-                    fetchUpdatedPollOptions(isDateVote); // lub false, jeśli lokalizacja – zależnie od kontekstu
+                    fetchUpdatedPollOptions(isDateVote);
                 } else {
                     Toast.makeText(EventDetailActivity.this, "Błąd oddawania głosu", Toast.LENGTH_SHORT).show();
                 }
@@ -337,7 +483,7 @@ public class EventDetailActivity extends AppCompatActivity {
                         locationPollOptions = updatedOptions;
                     }
 
-                    runOnUiThread(() -> setupVotingOptions()); // odśwież UI z nowymi danymi
+                    runOnUiThread(() -> setupVotingOptions());
                 } else {
                     Toast.makeText(EventDetailActivity.this, "Błąd pobierania wyników", Toast.LENGTH_SHORT).show();
                 }
@@ -380,6 +526,5 @@ public class EventDetailActivity extends AppCompatActivity {
         });
 
     }
-
 
 }
