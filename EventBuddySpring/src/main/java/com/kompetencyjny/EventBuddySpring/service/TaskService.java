@@ -80,9 +80,20 @@ public class TaskService {
     }
 
     @Transactional
+    public Task changeStatus(Long id, boolean done, String loggedEmail){
+        Task task = findById(id, loggedEmail)
+                .orElseThrow(() -> new NotFoundException("Task with id: "+id+" not found!"));
+
+        if (!eventService.isUserPermitted(task.getEvent().getId(), loggedEmail, EventRole.ACTIVE)) throw new ForbiddenException("User (of email: "+loggedEmail+") not allowed to update tasks of event with id: "+task.getEvent().getId());
+
+        task.setDone(done);
+        return taskRepository.save(task);
+    }
+
+    @Transactional
     public void removeTask(Long id, String loggedEmail){
         Optional<Task> taskOpt = findById(id, loggedEmail);
-        if (taskOpt.isEmpty()) return;
+        if (taskOpt.isEmpty()) throw new NotFoundException("Task with id: "+id+" not found!");
         Task task = taskOpt.get();
 
         if (!eventService.isUserPermitted(task.getEvent().getId(), loggedEmail, EventRole.ACTIVE)) throw new ForbiddenException("User (of email: "+loggedEmail+") not allowed to remove tasks from event of id: "+task.getEvent().getId());

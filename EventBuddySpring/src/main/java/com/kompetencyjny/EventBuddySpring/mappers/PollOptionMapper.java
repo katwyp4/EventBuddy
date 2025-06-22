@@ -9,8 +9,10 @@ import org.mapstruct.Mapping;
 public interface PollOptionMapper {
 
     @Mapping(source = "poll.id", target = "pollId")
+    @Mapping(source = "option.value_", target = "value")
     PollOptionDto toDto(PollOption option);
 
     @Mapping(target ="poll", ignore = true)
+    @Mapping(target ="value_", source = "dto.value")
     PollOption toEntity(PollOptionDto dto);
 }

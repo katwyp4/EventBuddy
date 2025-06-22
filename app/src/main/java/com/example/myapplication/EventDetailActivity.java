@@ -93,10 +93,6 @@ public class EventDetailActivity extends AppCompatActivity {
 
 
 
-        /* ─── tymczasowe nazwiska do spinnera w TaskActivity ───────────── */
-        ArrayList<String> dummyNames = new ArrayList<>(Arrays.asList(
-                "Jan Kowalski", "Anna Nowak", "Piotr Zieliński"));
-        /* ─────────────────────────────────────────────────────────────── */
 
         btnOpenTasks.setOnClickListener(v -> {
             Intent i = new Intent(EventDetailActivity.this,
@@ -104,7 +100,6 @@ public class EventDetailActivity extends AppCompatActivity {
 
             i.putExtra("EVENT_ID",
                     getIntent().getLongExtra("eventId", -1));     // id eventu
-            i.putStringArrayListExtra("PARTICIPANTS", dummyNames);
 
             startActivity(i);
         });

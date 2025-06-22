@@ -70,6 +70,15 @@ public class TaskController {
         return ResponseEntity.ok(taskMapper.toDto(
                 taskService.updateTask(id, taskMapper.toEntity(taskRequest), userDetails.getUsername())));
     }
+    // [PUT] /api/tasks/{id}/changeStatus?done=
+    @PutMapping("/{id}/changeStatus")
+    public ResponseEntity<TaskDto> changeStatus(@PathVariable Long id,
+                                              @RequestParam("done") boolean done,
+                                              @AuthenticationPrincipal UserDetails userDetails) {
+
+        return ResponseEntity.ok(taskMapper.toDto(
+                taskService.changeStatus(id, done, userDetails.getUsername())));
+    }
 
     // [PUT] /api/tasks/{id}/assign?assignUserId=...
     @PutMapping("/{id}/assign")

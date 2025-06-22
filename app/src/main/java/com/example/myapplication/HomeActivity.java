@@ -41,6 +41,7 @@ public class HomeActivity extends AppCompatActivity {
     private EventAdapter adapter;
     private List<Event> eventList;
 
+
     private ApiService apiService;
 
     private ActivityResultLauncher<Intent> addEventLauncher;

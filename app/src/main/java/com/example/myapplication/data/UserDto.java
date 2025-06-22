@@ -16,5 +16,20 @@ public class UserDto {
     public Long getId(){
         return this.id;
     }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+
+    public String getLastName() {
+        return lastName;
+    }
+
+
+    public String getEmail() {
+        return email;
+    }
+
 }
 

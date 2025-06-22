@@ -11,6 +11,7 @@ import org.mapstruct.ReportingPolicy;
 public interface TaskMapper {
     @Mapping(target = "eventId", source = "task.event.id")
     @Mapping(target = "assignedUserId", source = "task.assignedUser.id")
+    @Mapping(target = "assigneeFullName", expression = "java(task.getAssignedUser().getFullName())")
     TaskDto toDto(Task task);
 
     Task toEntity(TaskRequest taskRequest);

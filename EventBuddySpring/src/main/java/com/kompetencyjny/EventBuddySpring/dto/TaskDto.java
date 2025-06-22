@@ -19,4 +19,5 @@ public class TaskDto {
     private boolean done;
     private Long eventId;
     private Long assignedUserId;
+    private String assigneeFullName;
 }

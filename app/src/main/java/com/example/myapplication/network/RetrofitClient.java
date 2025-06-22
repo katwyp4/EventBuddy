@@ -39,7 +39,7 @@ public class RetrofitClient {
                 Response response = chain.proceed(request);
 
                 // Sprawdź czy odpowiedź to 401 lub 403 - Unauthorized
-                if (response.code() == 401 || response.code() == 403) {
+                if (response.code() == 401) { //usunięto 403, bo powodowało błedy gdy próbował wyświetlić coś do czego nie był uprawniony, ale token jeszcze nie wygasł
                     Log.d("LOGOWANIE", "LOGOWANIE");
                     tokenManager.clearToken();
 

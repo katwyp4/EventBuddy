@@ -1,6 +1,8 @@
 package com.example.myapplication.network;
 
+import com.example.myapplication.data.EventParticipantDto;
 import com.example.myapplication.data.ExpenseDto;
+import com.example.myapplication.data.TaskDto;
 import com.example.myapplication.data.UserDto;
 import com.example.myapplication.model.Event;
 import com.example.myapplication.model.LoginResponse;
@@ -12,7 +14,7 @@ import com.example.myapplication.model.RegisterResponse;
 import com.example.myapplication.data.CreateMessageDto;
 import com.example.myapplication.data.MessageDto;
 import com.example.myapplication.data.CreateExpenseDto;
-
+import com.example.myapplication.model.Task;
 
 
 import java.util.List;
@@ -22,11 +24,13 @@ import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
@@ -116,5 +120,33 @@ public interface ApiService {
     @GET("/api/users/me")
     Call<UserDto> getCurrentUser();
 
+    @GET("/api/tasks")
+    Call<PaginatedResponse<TaskDto>> getTasks(@Query("page") int page, @Query("size") int size);
 
+    @GET("/api/tasks/{taskId}")
+    Call<TaskDto> getTask(@Path("taskId") Long taskId);
+
+    @GET("/api/tasks")
+    Call<PaginatedResponse<TaskDto>> getEventsTasks(@Query("page") int page, @Query("size") int size, @Query("eventId") Long eventId);
+
+    @POST("/api/tasks")
+    Call<TaskDto> addTask(@Query("eventId") Long eventId, @Body Task task);
+
+    @POST("/api/tasks")
+    Call<TaskDto> addTask(@Query("eventId") Long eventId, @Body Task task, @Query("assignedUserId") Long assignedUserId);
+
+    @PUT("/api/tasks/{taskId}")
+    Call<TaskDto> updateTask(@Path("taskId") Long taskId, @Body Task task);
+
+    @PUT("/api/tasks/assign/{taskId}")
+    Call<TaskDto> assignTask(@Path("taskId") Long taskId, @Query("assignedUserId") Long assignedUserId);
+
+    @DELETE("/api/tasks/{taskId}")
+    Call<Void> deleteTask(@Path("taskId") Long taskId);
+
+    @GET("/api/events/{eventId}/participants")
+    Call<PaginatedResponse<EventParticipantDto>> getEventParticipants(@Path("eventId") Long eventId, @Query("page") int page, @Query("size") int size,  @Query("eventRole") String eventRole );
+
+    @PUT("/api/tasks/{taskId}/changeStatus")
+    Call<TaskDto> taskChangeStatus(@Path("taskId") Long taskId, @Query("done") boolean done);
 }

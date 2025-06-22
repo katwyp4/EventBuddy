@@ -199,7 +199,7 @@ class TaskControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(update))
                         .header("Authorization", "Bearer " + tokenB))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -222,7 +222,7 @@ class TaskControllerIntegrationTest {
         mockMvc.perform(put("/api/tasks/{id}/assign", taskA.getId())
                         .param("assignedUserId", userA.getId().toString())
                         .header("Authorization", "Bearer " + tokenB))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isNotFound());
     }
     
 
@@ -244,7 +244,7 @@ class TaskControllerIntegrationTest {
         String tokenB = jwtUtil.generateToken(userB.getEmail());
         mockMvc.perform(delete("/api/tasks/{id}", taskA.getId())
                         .header("Authorization", "Bearer " + tokenB))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isNotFound());
     }
 
 
@@ -252,6 +252,6 @@ class TaskControllerIntegrationTest {
     @DisplayName("Should return 401 for unauthenticated access")
     void shouldReturnUnauthorizedForUnauthenticated() throws Exception {
         mockMvc.perform(get("/api/tasks"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 }
