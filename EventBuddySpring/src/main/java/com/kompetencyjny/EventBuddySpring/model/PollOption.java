@@ -14,7 +14,7 @@ public class PollOption {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String value;
+    private String value_;
     private int voteCount;
 
     @ManyToOne

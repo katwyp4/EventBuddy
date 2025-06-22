@@ -96,4 +96,16 @@ public class Event {
     public boolean getEnableLocationVoting() {
         return enableLocationVoting;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Event that = (Event) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
 }

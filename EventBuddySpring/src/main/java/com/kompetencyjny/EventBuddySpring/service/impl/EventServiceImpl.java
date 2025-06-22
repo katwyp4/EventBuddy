@@ -59,8 +59,10 @@ public class EventServiceImpl implements EventService {
             }
         }
 
+        // 👥 Dodanie autora jako ADMIN
         event.addParticipant(loggedUserOpt.get(), EventRole.ADMIN);
 
+        // 💾 Zapisz
         return this.eventRepository.save(event);
     }
 
@@ -232,9 +234,6 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public boolean isUserAParticipantOf(Long eventId, Long userId) {
-        Optional<Event> eventOpt = this.findByIdInternal(eventId);
-        Optional<User> userOpt = this.userService.findById(userId);
-        if (userOpt.isEmpty() || eventOpt.isEmpty()) throw new NotFoundException("User or Event does not exists!");
         return eventParticipantRepository.existsById(new UserEventId(userId, eventId));
     }
 
@@ -291,6 +290,13 @@ public class EventServiceImpl implements EventService {
     public Page<EventParticipant> findAllEventParticipants(Pageable pageable, Long eventId, String loggedUserName) {
         if (!isEventVisibleToUser(eventId, loggedUserName)) throw new NotFoundException("Event does not exists!");
         return eventParticipantRepository.findAllById_EventId(eventId, pageable);
+    }
+
+
+    @Override
+    public Page<EventParticipant> findAllEventParticipantsWithRole(Pageable pageable, Long eventId, EventRole role, String loggedUserName){
+        if (!isEventVisibleToUser(eventId, loggedUserName)) throw new NotFoundException("Event does not exists!");
+        return eventParticipantRepository.findAllById_EventIdAndEventRole(eventId, role, pageable);
     }
 
     public EventParticipant joinEvent(Long eventId, String loggedEmail) {

@@ -42,4 +42,8 @@ public class User {
 
     @Column(name = "fcm_token")
     private String fcmToken;
+
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
 }

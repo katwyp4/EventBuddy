@@ -1,11 +1,15 @@
-package com.example.myapplication.model;
-
-import com.example.myapplication.data.UserDto;
+package com.example.myapplication.data;
 
 public class EventParticipantDto {
     private Long eventId;
     private String eventRole;
     private UserDto user;
+
+    public EventParticipantDto(Long eventId, String eventRole, UserDto user){
+        this.eventId = eventId;
+        this.eventRole = eventRole;
+        this.user = user;
+    }
 
     public Long getEventId() {
         return eventId;
@@ -31,4 +35,3 @@ public class EventParticipantDto {
         this.user = user;
     }
 }
-

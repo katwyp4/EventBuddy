@@ -12,7 +12,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
-import com.example.myapplication.model.EventParticipantDto;
+import com.example.myapplication.data.EventParticipantDto;
 import com.example.myapplication.model.PollOption;
 import com.example.myapplication.network.ApiService;
 import com.example.myapplication.network.RetrofitClient;
@@ -88,15 +88,14 @@ public class EventDetailActivity extends AppCompatActivity {
         textAlreadyJoined = findViewById(R.id.textAlreadyJoined);
         layoutParticipants = findViewById(R.id.layoutParticipants);
 
-        ArrayList<String> dummyNames = new ArrayList<>(Arrays.asList(
-                "Jan Kowalski", "Anna Nowak", "Piotr Zieliński"));
+
 
         btnOpenTasks.setOnClickListener(v -> {
             Intent i = new Intent(EventDetailActivity.this,
                     com.example.myapplication.task.TaskActivity.class);
             i.putExtra("EVENT_ID",
                     getIntent().getLongExtra("eventId", -1));
-            i.putStringArrayListExtra("PARTICIPANTS", dummyNames);
+
             startActivity(i);
         });
 
@@ -135,7 +134,7 @@ public class EventDetailActivity extends AppCompatActivity {
             Long eventId = getIntent().getLongExtra("eventId", -1);
             Intent i = new Intent(EventDetailActivity.this, BudgetActivity.class);
             i.putExtra("EVENT_ID", eventId);
-            i.putExtra("BUDGET_DEADLINE", budgetDeadline); 
+            i.putExtra("BUDGET_DEADLINE", budgetDeadline);
             startActivity(i);
         });
 
