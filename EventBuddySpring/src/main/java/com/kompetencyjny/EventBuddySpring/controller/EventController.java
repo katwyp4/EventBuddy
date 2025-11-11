@@ -1,17 +1,17 @@
 package com.kompetencyjny.EventBuddySpring.controller;
 
 import com.kompetencyjny.EventBuddySpring.dto.*;
+import com.kompetencyjny.EventBuddySpring.exception.NotFoundException;
 import com.kompetencyjny.EventBuddySpring.mappers.EventMapper;
 import com.kompetencyjny.EventBuddySpring.mappers.EventParticipantMapper;
 import com.kompetencyjny.EventBuddySpring.mappers.ExpenseMapper;
 import com.kompetencyjny.EventBuddySpring.model.*;
-import com.kompetencyjny.EventBuddySpring.repo.EventRepository;
-import com.kompetencyjny.EventBuddySpring.repo.ExpenseRepository;
-import com.kompetencyjny.EventBuddySpring.repo.PollOptionRepository;
-import com.kompetencyjny.EventBuddySpring.repo.UserRepository;
+import com.kompetencyjny.EventBuddySpring.repo.*;
 import com.kompetencyjny.EventBuddySpring.service.EventService;
 import com.kompetencyjny.EventBuddySpring.service.FileStorageService;
 import com.kompetencyjny.EventBuddySpring.service.PollService;
+import com.stripe.exception.StripeException;
+import com.stripe.model.PaymentIntent;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,10 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/events")
@@ -46,6 +43,7 @@ public class EventController {
     private final ExpenseRepository expenseRepository;
     private final ExpenseMapper expenseMapper;
     private final PollService pollService;
+    private final UserPaymentRepository userPaymentRepository;
 
     // [GET] /api/events?size={}?page={}
     @GetMapping
@@ -278,6 +276,45 @@ public class EventController {
         return eventRepository.findById(id)
                 .map(event -> ResponseEntity.ok("\"" + event.getBudgetDeadline().toString() + "\""))
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/{eventId}/stripe-payment")
+    public ResponseEntity<Map<String, String>> createStripePayment(
+            @PathVariable Long eventId,
+            @RequestParam BigDecimal amount,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event not found"));
+
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        long amountInCents = amount.multiply(BigDecimal.valueOf(100)).longValue();
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("amount", amountInCents);
+        params.put("currency", "pln");
+        params.put("payment_method_types", List.of("card"));
+
+        PaymentIntent intent;
+        try{
+            intent = PaymentIntent.create(params);
+            UserPayment payment = new UserPayment();
+            payment.setAmount(amount);
+            payment.setCurrency("pln");
+            payment.setPayer(user);
+            payment.setEvent(event);
+            payment.setStatus(PaymentStatus.CREATED);
+            payment.setStripePaymentIntentId(intent.getId());
+            userPaymentRepository.save(payment);
+        }
+        catch(StripeException e){
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Stripe payment creation failed"));
+        }
+        return ResponseEntity.ok(Map.of("clientSecret", intent.getClientSecret()));
     }
 
 }
